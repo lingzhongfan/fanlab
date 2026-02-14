@@ -5,138 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAS-EMO | 情感与决策</title>
     <style>
-        :root { --primary: #0f172a; --blue: #3b82f6; --green: #10b981; --red: #ef4444; }
-        body { font-family: -apple-system, sans-serif; background: #f8fafc; margin: 0; padding: 20px; touch-action: manipulation; }
-        .container { max-width: 650px; margin: 20px auto; background: white; padding: 35px 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        :root { --primary: #0f172a; --blue: #3b82f6; --green: #10b981; --red: #ef4444; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; touch-action: manipulation; }
+        .container { max-width: 650px; margin: 0 auto; background: white; padding: 35px 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
-        .btn-dark { background: var(--primary); color: white; }
-        .btn-blue { background: var(--blue); color: white; }
-        .btn-green { background: var(--green); color: white; }
-        .sys-btn:active:not(:disabled) { transform: scale(0.98); opacity: 0.9; }
         
-        /* 量表滑块样式 */
-        .q-group { margin-bottom: 30px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
-        .q-group label { display: block; font-weight: bold; margin-bottom: 15px; color: #1e293b; }
-        input[type=range] { width: 100%; height: 8px; border-radius: 5px; background: #e2e8f0; outline: none; -webkit-appearance: none; }
-        .labels { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-top: 10px; }
+        /* 标题样式 */
+        .module-header { border-left: 6px solid var(--blue); padding-left: 15px; margin-bottom: 30px; }
+        .module-header h2 { margin: 0; font-size: 22px; }
+
+        /* 按钮系统 */
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 14px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-dark { background: var(--primary); color: white; }
+        .btn-blue { background: var(--blue); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        .btn-green { background: var(--green); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+        .sys-btn:active { transform: scale(0.96); opacity: 0.9; }
+        .sys-btn:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; box-shadow: none; }
+
+        /* 优化后的滑块交互 */
+        .slider-box { margin-bottom: 40px; position: relative; padding-top: 30px; }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .slider-header label { font-weight: bold; color: var(--primary); font-size: 15px; }
+        .val-badge { background: var(--blue); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 12px; background: #e2e8f0; border-radius: 10px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { 
+            -webkit-appearance: none; width: 28px; height: 28px; background: white; 
+            border: 4px solid var(--blue); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
 
         /* BART 气球效果 */
-        #bart-workspace { width: 100%; height: 300px; background: #f1f5f9; border-radius: 16px; display: flex; align-items: flex-end; justify-content: center; position: relative; margin-bottom: 20px; overflow: hidden; }
-        #balloon { width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; transition: all 0.1s ease-out; position: relative; bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        #bart-workspace { width: 100%; height: 320px; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 20px; display: flex; align-items: flex-end; justify-content: center; position: relative; margin-bottom: 25px; }
+        #balloon { 
+            width: 50px; height: 60px; background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); 
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; transition: all 0.15s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
+            position: relative; bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; 
+        }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="margin-bottom: 15px;"><button onclick="location.href='index.html'" style="background:none; border:none; color:var(--blue); font-weight:bold; cursor:pointer;">← 返回控制台</button></div>
+
+    <div style="margin-bottom: 15px;"><button onclick="location.href='index.html'" style="background:none; border:none; color:var(--blue); font-weight:bold; cursor:pointer; font-size:16px;">← 返回控制台</button></div>
 
     <div class="container" id="menu">
-        <h2 style="margin-top:0;">❤️ 情感倾向与决策量表</h2>
-        <p style="color:#64748b; font-size: 14px;">请选择测试模块开始评估：</p>
-        <button class="sys-btn btn-dark" onclick="show('ema-area')">1. 实时状态评估 (EMA)</button>
-        <button class="sys-btn btn-dark" onclick="show('b5-area')">2. 人格特质倾向量表 (Big 5)</button>
-        <button class="sys-btn btn-blue" onclick="startBART()">3. BART 气球风险决策任务</button>
-        <button class="sys-btn btn-blue" onclick="startEmoStroop()">4. 情绪 Stroop 注意偏向提取</button>
+        <div class="module-header"><h2>❤️ 情感与决策评估</h2></div>
+        <button class="sys-btn btn-dark" onclick="show('ema-area')">📊 1. 实时状态评估 (EMA)</button>
+        <button class="sys-btn btn-dark" onclick="show('b5-area')">🧠 2. 人格特质倾向量表 (Big 5)</button>
+        <button class="sys-btn btn-blue" onclick="startBART()">🎈 3. BART 气球风险决策任务</button>
+        <button class="sys-btn btn-blue" onclick="startEmoStroop()">⚡ 4. 情绪 Stroop 注意偏向</button>
     </div>
 
     <div class="container hidden" id="ema-area">
-        <h2 class="module-header">EMA 瞬时情绪评估</h2>
-        <div class="q-group">
-            <label>1. 此时此刻，您感到【焦虑/紧张】的程度？</label>
-            <input type="range" id="ema-1" min="0" max="10" step="1" value="0">
-            <div class="labels"><span>完全没有</span><span>中等</span><span>极度强烈</span></div>
+        <div class="module-header"><h2>EMA 实时状态</h2></div>
+        
+        <div class="slider-box">
+            <div class="slider-header"><label>此刻感到【紧张/焦虑】的程度</label><span class="val-badge" id="v1">0%</span></div>
+            <input type="range" id="ema-1" min="0" max="100" value="0" oninput="updateVal('ema-1','v1')">
         </div>
-        <div class="q-group">
-            <label>2. 此时此刻，您感到【忧郁/低落】的程度？</label>
-            <input type="range" id="ema-2" min="0" max="10" step="1" value="0">
-            <div class="labels"><span>完全没有</span><span>中等</span><span>极度强烈</span></div>
+
+        <div class="slider-box">
+            <div class="slider-header"><label>此刻感到【情绪低落】的程度</label><span class="val-badge" id="v2">0%</span></div>
+            <input type="range" id="ema-2" min="0" max="100" value="0" oninput="updateVal('ema-2','v2')">
         </div>
-        <button class="sys-btn btn-green" onclick="saveEMA()">✓ 保存状态数据</button>
+
+        <button class="sys-btn btn-green" onclick="saveEMA()">完成并保存</button>
     </div>
 
     <div class="container hidden" id="b5-area">
-        <h2 class="module-header">大五人格 (简版)</h2>
-        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">请评估您在一般情况下的表现 (1=很不符合, 5=非常符合)：</p>
-        <div class="q-group"><label>O - 开放性 (乐于接受新想法、新事物)</label>
-            <input type="range" id="b5-o" min="1" max="5" step="1" value="3">
+        <div class="module-header"><h2>人格特质模型 (简版)</h2></div>
+        
+        <div class="slider-box">
+            <div class="slider-header"><label>外向性 (E): 喜爱社交、活跃</label><span class="val-badge" id="ve">50%</span></div>
+            <input type="range" id="b5-e" min="0" max="100" value="50" oninput="updateVal('b5-e','ve')">
         </div>
-        <div class="q-group"><label>C - 尽责性 (做事可靠、自律且有条理)</label>
-            <input type="range" id="b5-c" min="1" max="5" step="1" value="3">
+
+        <div class="slider-box">
+            <div class="slider-header"><label>神经质 (N): 情绪波动、敏感</label><span class="val-badge" id="vn">50%</span></div>
+            <input type="range" id="b5-n" min="0" max="100" value="50" oninput="updateVal('b5-n','vn')">
         </div>
-        <div class="q-group"><label>E - 外向性 (喜爱社交、充满活力)</label>
-            <input type="range" id="b5-e" min="1" max="5" step="1" value="3">
-        </div>
-        <div class="q-group"><label>A - 宜人性 (富有同情心、乐于助人)</label>
-            <input type="range" id="b5-a" min="1" max="5" step="1" value="3">
-        </div>
-        <div class="q-group"><label>N - 神经质 (情绪易波动、易感到压力)</label>
-            <input type="range" id="b5-n" min="1" max="5" step="1" value="3">
-        </div>
-        <button class="sys-btn btn-green" onclick="saveB5()">✓ 保存人格模型</button>
+
+        <button class="sys-btn btn-green" onclick="saveB5()">确认人格画像</button>
     </div>
 
     <div class="container hidden" id="bart-area">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold;">
-            <span id="bart-round">第 1 / 5 轮</span>
-            <span id="bart-pot" style="color:var(--red);">气球内: $0</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div style="font-size:18px; font-weight:bold;">轮次: <span id="bart-round" style="color:var(--blue);">1/5</span></div>
+            <div style="font-size:18px; font-weight:bold;">本轮积累: <span id="bart-pot" style="color:var(--red); font-size:24px;">$0</span></div>
         </div>
+        
         <div id="bart-workspace"><div id="balloon"></div></div>
-        <div style="display:flex; gap:15px;">
-            <button class="sys-btn btn-blue" id="btn-pump" onclick="pumpBalloon()">🎈 充气</button>
-            <button class="sys-btn btn-green" id="btn-collect" onclick="collectMoney()">💰 收集</button>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+            <button class="sys-btn btn-blue" id="btn-pump" onclick="pumpBalloon()">🎈 充气 (+1)</button>
+            <button class="sys-btn btn-green" id="btn-collect" onclick="collectMoney()">💰 收集收益</button>
         </div>
+        <p style="text-align:center; color:var(--slate); font-size:13px; margin-top:15px;">提示：气球炸裂则本轮收益清零</p>
     </div>
 
     <div class="container hidden" id="emo-area">
-        <div id="emo-word" style="font-size: 70px; margin: 60px 0; font-weight: bold;">+</div>
-        <div id="emo-controls" class="hidden" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
-            <button class="sys-btn" style="background:red;" onclick="recordEmoStroop('red')"></button>
-            <button class="sys-btn" style="background:green;" onclick="recordEmoStroop('green')"></button>
-            <button class="sys-btn" style="background:blue;" onclick="recordEmoStroop('blue')"></button>
+        <div id="emo-word" style="font-size: 80px; margin: 80px 0; font-weight: bold; text-align: center;">+</div>
+        <div id="emo-controls" class="hidden" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+            <button class="sys-btn" style="background:var(--red); height:80px;" onclick="recordES('red')"></button>
+            <button class="sys-btn" style="background:var(--green); height:80px;" onclick="recordES('green')"></button>
+            <button class="sys-btn" style="background:var(--blue); height:80px;" onclick="recordES('blue')"></button>
         </div>
     </div>
 
     <script>
+        // 界面切换
         function show(id) {
-            ['menu', 'ema-area', 'b5-area', 'bart-area', 'emo-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            ['menu', 'ema-area', 'b5-area', 'bart-area', 'emo-area'].forEach(d => {
+                const el = document.getElementById(d);
+                if(el) el.classList.add('hidden');
+            });
             document.getElementById(id).classList.remove('hidden');
             window.scrollTo(0,0);
         }
 
-        // 保存 EMA
-        function saveEMA() {
-            CAS_Storage.saveModuleData('Emotion_EMA', { 
-                anxiety: document.getElementById('ema-1').value,
-                depression: document.getElementById('ema-2').value 
-            });
-            alert("状态评估已保存"); show('menu');
+        // 滑块数值同步
+        function updateVal(inputID, spanID) {
+            const val = document.getElementById(inputID).value;
+            document.getElementById(spanID).innerText = val + "%";
         }
 
-        // 保存 Big 5
-        function saveB5() {
-            CAS_Storage.saveModuleData('Emotion_Big5', { 
-                O: document.getElementById('b5-o').value,
-                C: document.getElementById('b5-c').value,
-                E: document.getElementById('b5-e').value,
-                A: document.getElementById('b5-a').value,
-                N: document.getElementById('b5-n').value 
-            });
-            alert("人格量表已保存"); show('menu');
+        function saveEMA() { 
+            CAS_Storage.saveModuleData('Emotion_EMA', { anxiety: document.getElementById('ema-1').value }); 
+            alert("数据已同步"); show('menu'); 
+        }
+        
+        function saveB5() { 
+            CAS_Storage.saveModuleData('Emotion_Big5', { E: document.getElementById('b5-e').value }); 
+            alert("人格模型已更新"); show('menu'); 
         }
 
-        /* BART 逻辑 (修复版本) */
-        let bartData = { module: "Emotion_BART", trials: [] };
+        /* ================= BART 核心逻辑 (修复版) ================= */
+        let bartData = { module: "BART_Risk", trials: [] };
         let b_round = 1, b_pumps = 0, b_popLimit = 0;
 
-        function startBART() { b_round = 1; bartData.trials = []; show('bart-area'); initRound(); }
+        function startBART() {
+            b_round = 1;
+            bartData.trials = [];
+            show('bart-area');
+            nextRound();
+        }
 
-        function initRound() {
-            if(b_round > 5) { CAS_Storage.saveModuleData('Emotion_BART', bartData); alert("BART 完成"); show('menu'); return; }
-            b_pumps = 0; b_popLimit = Math.floor(Math.random() * 10) + 3;
-            document.getElementById('bart-round').innerText = `第 ${b_round} / 5 轮`;
-            document.getElementById('bart-pot').innerText = `气球内: $0`;
+        function nextRound() {
+            if(b_round > 5) {
+                CAS_Storage.saveModuleData('BART_Risk', bartData);
+                alert("BART任务结束，总收益已结算。");
+                show('menu');
+                return;
+            }
+            // 重置状态
+            b_pumps = 0;
+            b_popLimit = Math.floor(Math.random() * 12) + 2; 
+            document.getElementById('bart-round').innerText = `${b_round} / 5`;
+            document.getElementById('bart-pot').innerText = `$0`;
+            
             const b = document.getElementById('balloon');
-            b.innerText = ""; b.style.width = '40px'; b.style.height = '50px'; b.style.background = 'red';
+            b.innerText = "";
+            b.style.width = '50px'; b.style.height = '60px';
+            b.style.background = 'radial-gradient(circle at 30% 30%, #f87171, #dc2626)';
+            
+            // 🌟 启用按钮
             document.getElementById('btn-pump').disabled = false;
             document.getElementById('btn-collect').disabled = false;
         }
@@ -144,42 +176,47 @@
         function pumpBalloon() {
             b_pumps++;
             if(b_pumps >= b_popLimit) {
+                // 爆炸
                 document.getElementById('btn-pump').disabled = true;
                 document.getElementById('btn-collect').disabled = true;
-                document.getElementById('balloon').innerText = "💥";
-                bartData.trials.push({ round: b_round, result: 'exploded' });
-                setTimeout(() => { b_round++; initRound(); }, 1200);
-            } else {
                 const b = document.getElementById('balloon');
-                b.style.width = (40 + b_pumps * 12) + 'px';
-                b.style.height = (50 + b_pumps * 15) + 'px';
-                document.getElementById('bart-pot').innerText = `气球内: $${b_pumps}`;
+                b.style.background = 'transparent';
+                b.innerText = "💥";
+                bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'popped', gain: 0 });
+                setTimeout(() => { b_round++; nextRound(); }, 1500);
+            } else {
+                // 充气
+                const b = document.getElementById('balloon');
+                b.style.width = (50 + b_pumps * 15) + 'px';
+                b.style.height = (60 + b_pumps * 18) + 'px';
+                document.getElementById('bart-pot').innerText = `$${b_pumps}`;
             }
         }
 
+        // 🌟 修复收集逻辑
         function collectMoney() {
-            bartData.trials.push({ round: b_round, result: 'collected', earned: b_pumps });
-            alert(`收集成功：$${b_pumps}`); b_round++; initRound();
+            // 必须在未爆炸前调用
+            if(b_pumps === 0) { alert("当前没有积累收益哦"); return; }
+            
+            // 保存数据
+            bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'saved', gain: b_pumps });
+            
+            // UI 反馈
+            document.getElementById('btn-pump').disabled = true;
+            document.getElementById('btn-collect').disabled = true;
+            alert(`✅ 成功收集: $${b_pumps}`);
+            
+            b_round++;
+            setTimeout(nextRound, 500);
         }
 
-        /* EmoStroop 逻辑 */
-        let es_trial = 0, es_onset = 0;
-        function startEmoStroop() { es_trial = 0; show('emo-area'); nextES(); }
-        function nextES() {
-            if(es_trial >= 10) { show('menu'); return; }
-            document.getElementById('emo-controls').classList.add('hidden');
-            document.getElementById('emo-word').innerText = "+";
-            setTimeout(() => {
-                document.getElementById('emo-word').innerText = "疾病";
-                document.getElementById('emo-word').style.color = "blue";
-                document.getElementById('emo-controls').classList.remove('hidden');
-                es_onset = performance.now();
-            }, 800);
-        }
-        function recordEmoStroop(color) {
-            CAS_Storage.saveModuleData('Emotion_Stroop', { rt: Math.round(performance.now() - es_onset) });
-            es_trial++; nextES();
-        }
+        /* ================= Stroop 逻辑 ================= */
+        function startEmoStroop() { show('emo-area'); setTimeout(() => {
+            document.getElementById('emo-word').innerText = "焦虑";
+            document.getElementById('emo-word').style.color = "red";
+            document.getElementById('emo-controls').classList.remove('hidden');
+        }, 1000); }
+        function recordES(c) { show('menu'); }
     </script>
 </body>
 </html>
