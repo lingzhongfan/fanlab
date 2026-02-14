@@ -5,65 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAS 临床数字表型数据中心</title>
     <style>
-        :root { 
-            --primary: #0f172a; 
-            --success: #10b981; 
-            --danger: #f43f5e; 
-            --blue: #3b82f6;
-            --bg: #f8fafc;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); padding: 20px; color: #334155; margin: 0; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 6px solid var(--success); }
+        :root { --primary: #0f172a; --success: #10b981; --danger: #f43f5e; --blue: #3b82f6; --bg: #f8fafc; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); padding: 20px; color: #334155; margin: 0; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border-top: 6px solid var(--success); }
         
-        /* 头部状态区 */
-        .header-area { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .header-area { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; }
         .header-area h2 { color: var(--primary); margin: 0 0 5px 0; font-size: 28px; }
-        .session-badge { background: var(--success); color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .session-badge { background: var(--success); color: white; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; box-shadow: 0 4px 10px rgba(16,185,129,0.3); }
         
-        /* 人口学特征面板 */
-        .demographics-panel { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
+        .demographics-panel { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 16px; padding: 25px; margin-bottom: 35px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; }
         .demo-item { display: flex; flex-direction: column; }
-        .demo-label { font-size: 12px; color: #64748b; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        .demo-value { font-size: 16px; color: #0f172a; font-weight: bold; font-family: monospace; }
+        .demo-label { font-size: 12.5px; color: #64748b; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .demo-value { font-size: 17px; color: #0f172a; font-weight: bold; font-family: monospace; }
         
-        /* 全局进度条 */
-        .progress-wrapper { margin-bottom: 30px; }
-        .progress-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; font-size: 16px; }
-        .progress-bar { width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease-in-out; }
+        .progress-wrapper { margin-bottom: 35px; }
+        .progress-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; font-size: 16px; color: var(--primary); }
+        .progress-bar { width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* 分组网格视图 */
-        .domain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .domain-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; }
-        .domain-title { font-size: 18px; font-weight: bold; color: var(--primary); margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
-        
-        /* 列表项 */
-        .module-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; font-size: 14px; }
-        .module-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .domain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 45px; }
+        .domain-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; transition: 0.2s; } .domain-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .domain-title { font-size: 18px; font-weight: bold; color: var(--primary); margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
+        .module-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; font-size: 14.5px; } .module-item:last-child { border-bottom: none; padding-bottom: 0; }
         .module-name { color: #475569; font-weight: 500; }
-        
-        /* 状态标签 */
-        .status-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 6px; }
-        .status-done { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .status-pending { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
-        .time-stamp { font-family: monospace; font-size: 11px; opacity: 0.8; margin-left: 4px; }
+        .status-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; padding: 5px 10px; border-radius: 8px; }
+        .status-done { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; } .status-pending { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
+        .time-stamp { font-family: monospace; font-size: 12px; opacity: 0.8; margin-left: 6px; }
 
-        /* 操作按钮区 */
         .action-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .btn { padding: 18px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; color: white; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .btn:active { transform: translateY(0); }
-        .btn-export { background: var(--success); grid-column: 1 / -1; font-size: 18px; }
-        .btn-preview { background: #64748b; }
-        .btn-nav { background: var(--blue); }
-        .btn-danger { background: var(--danger); }
+        .btn { padding: 20px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; color: white; transition: all 0.2s; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); } .btn:active { transform: translateY(0); }
+        .btn-export { background: var(--success); grid-column: 1 / -1; font-size: 19px; } .btn-preview { background: #64748b; } .btn-nav { background: var(--blue); } .btn-danger { background: var(--danger); }
 
-        /* 隐藏的代码预览面板 */
-        .preview-box { display: none; flex-direction: column; background: #1e293b; padding: 20px; border-radius: 12px; margin-top: 20px; animation: slideDown 0.3s ease-out; }
-        .preview-box textarea { width: 100%; height: 400px; background: #0f172a; color: #10b981; border: 1px solid #334155; border-radius: 8px; padding: 15px; font-family: 'Courier New', monospace; font-size: 13px; resize: vertical; outline: none; box-sizing: border-box; line-height: 1.5; }
-        .copy-action-btn { align-self: flex-end; margin-top: 15px; background: var(--blue); color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .copy-action-btn:hover { background: #2563eb; }
-        
+        .preview-box { display: none; flex-direction: column; background: #1e293b; padding: 25px; border-radius: 16px; margin-top: 25px; animation: slideDown 0.3s ease-out; }
+        .preview-box textarea { width: 100%; height: 450px; background: #0f172a; color: #10b981; border: 1px solid #334155; border-radius: 12px; padding: 18px; font-family: 'Courier New', monospace; font-size: 14px; resize: vertical; outline: none; box-sizing: border-box; line-height: 1.6; }
+        .copy-action-btn { align-self: flex-end; margin-top: 15px; background: var(--blue); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; } .copy-action-btn:hover { background: #2563eb; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     <script src="cas-storage.js"></script>
@@ -71,16 +47,13 @@
 <body>
     <div class="container">
         <div class="header-area">
-            <div>
-                <h2>🔬 CAS 全维度数字表型数据中心</h2>
-                <span style="color: #64748b; font-size: 15px;">神经心理学特征聚合与质控面板</span>
-            </div>
-            <div class="session-badge" id="session-status">状态: 数据采集中</div>
+            <div><h2>🔬 CAS 临床数据整合面板</h2><span style="color: #64748b; font-size: 15px;">全维度神经心理学特征聚合中心</span></div>
+            <div class="session-badge" id="session-status">状态: 采集中...</div>
         </div>
 
         <div class="demographics-panel" id="demo-panel">
             <div class="demo-item"><span class="demo-label">受试者 ID</span><span class="demo-value" id="info-id">-</span></div>
-            <div class="demo-item"><span class="demo-label">姓名/缩写</span><span class="demo-value" id="info-name">-</span></div>
+            <div class="demo-item"><span class="demo-label">姓名缩写</span><span class="demo-value" id="info-name">-</span></div>
             <div class="demo-item"><span class="demo-label">出生日期</span><span class="demo-value" id="info-dob">-</span></div>
             <div class="demo-item"><span class="demo-label">性别</span><span class="demo-value" id="info-gender">-</span></div>
             <div class="demo-item"><span class="demo-label">利手</span><span class="demo-value" id="info-hand">-</span></div>
@@ -88,23 +61,17 @@
         </div>
         
         <div class="progress-wrapper">
-            <div class="progress-header">
-                <span>总体测试进度 (Overall Progress)</span>
-                <span id="progress-text" style="color: var(--success);">0 / 19 (0%)</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
+            <div class="progress-header"><span>测试总进度 (Progress)</span><span id="progress-text" style="color: var(--success);">0 / 22 (0%)</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
         </div>
 
-        <div class="domain-grid" id="domain-board">
-            </div>
+        <div class="domain-grid" id="domain-board"></div>
 
         <div class="action-group">
-            <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 一键导出完整高维 JSON 数据文件</button>
+            <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 一键提取高维 JSON 模型特征包</button>
             <button class="btn btn-preview" onclick="togglePreview()">👀 展开/折叠后台 JSON 源码面板</button>
-            <a href="index.html" class="btn btn-nav">← 返回主面板继续补充测试</a>
-            <button class="btn btn-danger" onclick="CAS_Storage.clearSession()">⚠️ 结束并清除受试者本地缓存</button>
+            <a href="index.html" class="btn btn-nav">← 返回主面板补全测试</a>
+            <button class="btn btn-danger" onclick="CAS_Storage.clearSession()">⚠️ 清除缓存并结束该受试者会话</button>
         </div>
 
         <div class="preview-box" id="preview-container">
@@ -114,170 +81,104 @@
     </div>
 
     <script>
-        // 定义包含领域的完整 19 项架构
+        // 定义包含领域的完整 22 项架构 (新增了语言和生活域的 3 个重要测试)
         const domains = [
-            {
-                name: '🧠 认知域 (Cognition)',
-                modules: [
-                    { id: 'Cognition_Corsi', name: '空间工作记忆 (Corsi)' },
-                    { id: 'Cognition_Stroop', name: '执行抑制 (Stroop)' },
-                    { id: 'Cognition_TMT_B', name: '认知柔性 (TMT-B)' },
-                    { id: 'Cognition_DSST', name: '处理速度 (DSST)' }
-                ]
-            },
-            {
-                name: '❤️ 情感与决策 (Emotion)',
-                modules: [
-                    { id: 'Emotion_State_EMA', name: '状态自评 (EMA)' },
-                    { id: 'Emotion_Trait_Big5', name: '人格特质 (Big5)' },
-                    { id: 'Emotion_Risk_BART', name: '风险决策 (BART)' },
-                    { id: 'Emotion_Affective_Stroop', name: '情绪注意 (E-Stroop)' }
-                ]
-            },
-            {
-                name: '🎯 运动与共济 (Motor)',
-                modules: [
-                    { id: 'Motor_SimpleTapping', name: '单指敲击 (Tapping)' },
-                    { id: 'Motor_Fitts', name: '靶向运动 (Fitts)' },
-                    { id: 'Motor_Spiral_Tracing', name: '震颤分析 (Spiral)' }
-                ]
-            },
-            {
-                name: '⚡ 感觉与知觉 (Sensation)',
-                modules: [
-                    { id: 'Sensation_SimpleRT', name: '简单反应 (SRT)' },
-                    { id: 'Sensation_ChoiceRT', name: '决策反应 (CRT)' },
-                    { id: 'Sensation_GoNoGo', name: '感觉抑制 (Go/No-Go)' },
-                    { id: 'Sensation_VisualSearch', name: '视觉搜索 (V-Search)' }
-                ]
-            },
-            {
-                name: '💬 语言功能 (Language)',
-                modules: [
-                    { id: 'Language_VFT', name: '词汇流畅性 (VFT)' },
-                    { id: 'Language_Naming', name: '图片命名 (Naming)' }
-                ]
-            },
-            {
-                name: '🌙 生活与主观 (Lifestyle)',
-                modules: [
-                    { id: 'Lifestyle_SCD', name: '主观认知下降 (SCD-Q)' },
-                    { id: 'Lifestyle_Sleep', name: '生物节律与睡眠 (Sleep)' }
-                ]
-            }
+            { name: '🧠 认知域 (Cognition)', modules: [ { id: 'Cognition_Corsi', name: '空间记忆 (Corsi)' }, { id: 'Cognition_Stroop', name: '执行抑制 (Stroop)' }, { id: 'Cognition_TMT_B', name: '认知柔性 (TMT-B)' }, { id: 'Cognition_DSST', name: '处理速度 (DSST)' } ] },
+            { name: '❤️ 情感与决策 (Emotion)', modules: [ { id: 'Emotion_State_EMA', name: '状态自评 (EMA)' }, { id: 'Emotion_Trait_Big5', name: '人格特质 (Big5)' }, { id: 'Emotion_Risk_BART', name: '风险决策 (BART)' }, { id: 'Emotion_Affective_Stroop', name: '情绪注意 (E-Stroop)' } ] },
+            { name: '🎯 运动与共济 (Motor)', modules: [ { id: 'Motor_SimpleTapping', name: '单指敲击 (Tapping)' }, { id: 'Motor_Fitts', name: '靶向运动 (Fitts)' }, { id: 'Motor_Spiral_Tracing', name: '震颤分析 (Spiral)' } ] },
+            { name: '⚡ 感觉与知觉 (Sensation)', modules: [ { id: 'Sensation_SimpleRT', name: '简单反应 (SRT)' }, { id: 'Sensation_ChoiceRT', name: '决策反应 (CRT)' }, { id: 'Sensation_GoNoGo', name: '感觉抑制 (Go/No-Go)' }, { id: 'Sensation_VisualSearch', name: '视觉搜索 (V-Search)' } ] },
+            { name: '💬 语言功能 (Language)', modules: [ { id: 'Language_VFT', name: '词汇流畅性 (VFT)' }, { id: 'Language_Naming', name: '图片命名 (Naming)' }, { id: 'Language_Semantic', name: '语义关联 (Semantic)' } ] },
+            { name: '🌙 主观与生活 (Lifestyle)', modules: [ { id: 'Lifestyle_SCD', name: '主观认知下降 (SCD)' }, { id: 'Lifestyle_Sleep', name: '睡眠与节律 (Sleep)' }, { id: 'Lifestyle_IADL', name: '日常能力鉴别 (IADL)' }, { id: 'Lifestyle_PHQ2', name: '抑郁鉴别筛查 (PHQ2)' } ] }
         ];
 
         window.onload = function() {
-            // 获取底层数据
             const session = CAS_Storage.getSession();
             
-            // 1. 渲染人口学特征
+            // 填充人口学数据
             if(session.demographics && Object.keys(session.demographics).length > 0) {
-                document.getElementById('info-id').innerText = session.demographics.subject_id || '-';
-                document.getElementById('info-name').innerText = session.demographics.name || '-';
+                document.getElementById('info-id').innerText = session.demographics.subject_id || '-'; 
+                document.getElementById('info-name').innerText = session.demographics.name || '-'; 
                 document.getElementById('info-dob').innerText = session.demographics.dob || '-';
                 
-                let genderStr = '-';
-                if(session.demographics.gender === 'Male') genderStr = '男 (Male)';
-                else if(session.demographics.gender === 'Female') genderStr = '女 (Female)';
-                else if(session.demographics.gender === 'Other') genderStr = '其他 (Other)';
-                document.getElementById('info-gender').innerText = genderStr;
+                let gStr = '-'; 
+                if(session.demographics.gender==='Male') gStr='男 (Male)'; else if(session.demographics.gender==='Female') gStr='女 (Female)'; else if(session.demographics.gender==='Other') gStr='其他'; 
+                document.getElementById('info-gender').innerText = gStr;
                 
-                let handStr = '-';
-                if(session.demographics.handedness === 'Right') handStr = '右手 (R)';
-                else if(session.demographics.handedness === 'Left') handStr = '左手 (L)';
-                else if(session.demographics.handedness === 'Ambidextrous') handStr = '双利手 (A)';
-                document.getElementById('info-hand').innerText = handStr;
-
+                let hStr = '-'; 
+                if(session.demographics.handedness==='Right') hStr='右手'; else if(session.demographics.handedness==='Left') hStr='左手'; else if(session.demographics.handedness==='Ambidextrous') hStr='双利手'; 
+                document.getElementById('info-hand').innerText = hStr;
+                
                 document.getElementById('info-edu').innerText = session.demographics.education_years ? session.demographics.education_years + ' 年' : '未录入';
-            } else {
-                // 防御性处理：如果底层没有人口学数据，显示未录入
-                document.getElementById('info-id').innerText = session.session_id || '未录入';
+            } else { 
+                document.getElementById('info-id').innerText = session.session_id || '未建档'; 
             }
 
-            // 2. 渲染各模块完成状态
-            const board = document.getElementById('domain-board');
-            let totalModules = 0;
-            let completedModules = 0;
-
-            domains.forEach(domain => {
-                let cardHtml = `<div class="domain-card"><h3 class="domain-title">${domain.name}</h3>`;
-                
-                domain.modules.forEach(m => {
-                    totalModules++;
-                    const moduleData = session.modules ? session.modules[m.id] : null;
-                    const isDone = !!moduleData;
+            // 动态构建看板视图与进度
+            const board = document.getElementById('domain-board'); 
+            let total = 0, completed = 0;
+            
+            domains.forEach(d => {
+                let html = `<div class="domain-card"><h3 class="domain-title">${d.name}</h3>`;
+                d.modules.forEach(m => {
+                    total++; 
+                    const data = session.modules ? session.modules[m.id] : null; 
+                    const isDone = !!data; 
+                    if (isDone) completed++;
                     
-                    if (isDone) completedModules++;
-
-                    // 解析完成时间，若已完成则提取出 HH:MM:SS
-                    let timeStr = "";
-                    if (isDone && moduleData.completed_at) {
-                        const dateObj = new Date(moduleData.completed_at);
-                        timeStr = `<span class="time-stamp">${dateObj.getHours().toString().padStart(2,'0')}:${dateObj.getMinutes().toString().padStart(2,'0')}:${dateObj.getSeconds().toString().padStart(2,'0')}</span>`;
+                    // 解析完成时间
+                    let tStr = ""; 
+                    if (isDone && data.completed_at) { 
+                        const dt = new Date(data.completed_at); 
+                        tStr = `<span class="time-stamp">${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}:${dt.getSeconds().toString().padStart(2,'0')}</span>`; 
                     }
-
-                    const badgeHtml = isDone 
-                        ? `<div class="status-badge status-done">✓ 已采录 ${timeStr}</div>`
-                        : `<div class="status-badge status-pending">○ 待完成</div>`;
-
-                    cardHtml += `
-                        <div class="module-item">
-                            <span class="module-name">${m.name}</span>
-                            ${badgeHtml}
-                        </div>`;
-                });
-                
-                cardHtml += `</div>`;
-                board.innerHTML += cardHtml;
+                    
+                    const badge = isDone ? `<div class="status-badge status-done">✓ 已采录 ${tStr}</div>` : `<div class="status-badge status-pending">○ 待完成</div>`;
+                    html += `<div class="module-item"><span class="module-name">${m.name}</span>${badge}</div>`;
+                }); 
+                html += `</div>`; 
+                board.innerHTML += html;
             });
 
-            // 3. 更新进度条
-            const progressPercent = Math.round((completedModules / totalModules) * 100) || 0;
-            document.getElementById('progress-text').innerText = `${completedModules} / ${totalModules} (${progressPercent}%)`;
-            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+            // 更新总进度条 (基于22项)
+            const pct = Math.round((completed / total) * 100) || 0;
+            document.getElementById('progress-text').innerText = `${completed} / ${total} (${pct}%)`; 
+            document.getElementById('progress-fill').style.width = `${pct}%`;
             
-            // 如果全部完成，更新状态视觉效果
-            if (completedModules === totalModules && totalModules > 0) {
-                document.getElementById('progress-fill').style.background = "linear-gradient(90deg, #10b981, #34d399)";
-                document.getElementById('progress-fill').style.boxShadow = "0 0 10px rgba(52, 211, 153, 0.5)";
-                document.getElementById('session-status').innerText = "状态: 测试已全部完成";
+            // 通关效果
+            if (completed === total && total > 0) {
+                document.getElementById('progress-fill').style.background = "linear-gradient(90deg, #10b981, #34d399)"; 
+                document.getElementById('progress-fill').style.boxShadow = "0 0 15px rgba(52, 211, 153, 0.6)";
+                document.getElementById('session-status').innerText = "✓ 测试已全部通关"; 
                 document.getElementById('session-status').style.background = "#059669";
             }
         };
 
-        // 切换预览面板
         function togglePreview() {
-            const container = document.getElementById('preview-container');
-            if (container.style.display === 'flex') {
-                container.style.display = 'none';
+            const c = document.getElementById('preview-container');
+            if (c.style.display === 'flex') { 
+                c.style.display = 'none'; 
             } else {
-                const session = CAS_Storage.getSession();
-                session.end_time = new Date().toISOString(); // 预览时自动打上结束时间戳
+                const session = CAS_Storage.getSession(); 
+                session.end_time = new Date().toISOString();
                 document.getElementById('json-output-text').value = JSON.stringify(session, null, 2);
-                container.style.display = 'flex';
-                // 平滑滚动至预览框
-                container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                c.style.display = 'flex'; 
+                c.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         }
-
-        // 复制 JSON 功能 (跨平台兼容)
+        
         function copyJSON() {
-            const textArea = document.getElementById('json-output-text');
-            const btn = document.getElementById('copy-btn');
-            
-            textArea.select();
-            textArea.setSelectionRange(0, 999999); // 适配移动设备 (iOS)
-            
-            navigator.clipboard.writeText(textArea.value).then(() => {
-                btn.innerText = "✓ 成功复制至剪贴板！";
-                btn.style.background = "#10b981";
+            const t = document.getElementById('json-output-text'), b = document.getElementById('copy-btn');
+            t.select(); 
+            t.setSelectionRange(0, 999999);
+            navigator.clipboard.writeText(t.value).then(() => { 
+                b.innerText = "✓ 成功复制至剪贴板！"; 
+                b.style.background = "#10b981"; 
                 setTimeout(() => { 
-                    btn.innerText = "📋 复制全部 JSON 至剪贴板"; 
-                    btn.style.background = "#3b82f6"; 
-                }, 2500);
-            }).catch(err => {
-                alert("复制失败，您的浏览器可能不支持该操作，请尝试手动长安全选框内文本。");
+                    b.innerText = "📋 复制全部 JSON 至剪贴板"; 
+                    b.style.background = "#3b82f6"; 
+                }, 2500); 
+            }).catch(err => { 
+                alert("复制失败，请尝试在代码框内手动全选复制。"); 
             });
         }
     </script>
