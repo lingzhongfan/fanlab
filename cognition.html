@@ -3,20 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>认知组合测试</title>
+    <title>临床级认知评估组合</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; text-align: center; touch-action: none; user-select: none; }
-        .container { max-width: 600px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 10px; }
-        /* Corsi UI */
-        #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px auto; width: 300px; height: 300px; }
-        .block { background: #e2e8f0; border-radius: 12px; cursor: pointer; }
-        .block.active { background: #3b82f6 !important; transform: scale(0.95); }
-        /* Stroop UI */
-        #stroop-word { font-size: 80px; font-weight: bold; margin: 40px 0; min-height: 100px; }
-        .stroop-btn { padding: 20px 40px; font-size: 24px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; margin: 0 10px; }
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; margin: 0; padding: 20px; text-align: center; touch-action: none; user-select: none; }
+        .container { max-width: 650px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 10px; width: 80%; transition: background 0.1s; }
+        .sys-btn:active { background: #334155; }
         .hidden { display: none !important; }
         #nav-back { display: block; text-align: left; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
+        
+        /* 1. Corsi UI */
+        #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 30px auto; width: 300px; height: 300px; }
+        .block { background: #e2e8f0; border-radius: 12px; cursor: pointer; transition: transform 0.1s; }
+        .block.active { background: #3b82f6 !important; transform: scale(0.95); }
+        
+        /* 2. Stroop UI */
+        #stroop-word { font-size: 80px; font-weight: bold; margin: 50px 0; min-height: 100px; letter-spacing: 5px; }
+        .stroop-btn { padding: 20px 40px; font-size: 24px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; margin: 0 10px; font-weight: bold; }
+        
+        /* 3. TMT UI */
+        #tmt-workspace { position: relative; width: 100%; height: 400px; background: #f1f5f9; border-radius: 12px; border: 2px solid #cbd5e1; overflow: hidden; margin: 20px 0; }
+        .tmt-node { position: absolute; width: 45px; height: 45px; background: white; border: 3px solid #0f172a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer; transform: translate(-50%, -50%); transition: all 0.2s; z-index: 10; }
+        .tmt-node.active { background: #22c55e; color: white; border-color: #166534; }
+        .tmt-node.error { background: #ef4444; color: white; border-color: #991b1b; }
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+        
+        /* 4. DSST UI */
+        .dsst-key { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; padding: 15px; background: #f1f5f9; border-radius: 12px; }
+        .dsst-pair { display: flex; flex-direction: column; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 24px; font-weight: bold; }
+        #dsst-target { font-size: 60px; margin: 40px 0; font-weight: bold; color: #0f172a; }
+        .dsst-controls { display: flex; justify-content: center; gap: 10px; }
+        .dsst-btn { flex: 1; padding: 20px; font-size: 24px; font-weight: bold; border-radius: 12px; border: 2px solid #3b82f6; background: white; color: #3b82f6; cursor: pointer; }
+        .dsst-btn:active { background: #3b82f6; color: white; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
@@ -24,58 +42,106 @@
     <a href="index.html" id="nav-back">← 返回主控台</a>
     
     <div class="container" id="menu">
-        <h2>认知评估组合</h2>
-        <button class="sys-btn" onclick="startCorsi()">1. 启动空间工作记忆 (Corsi)</button>
-        <button class="sys-btn" onclick="startStroop()">2. 启动执行与抑制 (Stroop)</button>
+        <h2>深度认知评估组合 (Cognition Battery)</h2>
+        <button class="sys-btn" onclick="show('corsi-area'); startCorsi();">1. 空间工作记忆 (Corsi Block)</button>
+        <button class="sys-btn" onclick="show('stroop-area'); startStroop();">2. 执行与抑制控制 (Stroop)</button>
+        <button class="sys-btn" style="background:#3b82f6;" onclick="show('tmt-area'); startTMT();">3. 连线测试 - 认知柔性 (TMT)</button>
+        <button class="sys-btn" style="background:#3b82f6;" onclick="show('dsst-area'); startDSST();">4. 数字符号转换 - 处理速度 (DSST)</button>
     </div>
 
     <div class="container hidden" id="corsi-area">
-        <h3 id="corsi-status">注意观察...</h3>
+        <h3>空间工作记忆</h3>
+        <p id="corsi-status" style="color:#64748b;">注意观察...</p>
         <div id="grid"></div>
-        <button class="sys-btn" onclick="document.getElementById('corsi-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');">返回菜单</button>
+        <button class="sys-btn" style="background:#94a3b8;" onclick="show('menu')">返回菜单</button>
     </div>
 
     <div class="container hidden" id="stroop-area">
-        <h3>请点击文字的<span style="color:red">颜色</span> (忽略字义)</h3>
+        <h3>点击文字对应的<span style="color:red">颜色</span></h3>
         <div id="stroop-word">+</div>
-        <div id="stroop-controls" class="hidden">
-            <button class="stroop-btn" onclick="recordStroop('red')">红</button>
-            <button class="stroop-btn" onclick="recordStroop('blue')">蓝</button>
+        <div id="stroop-controls" class="hidden" style="display:flex; justify-content:center;">
+            <button class="stroop-btn" onclick="recordStroop('red')">红色</button>
+            <button class="stroop-btn" onclick="recordStroop('blue')">蓝色</button>
         </div>
-        <div id="stroop-result" class="hidden" style="margin-top:20px; font-weight:bold;"></div>
-        <br><button class="sys-btn" onclick="document.getElementById('stroop-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');">返回菜单</button>
+    </div>
+
+    <div class="container hidden" id="tmt-area">
+        <h3>数字-字母交替连线 (TMT-B)</h3>
+        <p style="font-size:14px; color:#64748b;">请按 <strong>1 -> A -> 2 -> B -> 3 -> C</strong> 的顺序点击圆圈。</p>
+        <div id="tmt-workspace">
+            <svg id="tmt-lines"></svg>
+            <div id="tmt-nodes"></div>
+        </div>
+        <p id="tmt-timer" style="font-weight:bold; font-size:18px; color:#ef4444;"></p>
+    </div>
+
+    <div class="container hidden" id="dsst-area">
+        <h3>数字符号转换 (DSST)</h3>
+        <p style="font-size:14px; color:#64748b;">请根据上方的对照表，为出现的符号选择对应的数字。时间：60秒。</p>
+        
+        <div class="dsst-key">
+            <div class="dsst-pair"><span>★</span><span>1</span></div>
+            <div class="dsst-pair"><span>▲</span><span>2</span></div>
+            <div class="dsst-pair"><span>●</span><span>3</span></div>
+            <div class="dsst-pair"><span>■</span><span>4</span></div>
+            <div class="dsst-pair"><span>✦</span><span>5</span></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+            <span id="dsst-score" style="color:#10b981;">得分: 0</span>
+            <span id="dsst-time" style="color:#ef4444;">剩余: 60s</span>
+        </div>
+
+        <div id="dsst-target">★</div>
+        
+        <div class="dsst-controls">
+            <button class="dsst-btn" onclick="recordDSST(1)">1</button>
+            <button class="dsst-btn" onclick="recordDSST(2)">2</button>
+            <button class="dsst-btn" onclick="recordDSST(3)">3</button>
+            <button class="dsst-btn" onclick="recordDSST(4)">4</button>
+            <button class="dsst-btn" onclick="recordDSST(5)">5</button>
+        </div>
     </div>
 
     <script>
-        // --- Corsi 逻辑简写 ---
+        function show(id) { 
+            ['menu', 'corsi-area', 'stroop-area', 'tmt-area', 'dsst-area'].forEach(div => document.getElementById(div).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+
+        // ================= 1. Corsi 空间记忆 =================
         let corsiData = { module: "Cognition_Corsi", span: 0, trials: [] };
         let seq = [], userSeq = [], cSpan = 2, cTrials = 0, allow = false, grid = document.getElementById('grid');
         for(let i=0; i<9; i++) {
             let d = document.createElement('div'); d.className = 'block';
-            d.ontouchstart = d.onmousedown = (e) => { e.preventDefault(); if(allow){
-                d.classList.add('active'); setTimeout(()=>d.classList.remove('active'),150);
-                userSeq.push(i); if(userSeq[userSeq.length-1] !== seq[userSeq.length-1]) { allow=false; alert("错误，测试结束"); finishCorsi(); }
-                else if(userSeq.length === seq.length) { allow=false; corsiData.span = cSpan; cSpan++; cTrials++; document.getElementById('corsi-status').innerText="正确！下一轮"; setTimeout(runCorsi, 1000); }
-            }}; grid.appendChild(d);
+            d.ontouchstart = d.onmousedown = (e) => { e.preventDefault(); if(!allow) return;
+                d.classList.add('active'); setTimeout(()=>d.classList.remove('active'), 150);
+                userSeq.push(i); 
+                if(userSeq[userSeq.length-1] !== seq[userSeq.length-1]) { allow=false; alert(`测试结束。最终记忆广度：${cSpan-1}`); finishCorsi(); }
+                else if(userSeq.length === seq.length) { allow=false; corsiData.span = cSpan; cSpan++; cTrials++; document.getElementById('corsi-status').innerText="正确！进入下一难度..."; setTimeout(runCorsi, 1000); }
+            }; grid.appendChild(d);
         }
-        function startCorsi() { document.getElementById('menu').classList.add('hidden'); document.getElementById('corsi-area').classList.remove('hidden'); cSpan=2; cTrials=0; runCorsi(); }
-        function runCorsi() { if(cTrials>4) return finishCorsi(); seq=[]; userSeq=[]; allow=false; document.getElementById('corsi-status').innerText=`广度: ${cSpan}`;
+        function startCorsi() { cSpan=2; cTrials=0; runCorsi(); }
+        function runCorsi() { 
+            if(cTrials>5) return finishCorsi(); 
+            seq=[]; userSeq=[]; allow=false; document.getElementById('corsi-status').innerText=`当前难度: ${cSpan}`;
             let p=[0,1,2,3,4,5,6,7,8]; for(let i=0;i<cSpan;i++) seq.push(p.splice(Math.floor(Math.random()*p.length),1)[0]);
             let st=0, it=setInterval(()=>{
                 document.querySelectorAll('.block').forEach(b=>b.classList.remove('active'));
-                if(st<seq.length) { grid.children[seq[st]].classList.add('active'); setTimeout(()=>grid.children[seq[st-1]].classList.remove('active'),400); st++; }
-                else { clearInterval(it); document.getElementById('corsi-status').innerText="请复现"; allow=true; }
-            },800);
+                if(st<seq.length) { grid.children[seq[st]].classList.add('active'); setTimeout(()=>grid.children[seq[st-1]].classList.remove('active'), 400); st++; }
+                else { clearInterval(it); document.getElementById('corsi-status').innerText="请复现序列"; allow=true; }
+            }, 800);
         }
-        function finishCorsi() { CAS_Storage.saveModuleData('Cognition_Corsi', corsiData); document.getElementById('corsi-status').innerText=`已保存. 广度: ${corsiData.span}`; }
+        function finishCorsi() { CAS_Storage.saveModuleData('Cognition_Corsi', corsiData); show('menu'); }
 
-        // --- Stroop 逻辑简写 ---
-        const s_stim = [{w:'红',c:'red',t:'con'},{w:'蓝',c:'blue',t:'con'},{w:'红',c:'blue',t:'inc'},{w:'蓝',c:'red',t:'inc'}];
+        // ================= 2. Stroop 执行抑制 =================
+        const s_stim = [{w:'红',c:'red',t:'congruent'},{w:'蓝',c:'blue',t:'congruent'},{w:'红',c:'blue',t:'incongruent'},{w:'蓝',c:'red',t:'incongruent'}];
         let stroopData = { module: "Cognition_Stroop", records: [] }, s_tr=0, s_onset=0;
-        function startStroop() { document.getElementById('menu').classList.add('hidden'); document.getElementById('stroop-area').classList.remove('hidden'); stroopData.records=[]; s_tr=0; nextStroop(); }
+        function startStroop() { stroopData.records=[]; s_tr=0; nextStroop(); }
         function nextStroop() {
-            if(s_tr>=10) { CAS_Storage.saveModuleData('Cognition_Stroop', stroopData); document.getElementById('stroop-result').innerText="Stroop 已保存"; document.getElementById('stroop-result').classList.remove('hidden'); return; }
-            document.getElementById('stroop-controls').classList.add('hidden'); document.getElementById('stroop-word').innerText = "+"; document.getElementById('stroop-word').style.color = "#333";
+            if(s_tr>=10) { CAS_Storage.saveModuleData('Cognition_Stroop', stroopData); alert("Stroop 数据已保存"); show('menu'); return; }
+            document.getElementById('stroop-controls').classList.add('hidden'); 
+            document.getElementById('stroop-word').innerText = "+"; document.getElementById('stroop-word').style.color = "#333";
             setTimeout(()=>{
                 let stim = s_stim[Math.floor(Math.random()*4)];
                 document.getElementById('stroop-word').innerText = stim.w; document.getElementById('stroop-word').style.color = stim.c;
@@ -87,6 +153,99 @@
             let rt = performance.now() - s_onset; let tar = document.getElementById('stroop-word').dataset.t;
             stroopData.records.push({ trial: s_tr+1, condition: document.getElementById('stroop-word').dataset.type, correct: res===tar, rt_ms: Math.round(rt) });
             s_tr++; nextStroop();
+        }
+
+        // ================= 3. TMT 连线测试 =================
+        const tmtSequence = [ {id:1, lbl:'1', x:15, y:20}, {id:2, lbl:'A', x:40, y:80}, {id:3, lbl:'2', x:80, y:30}, {id:4, lbl:'B', x:85, y:85}, {id:5, lbl:'3', x:15, y:70}, {id:6, lbl:'C', x:50, y:45} ];
+        let tmtData = { module: "Cognition_TMT_B", total_time_ms: 0, path: [] };
+        let tmtCurrent = 0, tmtStartTime = 0, tmtTimerId, tmtLastNode = null;
+        
+        function startTMT() {
+            tmtData.path = []; tmtCurrent = 0; document.getElementById('tmt-lines').innerHTML = '';
+            let container = document.getElementById('tmt-nodes'); container.innerHTML = '';
+            
+            tmtSequence.forEach((node, index) => {
+                let el = document.createElement('div'); el.className = 'tmt-node';
+                el.innerText = node.lbl; el.style.left = node.x + '%'; el.style.top = node.y + '%';
+                el.ontouchstart = el.onmousedown = (e) => { e.preventDefault(); hitTMTNode(index, el, node); };
+                container.appendChild(el);
+            });
+            tmtStartTime = performance.now();
+            tmtTimerId = setInterval(() => { document.getElementById('tmt-timer').innerText = `耗时: ${((performance.now()-tmtStartTime)/1000).toFixed(1)}s`; }, 100);
+        }
+        
+        function hitTMTNode(index, el, nodeData) {
+            if (index === tmtCurrent) {
+                // 正确点击
+                el.classList.add('active');
+                tmtData.path.push({ node: nodeData.lbl, rt_ms: Math.round(performance.now() - tmtStartTime) });
+                
+                if (tmtLastNode) {
+                    // 画线
+                    let svg = document.getElementById('tmt-lines');
+                    let line = document.createElementNS('http://www.w3.org/2000/svg','line');
+                    line.setAttribute('x1', tmtLastNode.x + '%'); line.setAttribute('y1', tmtLastNode.y + '%');
+                    line.setAttribute('x2', nodeData.x + '%'); line.setAttribute('y2', nodeData.y + '%');
+                    line.setAttribute('stroke', '#22c55e'); line.setAttribute('stroke-width', '4');
+                    svg.appendChild(line);
+                }
+                tmtLastNode = nodeData; tmtCurrent++;
+                
+                if (tmtCurrent === tmtSequence.length) {
+                    clearInterval(tmtTimerId);
+                    tmtData.total_time_ms = Math.round(performance.now() - tmtStartTime);
+                    CAS_Storage.saveModuleData('Cognition_TMT_B', tmtData);
+                    setTimeout(() => { alert(`TMT 完成，耗时 ${tmtData.total_time_ms} 毫秒`); show('menu'); }, 500);
+                }
+            } else if (index > tmtCurrent) {
+                // 点错了
+                el.classList.add('error'); setTimeout(() => el.classList.remove('error'), 300);
+            }
+        }
+
+        // ================= 4. DSST 数字符号转换 =================
+        const dsstMap = { '★': 1, '▲': 2, '●': 3, '■': 4, '✦': 5 };
+        const dsstSymbols = Object.keys(dsstMap);
+        let dsstData = { module: "Cognition_DSST", correct_count: 0, total_trials: 0, records: [] };
+        let dsstTimeLeft = 60, dsstTimerId, dsstOnset = 0, currentDsstTarget = '';
+
+        function startDSST() {
+            dsstData.correct_count = 0; dsstData.total_trials = 0; dsstData.records = [];
+            dsstTimeLeft = 60; document.getElementById('dsst-score').innerText = '得分: 0';
+            
+            dsstTimerId = setInterval(() => {
+                dsstTimeLeft--;
+                document.getElementById('dsst-time').innerText = `剩余: ${dsstTimeLeft}s`;
+                if (dsstTimeLeft <= 0) finishDSST();
+            }, 1000);
+            nextDSST();
+        }
+
+        function nextDSST() {
+            currentDsstTarget = dsstSymbols[Math.floor(Math.random() * dsstSymbols.length)];
+            document.getElementById('dsst-target').innerText = currentDsstTarget;
+            dsstOnset = performance.now();
+        }
+
+        function recordDSST(number) {
+            if (dsstTimeLeft <= 0) return;
+            let rt = performance.now() - dsstOnset;
+            let isCorrect = dsstMap[currentDsstTarget] === number;
+            
+            dsstData.total_trials++;
+            if (isCorrect) {
+                dsstData.correct_count++;
+                document.getElementById('dsst-score').innerText = `得分: ${dsstData.correct_count}`;
+            }
+            dsstData.records.push({ symbol: currentDsstTarget, response: number, correct: isCorrect, rt_ms: Math.round(rt) });
+            nextDSST();
+        }
+
+        function finishDSST() {
+            clearInterval(dsstTimerId);
+            CAS_Storage.saveModuleData('Cognition_DSST', dsstData);
+            alert(`DSST 时间到！共完成 ${dsstData.total_trials} 个，正确 ${dsstData.correct_count} 个。`);
+            show('menu');
         }
     </script>
 </body>
