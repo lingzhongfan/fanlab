@@ -1,1 +1,35 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAS - 数字表型与认知评估系统</title>
+    <style>
+        :root { --primary: #0f172a; --bg: #f8fafc; --text: #334155; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        header { text-align: center; margin-bottom: 40px; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; text-decoration: none; color: inherit; border: 2px solid transparent; transition: all 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .card h2 { color: var(--primary); margin: 15px 0 5px; font-size: 20px; }
+        .icon { font-size: 48px; }
+        .data-btn { display: block; max-width: 1000px; margin: 30px auto; padding: 20px; background: #3b82f6; color: white; text-align: center; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; transition: background 0.2s; }
+        .data-btn:hover { background: #2563eb; }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <header>
+        <h1 style="margin:0 0 10px 0; color: #0f172a;">多模态数字认知评估系统 (CAS)</h1>
+        <p style="margin:0; font-size: 16px; color: #64748b;">面向 AI 模型优化的临床级数字表型采集终端</p>
+    </header>
+    <div class="grid">
+        <a href="cognition.html" class="card"><div class="icon">🧠</div><h2>认知 (Cognition)</h2><p style="color:#64748b;">空间工作记忆 (Corsi Span)</p></a>
+        <a href="emotion.html" class="card"><div class="icon">📊</div><h2>情感 (Emotion)</h2><p style="color:#64748b;">连续生态瞬时评估 (EMA)</p></a>
+        <a href="motor.html" class="card"><div class="icon">🎯</div><h2>运动 (Motor)</h2><p style="color:#64748b;">菲茨交替点击 (Fitts' Law)</p></a>
+        <a href="sensation.html" class="card"><div class="icon">⚡</div><h2>感觉 (Sensation)</h2><p style="color:#64748b;">选择反应时 (Choice RT)</p></a>
+    </div>
+    <a href="report.html" class="data-btn">进入数据集成与导出中心 ➔</a>
+</body>
+</html>
