@@ -71,7 +71,7 @@
             <div class="form-group"><label>姓名拼音/缩写 <span>*</span></label><input type="text" id="subj-name" placeholder="如：ZhangSan"></div>
         </div>
         <div class="form-row">
-            <div class="form-group"><label>出生年月日 <span>*</span></label><input type="date" id="subj-dob"></div>
+            <div class="form-group"><label>出生年月日 <span>*</span></label><input type="date" id="subj-dob" min="1900-01-01" max="2099-12-31"></div>
             <div class="form-group"><label>性别 <span>*</span></label><select id="subj-gender"><option value="">请选择...</option><option value="Male">男</option><option value="Female">女</option></select></div>
         </div>
         <div class="form-row">
@@ -140,17 +140,45 @@
 
     <script>
         window.onload = function() {
+            // 【进阶修复】：动态将出生日期的最大可选值设定为今天，防止选错到未来年份
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById('subj-dob').setAttribute("max", today);
+
             if (CAS_Storage.hasSession()) {
-                document.getElementById('setup-container').style.display = 'none'; document.getElementById('dashboard-container').style.display = 'block';
+                document.getElementById('setup-container').style.display = 'none'; 
+                document.getElementById('dashboard-container').style.display = 'block';
                 const session = CAS_Storage.getSession();
-                document.getElementById('display-subj-name').innerText = session.demographics.name; document.getElementById('display-subj-id').innerText = session.session_id;
-            } else { document.getElementById('setup-container').style.display = 'block'; document.getElementById('dashboard-container').style.display = 'none'; }
+                document.getElementById('display-subj-name').innerText = session.demographics.name; 
+                document.getElementById('display-subj-id').innerText = session.session_id;
+            } else { 
+                document.getElementById('setup-container').style.display = 'block'; 
+                document.getElementById('dashboard-container').style.display = 'none'; 
+            }
         };
+
         function registerSubject() {
-            const id = document.getElementById('subj-id').value.trim(), name = document.getElementById('subj-name').value.trim(), dob = document.getElementById('subj-dob').value, gender = document.getElementById('subj-gender').value, hand = document.getElementById('subj-hand').value, edu = document.getElementById('subj-edu').value;
+            const id = document.getElementById('subj-id').value.trim(), 
+                  name = document.getElementById('subj-name').value.trim(), 
+                  dob = document.getElementById('subj-dob').value, 
+                  gender = document.getElementById('subj-gender').value, 
+                  hand = document.getElementById('subj-hand').value, 
+                  edu = document.getElementById('subj-edu').value;
+            
             if(!id || !name || !dob || !gender || !hand) return alert("⚠️ 请完整填写所有带 * 的必填项！");
-            CAS_Storage.initSession({ subject_id: id, name: name, dob: dob, gender: gender, handedness: hand, education_years: edu ? parseInt(edu) : null });
-            document.getElementById('setup-container').style.display = 'none'; document.getElementById('display-subj-name').innerText = name; document.getElementById('display-subj-id').innerText = id; document.getElementById('dashboard-container').style.display = 'block';
+            
+            CAS_Storage.initSession({ 
+                subject_id: id, 
+                name: name, 
+                dob: dob, 
+                gender: gender, 
+                handedness: hand, 
+                education_years: edu ? parseInt(edu) : null 
+            });
+            
+            document.getElementById('setup-container').style.display = 'none'; 
+            document.getElementById('display-subj-name').innerText = name; 
+            document.getElementById('display-subj-id').innerText = id; 
+            document.getElementById('dashboard-container').style.display = 'block';
         }
     </script>
 </body>
