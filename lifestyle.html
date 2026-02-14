@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>主观认知与生物节律</title>
+    <style>
+        body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 650px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 10px 0; width: 100%; }
+        .hidden { display: none !important; }
+        #nav-back { display: block; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
+        
+        .q-group { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
+        .q-group label { display: block; font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 16px; }
+        select, input[type="time"] { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 16px; background: #f8fafc; }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <a href="index.html" id="nav-back">← 返回主控台</a>
+    <div class="container" id="menu">
+        <h2>节律与主观状态评估 (Lifestyle)</h2>
+        <p style="color:#64748b; font-size:14px;">收集 ADL 日常功能下降的早期预警信号与睡眠特征。</p>
+        <button class="sys-btn" onclick="show('scd-area');">1. 主观认知下降问卷 (SCD-Q)</button>
+        <button class="sys-btn" style="background:#3b82f6;" onclick="show('sleep-area');">2. 睡眠与生物节律状态 (Sleep)</button>
+    </div>
+
+    <div class="container hidden" id="scd-area">
+        <h3>主观认知下降 (SCD)</h3>
+        <div class="q-group">
+            <label>1. 您觉得自己的记忆力是否正在下降？</label>
+            <select id="scd-1"><option value="0">没有</option><option value="1">偶尔感觉</option><option value="2">明显感觉下降</option></select>
+        </div>
+        <div class="q-group">
+            <label>2. 这种记忆下降是否引起了您的担忧？</label>
+            <select id="scd-2"><option value="0">完全不担忧</option><option value="1">有点担忧</option><option value="2">非常担忧</option></select>
+        </div>
+        <div class="q-group">
+            <label>3. 寻找合适的词语表达(找词困难)是否变得更难了？</label>
+            <select id="scd-3"><option value="0">没有变化</option><option value="1">偶尔困难</option><option value="2">经常卡壳</option></select>
+        </div>
+        <button class="sys-btn" onclick="saveSCD()">保存 SCD 数据</button>
+    </div>
+
+    <div class="container hidden" id="sleep-area">
+        <h3>睡眠与节律特征</h3>
+        <div class="q-group">
+            <label>1. 过去一个月，您通常晚上几点入睡？</label>
+            <input type="time" id="slp-1" value="23:00">
+        </div>
+        <div class="q-group">
+            <label>2. 您夜间通常会醒来几次？(睡眠碎片化)</label>
+            <select id="slp-2"><option value="0">0次 (一觉到天亮)</option><option value="1">1-2次</option><option value="2">3次及以上</option></select>
+        </div>
+        <div class="q-group">
+            <label>3. 整体睡眠质量自评 (0极差 - 100极佳)</label>
+            <input type="range" id="slp-3" min="0" max="100" value="70" style="width:100%;">
+        </div>
+        <button class="sys-btn" onclick="saveSleep()">保存睡眠特征</button>
+    </div>
+
+    <script>
+        function show(id) { 
+            ['menu', 'scd-area', 'sleep-area'].forEach(div => document.getElementById(div).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+
+        function saveSCD() {
+            CAS_Storage.saveModuleData('Lifestyle_SCD', { memory_decline: parseInt(document.getElementById('scd-1').value), worry: parseInt(document.getElementById('scd-2').value), word_finding: parseInt(document.getElementById('scd-3').value) });
+            alert("主观认知问卷已保存"); show('menu');
+        }
+
+        function saveSleep() {
+            CAS_Storage.saveModuleData('Lifestyle_Sleep', { bedtime: document.getElementById('slp-1').value, awakenings: parseInt(document.getElementById('slp-2').value), quality_score: parseInt(document.getElementById('slp-3').value) });
+            alert("睡眠节律特征已保存"); show('menu');
+        }
+    </script>
+</body>
+</html>
