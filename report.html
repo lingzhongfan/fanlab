@@ -16,9 +16,15 @@
         .container { max-width: 1100px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 6px solid var(--success); }
         
         /* 头部状态区 */
-        .header-area { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
-        .header-area h2 { color: var(--primary); margin: 0 0 10px 0; font-size: 28px; }
-        .session-badge { background: #f1f5f9; padding: 8px 15px; border-radius: 8px; font-family: monospace; font-size: 15px; color: #475569; font-weight: bold; border: 1px solid #cbd5e1; }
+        .header-area { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .header-area h2 { color: var(--primary); margin: 0 0 5px 0; font-size: 28px; }
+        .session-badge { background: var(--success); color: white; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        
+        /* 人口学特征面板 */
+        .demographics-panel { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
+        .demo-item { display: flex; flex-direction: column; }
+        .demo-label { font-size: 12px; color: #64748b; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+        .demo-value { font-size: 16px; color: #0f172a; font-weight: bold; font-family: monospace; }
         
         /* 全局进度条 */
         .progress-wrapper { margin-bottom: 30px; }
@@ -32,15 +38,15 @@
         .domain-title { font-size: 18px; font-weight: bold; color: var(--primary); margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
         
         /* 列表项 */
-        .module-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #cbd5e1; font-size: 14px; }
+        .module-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; font-size: 14px; }
         .module-item:last-child { border-bottom: none; padding-bottom: 0; }
         .module-name { color: #475569; font-weight: 500; }
         
         /* 状态标签 */
         .status-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 6px; }
-        .status-done { background: #d1fae5; color: #065f46; }
-        .status-pending { background: #ffe4e6; color: #9f1239; }
-        .time-stamp { font-family: monospace; font-size: 11px; opacity: 0.8; }
+        .status-done { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .status-pending { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
+        .time-stamp { font-family: monospace; font-size: 11px; opacity: 0.8; margin-left: 4px; }
 
         /* 操作按钮区 */
         .action-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
@@ -66,10 +72,19 @@
     <div class="container">
         <div class="header-area">
             <div>
-                <h2>🔬 CAS 复合数字表型数据中心</h2>
-                <span style="color: #64748b; font-size: 15px;">全维度神经心理学特征聚合与质控面板</span>
+                <h2>🔬 CAS 全维度数字表型数据中心</h2>
+                <span style="color: #64748b; font-size: 15px;">神经心理学特征聚合与质控面板</span>
             </div>
-            <div class="session-badge">ID: <span id="sess-id"></span></div>
+            <div class="session-badge" id="session-status">状态: 数据采集中</div>
+        </div>
+
+        <div class="demographics-panel" id="demo-panel">
+            <div class="demo-item"><span class="demo-label">受试者 ID</span><span class="demo-value" id="info-id">-</span></div>
+            <div class="demo-item"><span class="demo-label">姓名/缩写</span><span class="demo-value" id="info-name">-</span></div>
+            <div class="demo-item"><span class="demo-label">出生日期</span><span class="demo-value" id="info-dob">-</span></div>
+            <div class="demo-item"><span class="demo-label">性别</span><span class="demo-value" id="info-gender">-</span></div>
+            <div class="demo-item"><span class="demo-label">利手</span><span class="demo-value" id="info-hand">-</span></div>
+            <div class="demo-item"><span class="demo-label">教育年限</span><span class="demo-value" id="info-edu">-</span></div>
         </div>
         
         <div class="progress-wrapper">
@@ -86,15 +101,15 @@
             </div>
 
         <div class="action-group">
-            <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 导出结构化 JSON 数据包 (用于 AI 建模)</button>
-            <button class="btn btn-preview" onclick="togglePreview()">👀 展开/折叠数据源码</button>
-            <a href="index.html" class="btn btn-nav">← 返回主面板继续测试</a>
-            <button class="btn btn-danger" onclick="CAS_Storage.clearSession()">⚠️ 结束并清除当前受试者数据</button>
+            <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 一键导出完整高维 JSON 数据文件</button>
+            <button class="btn btn-preview" onclick="togglePreview()">👀 展开/折叠后台 JSON 源码面板</button>
+            <a href="index.html" class="btn btn-nav">← 返回主面板继续补充测试</a>
+            <button class="btn btn-danger" onclick="CAS_Storage.clearSession()">⚠️ 结束并清除受试者本地缓存</button>
         </div>
 
         <div class="preview-box" id="preview-container">
             <textarea id="json-output-text" readonly spellcheck="false"></textarea>
-            <button class="copy-action-btn" id="copy-btn" onclick="copyJSON()">📋 一键复制全部 JSON 代码</button>
+            <button class="copy-action-btn" id="copy-btn" onclick="copyJSON()">📋 复制全部 JSON 至剪贴板</button>
         </div>
     </div>
 
@@ -106,7 +121,7 @@
                 modules: [
                     { id: 'Cognition_Corsi', name: '空间工作记忆 (Corsi)' },
                     { id: 'Cognition_Stroop', name: '执行抑制 (Stroop)' },
-                    { id: 'Cognition_TMT_B', name: '认知柔性 (TMT)' },
+                    { id: 'Cognition_TMT_B', name: '认知柔性 (TMT-B)' },
                     { id: 'Cognition_DSST', name: '处理速度 (DSST)' }
                 ]
             },
@@ -144,29 +159,53 @@
                 ]
             },
             {
-                name: '🌙 主观与节律 (Lifestyle)',
+                name: '🌙 生活与主观 (Lifestyle)',
                 modules: [
-                    { id: 'Lifestyle_SCD', name: '主观认知下降 (SCD)' },
-                    { id: 'Lifestyle_Sleep', name: '睡眠与生物节律 (Sleep)' }
+                    { id: 'Lifestyle_SCD', name: '主观认知下降 (SCD-Q)' },
+                    { id: 'Lifestyle_Sleep', name: '生物节律与睡眠 (Sleep)' }
                 ]
             }
         ];
 
         window.onload = function() {
+            // 获取底层数据
             const session = CAS_Storage.getSession();
-            document.getElementById('sess-id').innerText = session.session_id;
             
+            // 1. 渲染人口学特征
+            if(session.demographics && Object.keys(session.demographics).length > 0) {
+                document.getElementById('info-id').innerText = session.demographics.subject_id || '-';
+                document.getElementById('info-name').innerText = session.demographics.name || '-';
+                document.getElementById('info-dob').innerText = session.demographics.dob || '-';
+                
+                let genderStr = '-';
+                if(session.demographics.gender === 'Male') genderStr = '男 (Male)';
+                else if(session.demographics.gender === 'Female') genderStr = '女 (Female)';
+                else if(session.demographics.gender === 'Other') genderStr = '其他 (Other)';
+                document.getElementById('info-gender').innerText = genderStr;
+                
+                let handStr = '-';
+                if(session.demographics.handedness === 'Right') handStr = '右手 (R)';
+                else if(session.demographics.handedness === 'Left') handStr = '左手 (L)';
+                else if(session.demographics.handedness === 'Ambidextrous') handStr = '双利手 (A)';
+                document.getElementById('info-hand').innerText = handStr;
+
+                document.getElementById('info-edu').innerText = session.demographics.education_years ? session.demographics.education_years + ' 年' : '未录入';
+            } else {
+                // 防御性处理：如果底层没有人口学数据，显示未录入
+                document.getElementById('info-id').innerText = session.session_id || '未录入';
+            }
+
+            // 2. 渲染各模块完成状态
             const board = document.getElementById('domain-board');
             let totalModules = 0;
             let completedModules = 0;
 
-            // 动态生成分组卡片
             domains.forEach(domain => {
                 let cardHtml = `<div class="domain-card"><h3 class="domain-title">${domain.name}</h3>`;
                 
                 domain.modules.forEach(m => {
                     totalModules++;
-                    const moduleData = session.modules[m.id];
+                    const moduleData = session.modules ? session.modules[m.id] : null;
                     const isDone = !!moduleData;
                     
                     if (isDone) completedModules++;
@@ -193,15 +232,17 @@
                 board.innerHTML += cardHtml;
             });
 
-            // 更新进度条
-            const progressPercent = Math.round((completedModules / totalModules) * 100);
+            // 3. 更新进度条
+            const progressPercent = Math.round((completedModules / totalModules) * 100) || 0;
             document.getElementById('progress-text').innerText = `${completedModules} / ${totalModules} (${progressPercent}%)`;
             document.getElementById('progress-fill').style.width = `${progressPercent}%`;
             
-            // 如果全部完成，进度条变成金色/耀眼效果提示可以导出
-            if (completedModules === totalModules) {
+            // 如果全部完成，更新状态视觉效果
+            if (completedModules === totalModules && totalModules > 0) {
                 document.getElementById('progress-fill').style.background = "linear-gradient(90deg, #10b981, #34d399)";
-                document.getElementById('progress-fill').style.boxShadow = "0 0 10px #34d399";
+                document.getElementById('progress-fill').style.boxShadow = "0 0 10px rgba(52, 211, 153, 0.5)";
+                document.getElementById('session-status').innerText = "状态: 测试已全部完成";
+                document.getElementById('session-status').style.background = "#059669";
             }
         };
 
@@ -212,31 +253,31 @@
                 container.style.display = 'none';
             } else {
                 const session = CAS_Storage.getSession();
-                session.end_time = new Date().toISOString(); // 预览时记录当前为结束时间
+                session.end_time = new Date().toISOString(); // 预览时自动打上结束时间戳
                 document.getElementById('json-output-text').value = JSON.stringify(session, null, 2);
                 container.style.display = 'flex';
-                // 平滑滚动到底部
+                // 平滑滚动至预览框
                 container.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         }
 
-        // 复制 JSON 功能
+        // 复制 JSON 功能 (跨平台兼容)
         function copyJSON() {
             const textArea = document.getElementById('json-output-text');
             const btn = document.getElementById('copy-btn');
             
             textArea.select();
-            textArea.setSelectionRange(0, 999999); // 适配移动设备
+            textArea.setSelectionRange(0, 999999); // 适配移动设备 (iOS)
             
             navigator.clipboard.writeText(textArea.value).then(() => {
-                btn.innerText = "✓ 成功复制到剪贴板！";
+                btn.innerText = "✓ 成功复制至剪贴板！";
                 btn.style.background = "#10b981";
                 setTimeout(() => { 
-                    btn.innerText = "📋 一键复制全部 JSON 代码"; 
+                    btn.innerText = "📋 复制全部 JSON 至剪贴板"; 
                     btn.style.background = "#3b82f6"; 
-                }, 2000);
+                }, 2500);
             }).catch(err => {
-                alert("复制失败，请尝试在代码框内手动全选复制。");
+                alert("复制失败，您的浏览器可能不支持该操作，请尝试手动长安全选框内文本。");
             });
         }
     </script>
