@@ -5,249 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAS-EMO | 情感与决策</title>
     <style>
-        /* ==================== 1. 样式表 ==================== */
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: #f8fafc; 
-            margin: 0; 
-            padding: 20px; 
-            touch-action: manipulation; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-        .container { 
-            max-width: 650px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 35px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        }
-        .module-header { 
-            color: #0f172a; 
-            margin-top: 0; 
-            font-size: 24px; 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-        }
-        .sys-btn { 
-            background: #0f172a; 
-            color: white; 
-            border: none; 
-            padding: 18px 30px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-bottom: 15px; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-        .sys-btn:active:not(:disabled) { transform: scale(0.98); } 
+        :root { --primary: #0f172a; --blue: #3b82f6; --green: #10b981; --red: #ef4444; }
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; margin: 0; padding: 20px; touch-action: manipulation; }
+        .container { max-width: 650px; margin: 20px auto; background: white; padding: 35px 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
-        #nav-back { 
-            display: inline-flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: #3b82f6; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            padding: 10px 18px; 
-            background: #eff6ff; 
-            border-radius: 10px; 
-            transition: 0.2s; 
-        } 
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
+        .btn-dark { background: var(--primary); color: white; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-green { background: var(--green); color: white; }
+        .sys-btn:active:not(:disabled) { transform: scale(0.98); opacity: 0.9; }
+        .sys-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* BART 气球样式 */
-        #bart-workspace { 
-            width: 100%; height: 320px; background: #f1f5f9; border-radius: 16px; 
-            display: flex; align-items: flex-end; justify-content: center; 
-            overflow: hidden; position: relative; border: 2px solid #cbd5e1; margin-bottom: 20px; 
-        }
-        #balloon { 
-            width: 40px; height: 50px; 
-            background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); 
-            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; 
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); 
-            position: relative; bottom: 25px; 
-            box-shadow: -5px -5px 15px rgba(0,0,0,0.1) inset, 0 10px 10px rgba(0,0,0,0.1); 
-        }
-
-        /* 情绪 Stroop 样式 */
-        #emo-word { font-size: 80px; font-weight: bold; margin: 60px 0; min-height: 100px; text-align: center; }
-        .color-btn-group { display: flex; gap: 20px; justify-content: center; } 
-        .color-btn { width: 90px; height: 70px; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.15); transition: 0.1s; } 
+        /* BART 气球效果 */
+        #bart-workspace { width: 100%; height: 300px; background: #f1f5f9; border-radius: 16px; display: flex; align-items: flex-end; justify-content: center; position: relative; margin-bottom: 20px; overflow: hidden; }
+        #balloon { width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; transition: all 0.1s ease-out; position: relative; bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="text-align: left; max-width: 650px; margin: 0 auto;">
-        <a href="index.html" id="nav-back">← 返回控制台</a>
-    </div>
-    
+    <div style="margin-bottom: 15px;"><button onclick="location.href='index.html'" style="background:none; border:none; color:var(--blue); font-weight:bold; cursor:pointer;">← 返回控制台</button></div>
+
     <div class="container" id="menu">
-        <h2 class="module-header">❤️ 情感倾向与决策量表</h2>
-        <h3 style="color:#64748b; font-size:15px; margin-bottom:15px;">量表部分 (Self-Report)</h3>
-        <button class="sys-btn" onclick="show('ema-area')">1. 实时状态评估 (EMA)</button>
-        <button class="sys-btn" onclick="show('b5-area')">2. 人格特质倾向量表 (Big 5)</button>
-        
-        <h3 style="color:#64748b; font-size:15px; margin-top:30px; margin-bottom:15px;">行为学范式 (Behavioral)</h3>
-        <button class="sys-btn" onclick="startBART()" style="background:#3b82f6;">3. BART 气球风险决策任务</button>
-        <button class="sys-btn" onclick="startEmoStroop()" style="background:#3b82f6;">4. 情绪 Stroop 注意偏向提取</button>
-    </div>
-
-    <div class="container hidden" id="ema-area">
-        <h2 class="module-header">EMA 状态评估</h2>
-        <button class="sys-btn" onclick="show('menu')">保存并返回</button>
-    </div>
-
-    <div class="container hidden" id="b5-area">
-        <h2 class="module-header">大五人格评估</h2>
-        <button class="sys-btn" onclick="show('menu')">保存并返回</button>
+        <h2 style="margin-top:0;">❤️ 情感倾向与决策量表</h2>
+        <p style="color:#64748b;">行为学范式 (Behavioral)</p>
+        <button class="sys-btn btn-blue" onclick="startBART()">3. BART 气球风险决策任务</button>
+        <button class="sys-btn btn-blue" onclick="startEmoStroop()">4. 情绪 Stroop 注意偏向提取</button>
     </div>
 
     <div class="container hidden" id="bart-area">
-        <h2 class="module-header">BART 风险决策</h2>
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold; font-size:18px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold;">
             <span id="bart-round">第 1 / 5 轮</span>
-            <span id="bart-pot" style="color:#ef4444;">气球内: $0</span>
+            <span id="bart-pot" style="color:var(--red);">气球内: $0</span>
         </div>
         <div id="bart-workspace"><div id="balloon"></div></div>
         <div style="display:flex; gap:15px;">
-            <button class="sys-btn" style="background:#ef4444;" id="btn-pump" onclick="pumpBalloon()">🎈 充气</button>
-            <button class="sys-btn" style="background:#10b981;" id="btn-collect" onclick="collectMoney()">💰 收集</button>
+            <button class="sys-btn btn-blue" id="btn-pump" onclick="pumpBalloon()">🎈 充气</button>
+            <button class="sys-btn btn-green" id="btn-collect" onclick="collectMoney()">💰 收集</button>
         </div>
     </div>
 
-    <div class="container hidden" id="emo-stroop-area">
-        <h2 class="module-header">情绪注意偏向</h2>
-        <div id="emo-word">+</div>
-        <div class="color-btn-group hidden" id="emo-controls">
-            <button class="color-btn" style="background:#ef4444;" onclick="recordEmoStroop('red')"></button>
-            <button class="color-btn" style="background:#22c55e;" onclick="recordEmoStroop('green')"></button>
-            <button class="color-btn" style="background:#3b82f6;" onclick="recordEmoStroop('blue')"></button>
+    <div class="container hidden" id="emo-area">
+        <h2 id="emo-word" style="font-size: 70px; margin: 60px 0;">+</h2>
+        <div id="emo-controls" class="hidden" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+            <button class="sys-btn" style="background:red;" onclick="recordEmoStroop('red')"></button>
+            <button class="sys-btn" style="background:green;" onclick="recordEmoStroop('green')"></button>
+            <button class="sys-btn" style="background:blue;" onclick="recordEmoStroop('blue')"></button>
         </div>
     </div>
 
     <script>
-        // ==================== 核心逻辑脚本 ====================
-
-        /**
-         * 视图切换函数
-         * @param {string} id - 目标容器的 ID
-         */
-        function show(id) { 
-            const sections = ['menu', 'ema-area', 'b5-area', 'bart-area', 'emo-stroop-area'];
-            sections.forEach(sectionId => {
-                const element = document.getElementById(sectionId);
-                if (element) element.classList.add('hidden');
-            }); 
-            
-            const targetElement = document.getElementById(id);
-            if (targetElement) {
-                targetElement.classList.remove('hidden');
-                window.scrollTo(0,0); 
-            }
+        // 核心显示切换逻辑
+        function show(id) {
+            ['menu', 'bart-area', 'emo-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        /* -------------------- 3. BART 逻辑 -------------------- */
-        let bartData = { module: "Emotion_Risk_BART", trials: [] };
-        let b_trial = 1, b_pumps = 0, b_popLimit = 0;
+        /* ==================== 3. BART 逻辑 (修复收集点击) ==================== */
+        let bartData = { module: "Emotion_BART", trials: [] };
+        let b_round = 1, b_pumps = 0, b_popLimit = 0;
 
         function startBART() {
-            b_trial = 1;
+            b_round = 1;
             bartData.trials = [];
-            show('bart-area'); // 🌟 必须先调用 show 切换视图
-            resetBalloon();
+            show('bart-area');
+            initRound();
         }
 
-        function resetBalloon() {
-            if (b_trial > 5) {
-                CAS_Storage.saveModuleData('Emotion_Risk_BART', bartData);
-                alert("BART 测试完成");
+        function initRound() {
+            if(b_round > 5) {
+                CAS_Storage.saveModuleData('Emotion_BART', bartData);
+                alert("BART 测试完成，数据已同步。");
                 show('menu');
                 return;
             }
             b_pumps = 0;
-            b_popLimit = Math.floor(Math.random() * 15) + 3; // 随机爆炸阈值
-            document.getElementById('bart-round').innerText = `第 ${b_trial} / 5 轮`;
+            b_popLimit = Math.floor(Math.random() * 12) + 2; // 随机爆炸点
+            document.getElementById('bart-round').innerText = `第 ${b_round} / 5 轮`;
             document.getElementById('bart-pot').innerText = `气球内: $0`;
+            
             const b = document.getElementById('balloon');
+            b.innerText = "";
             b.style.width = '40px'; b.style.height = '50px';
             b.style.background = 'radial-gradient(circle at 30% 30%, #f87171, #dc2626)';
-            b.innerText = "";
+            
+            // 🌟 核心修复：重置按钮状态，确保收集可点
             document.getElementById('btn-pump').disabled = false;
             document.getElementById('btn-collect').disabled = false;
         }
 
         function pumpBalloon() {
             b_pumps++;
-            if (b_pumps >= b_popLimit) {
-                // 爆炸
+            if(b_pumps >= b_popLimit) {
+                // 爆炸逻辑
                 document.getElementById('btn-pump').disabled = true;
                 document.getElementById('btn-collect').disabled = true;
                 const b = document.getElementById('balloon');
                 b.style.background = 'transparent';
-                b.innerText = "💥"; b.style.fontSize = "40px";
-                bartData.trials.push({ trial: b_trial, pumps: b_pumps, result: "exploded" });
-                setTimeout(() => { b_trial++; resetBalloon(); }, 1200);
+                b.innerText = "💥";
+                bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'exploded', earned: 0 });
+                setTimeout(() => { b_round++; initRound(); }, 1200);
             } else {
-                // 膨胀
                 const b = document.getElementById('balloon');
-                b.style.width = (40 + b_pumps * 8) + 'px';
-                b.style.height = (50 + b_pumps * 10) + 'px';
+                b.style.width = (40 + b_pumps * 12) + 'px';
+                b.style.height = (50 + b_pumps * 15) + 'px';
                 document.getElementById('bart-pot').innerText = `气球内: $${b_pumps}`;
             }
         }
 
         function collectMoney() {
-            bartData.trials.push({ trial: b_trial, pumps: b_pumps, result: "collected", earned: b_pumps });
-            b_trial++;
-            resetBalloon();
+            // 🌟 核心修复：点击收集后立即保存本轮数据
+            bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'collected', earned: b_pumps });
+            alert(`本轮获得: $${b_pumps}`);
+            b_round++;
+            initRound();
         }
 
-        /* -------------------- 4. EmoStroop 逻辑 -------------------- */
-        let esData = { module: "Emotion_Affective_Stroop", records: [] };
-        let es_trial = 0, es_onset = 0, es_targetColor = '';
-        const emoWords = [{w:'痛苦', v:'neg'}, {w:'快乐', v:'pos'}, {w:'桌子', v:'neu'}];
-        const colors = ['red', 'green', 'blue'];
-
-        function startEmoStroop() {
-            es_trial = 0;
-            esData.records = [];
-            show('emo-stroop-area'); // 🌟 切换视图
-            nextEmoStroop();
-        }
-
-        function nextEmoStroop() {
-            if (es_trial >= 10) {
-                CAS_Storage.saveModuleData('Emotion_Affective_Stroop', esData);
-                alert("情绪注意偏向测试完成");
-                show('menu');
-                return;
-            }
+        /* ==================== 4. EmoStroop 逻辑 ==================== */
+        let es_trial = 0, es_onset = 0;
+        function startEmoStroop() { es_trial = 0; show('emo-area'); nextES(); }
+        function nextES() {
+            if(es_trial >= 10) { show('menu'); return; }
             document.getElementById('emo-controls').classList.add('hidden');
             document.getElementById('emo-word').innerText = "+";
-            document.getElementById('emo-word').style.color = "#64748b";
-            
+            document.getElementById('emo-word').style.color = "#ccc";
             setTimeout(() => {
-                const word = emoWords[Math.floor(Math.random() * emoWords.length)];
-                es_targetColor = colors[Math.floor(Math.random() * colors.length)];
-                const el = document.getElementById('emo-word');
-                el.innerText = word.w;
-                el.style.color = es_targetColor;
+                document.getElementById('emo-word').innerText = "失败";
+                document.getElementById('emo-word').style.color = "red";
                 document.getElementById('emo-controls').classList.remove('hidden');
                 es_onset = performance.now();
             }, 800);
         }
-
         function recordEmoStroop(color) {
             const rt = Math.round(performance.now() - es_onset);
-            esData.records.push({ trial: es_trial, rt: rt, correct: color === es_targetColor });
+            CAS_Storage.saveModuleData('Emotion_Stroop', { trial: es_trial, rt: rt });
             es_trial++;
-            nextEmoStroop();
+            nextES();
         }
     </script>
 </body>
