@@ -3,122 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>认知 - 空间工作记忆</title>
+    <title>认知组合测试</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; text-align: center; margin: 0; padding: 20px; touch-action: none; user-select: none; }
-        .container { max-width: 600px; margin: 0 auto; }
-        #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 40px auto; width: 300px; height: 300px; }
-        .block { background: #e2e8f0; border-radius: 12px; transition: background 0.2s, transform 0.1s; cursor: pointer; }
+        body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; text-align: center; touch-action: none; user-select: none; }
+        .container { max-width: 600px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 10px; }
+        /* Corsi UI */
+        #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px auto; width: 300px; height: 300px; }
+        .block { background: #e2e8f0; border-radius: 12px; cursor: pointer; }
         .block.active { background: #3b82f6 !important; transform: scale(0.95); }
-        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; }
-        #nav-back { display: block; text-align: left; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 20px; }
+        /* Stroop UI */
+        #stroop-word { font-size: 80px; font-weight: bold; margin: 40px 0; min-height: 100px; }
+        .stroop-btn { padding: 20px 40px; font-size: 24px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; margin: 0 10px; }
+        .hidden { display: none !important; }
+        #nav-back { display: block; text-align: left; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <a href="index.html" id="nav-back">← 返回主控台</a>
-    <div class="container" id="intro">
-        <h2>空间工作记忆测试</h2>
-        <p style="color:#64748b;">方块会按特定顺序闪烁。请在闪烁结束后，<strong>按相同顺序点击这些方块</strong>。序列长度会逐渐增加。</p>
-        <button class="sys-btn" onclick="startTest()">开始测试</button>
+    
+    <div class="container" id="menu">
+        <h2>认知评估组合</h2>
+        <button class="sys-btn" onclick="startCorsi()">1. 启动空间工作记忆 (Corsi)</button>
+        <button class="sys-btn" onclick="startStroop()">2. 启动执行与抑制 (Stroop)</button>
     </div>
 
-    <div class="container" id="test-area" style="display:none;">
-        <h3 id="status" style="color:#334155;">注意观察...</h3>
+    <div class="container hidden" id="corsi-area">
+        <h3 id="corsi-status">注意观察...</h3>
         <div id="grid"></div>
+        <button class="sys-btn" onclick="document.getElementById('corsi-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');">返回菜单</button>
+    </div>
+
+    <div class="container hidden" id="stroop-area">
+        <h3>请点击文字的<span style="color:red">颜色</span> (忽略字义)</h3>
+        <div id="stroop-word">+</div>
+        <div id="stroop-controls" class="hidden">
+            <button class="stroop-btn" onclick="recordStroop('red')">红</button>
+            <button class="stroop-btn" onclick="recordStroop('blue')">蓝</button>
+        </div>
+        <div id="stroop-result" class="hidden" style="margin-top:20px; font-weight:bold;"></div>
+        <br><button class="sys-btn" onclick="document.getElementById('stroop-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');">返回菜单</button>
     </div>
 
     <script>
-        let sequence = [], userSequence = [];
-        let currentSpan = 2, maxTrials = 5, currentTrial = 0;
-        let aiData = { module: "Cognition_Corsi", max_span: 0, trials: [] };
-        let allowInput = false, trialStartTime = 0;
-        
-        const grid = document.getElementById('grid');
+        // --- Corsi 逻辑简写 ---
+        let corsiData = { module: "Cognition_Corsi", span: 0, trials: [] };
+        let seq = [], userSeq = [], cSpan = 2, cTrials = 0, allow = false, grid = document.getElementById('grid');
         for(let i=0; i<9; i++) {
-            let div = document.createElement('div');
-            div.className = 'block'; div.dataset.id = i;
-            div.onmousedown = () => handleTap(i);
-            div.ontouchstart = (e) => { e.preventDefault(); handleTap(i); };
-            grid.appendChild(div);
+            let d = document.createElement('div'); d.className = 'block';
+            d.ontouchstart = d.onmousedown = (e) => { e.preventDefault(); if(allow){
+                d.classList.add('active'); setTimeout(()=>d.classList.remove('active'),150);
+                userSeq.push(i); if(userSeq[userSeq.length-1] !== seq[userSeq.length-1]) { allow=false; alert("错误，测试结束"); finishCorsi(); }
+                else if(userSeq.length === seq.length) { allow=false; corsiData.span = cSpan; cSpan++; cTrials++; document.getElementById('corsi-status').innerText="正确！下一轮"; setTimeout(runCorsi, 1000); }
+            }}; grid.appendChild(d);
         }
-        const blocks = document.querySelectorAll('.block');
-
-        function startTest() {
-            document.getElementById('intro').style.display = 'none';
-            document.getElementById('test-area').style.display = 'block';
-            nextTrial();
+        function startCorsi() { document.getElementById('menu').classList.add('hidden'); document.getElementById('corsi-area').classList.remove('hidden'); cSpan=2; cTrials=0; runCorsi(); }
+        function runCorsi() { if(cTrials>4) return finishCorsi(); seq=[]; userSeq=[]; allow=false; document.getElementById('corsi-status').innerText=`广度: ${cSpan}`;
+            let p=[0,1,2,3,4,5,6,7,8]; for(let i=0;i<cSpan;i++) seq.push(p.splice(Math.floor(Math.random()*p.length),1)[0]);
+            let st=0, it=setInterval(()=>{
+                document.querySelectorAll('.block').forEach(b=>b.classList.remove('active'));
+                if(st<seq.length) { grid.children[seq[st]].classList.add('active'); setTimeout(()=>grid.children[seq[st-1]].classList.remove('active'),400); st++; }
+                else { clearInterval(it); document.getElementById('corsi-status').innerText="请复现"; allow=true; }
+            },800);
         }
+        function finishCorsi() { CAS_Storage.saveModuleData('Cognition_Corsi', corsiData); document.getElementById('corsi-status').innerText=`已保存. 广度: ${corsiData.span}`; }
 
-        function nextTrial() {
-            if (currentTrial >= maxTrials) return finishTest();
-            userSequence = [];
-            allowInput = false;
-            document.getElementById('status').innerText = `广度: ${currentSpan} | 注意观察...`;
-            
-            // 生成不重复的随机序列
-            sequence = [];
-            let pool = [0,1,2,3,4,5,6,7,8];
-            for(let i=0; i<currentSpan; i++) {
-                let idx = Math.floor(Math.random() * pool.length);
-                sequence.push(pool.splice(idx, 1)[0]);
-            }
-
-            // 闪烁序列
-            let step = 0;
-            let interval = setInterval(() => {
-                blocks.forEach(b => b.classList.remove('active'));
-                if (step < sequence.length) {
-                    blocks[sequence[step]].classList.add('active');
-                    setTimeout(() => blocks[sequence[step]].classList.remove('active'), 400); // 亮400ms
-                    step++;
-                } else {
-                    clearInterval(interval);
-                    document.getElementById('status').innerText = "请复现序列！";
-                    allowInput = true;
-                    trialStartTime = performance.now();
-                }
-            }, 800); // 间隔800ms
+        // --- Stroop 逻辑简写 ---
+        const s_stim = [{w:'红',c:'red',t:'con'},{w:'蓝',c:'blue',t:'con'},{w:'红',c:'blue',t:'inc'},{w:'蓝',c:'red',t:'inc'}];
+        let stroopData = { module: "Cognition_Stroop", records: [] }, s_tr=0, s_onset=0;
+        function startStroop() { document.getElementById('menu').classList.add('hidden'); document.getElementById('stroop-area').classList.remove('hidden'); stroopData.records=[]; s_tr=0; nextStroop(); }
+        function nextStroop() {
+            if(s_tr>=10) { CAS_Storage.saveModuleData('Cognition_Stroop', stroopData); document.getElementById('stroop-result').innerText="Stroop 已保存"; document.getElementById('stroop-result').classList.remove('hidden'); return; }
+            document.getElementById('stroop-controls').classList.add('hidden'); document.getElementById('stroop-word').innerText = "+"; document.getElementById('stroop-word').style.color = "#333";
+            setTimeout(()=>{
+                let stim = s_stim[Math.floor(Math.random()*4)];
+                document.getElementById('stroop-word').innerText = stim.w; document.getElementById('stroop-word').style.color = stim.c;
+                document.getElementById('stroop-word').dataset.t = stim.c; document.getElementById('stroop-word').dataset.type = stim.t;
+                document.getElementById('stroop-controls').classList.remove('hidden'); s_onset = performance.now();
+            }, 500);
         }
-
-        function handleTap(id) {
-            if (!allowInput) return;
-            blocks[id].classList.add('active');
-            setTimeout(() => blocks[id].classList.remove('active'), 150);
-            
-            userSequence.push(id);
-            const isCorrectSoFar = userSequence[userSequence.length-1] === sequence[userSequence.length-1];
-
-            if (!isCorrectSoFar) {
-                // 错误
-                recordTrial(false);
-                document.getElementById('status').innerText = "错误！序列结束。";
-                setTimeout(finishTest, 1000);
-            } else if (userSequence.length === sequence.length) {
-                // 正确完成该轮
-                recordTrial(true);
-                aiData.max_span = currentSpan;
-                currentSpan++;
-                currentTrial++;
-                document.getElementById('status').innerText = "正确！准备下一轮...";
-                allowInput = false;
-                setTimeout(nextTrial, 1500);
-            }
-        }
-
-        function recordTrial(isCorrect) {
-            aiData.trials.push({
-                trial_index: currentTrial + 1,
-                target_sequence: [...sequence],
-                user_sequence: [...userSequence],
-                is_correct: isCorrect,
-                recall_duration_ms: parseFloat((performance.now() - trialStartTime).toFixed(2))
-            });
-        }
-
-        function finishTest() {
-            CAS_Storage.saveModuleData('Cognition_Corsi', aiData);
-            document.getElementById('test-area').innerHTML = `<h2>测试结束</h2><p style="font-size:20px;">您的空间记忆广度为: <strong>${aiData.max_span}</strong></p><a href="index.html" class="sys-btn" style="text-decoration:none;">返回主控台</a>`;
+        function recordStroop(res) {
+            let rt = performance.now() - s_onset; let tar = document.getElementById('stroop-word').dataset.t;
+            stroopData.records.push({ trial: s_tr+1, condition: document.getElementById('stroop-word').dataset.type, correct: res===tar, rt_ms: Math.round(rt) });
+            s_tr++; nextStroop();
         }
     </script>
 </body>
