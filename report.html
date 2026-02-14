@@ -3,32 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAS 多维数据中心</title>
+    <title>CAS 复合数字表型数据中心</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
-        .container { max-width: 800px; margin: 20px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #10b981; }
-        h2 { color: #0f172a; margin-top: 0; }
-        .status-board { background: #f1f5f9; padding: 20px; border-radius: 12px; margin: 30px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .item { display: flex; justify-content: space-between; padding: 12px 10px; background: white; border-radius: 8px; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .done { color: #10b981; font-weight: bold; }
-        .pending { color: #f43f5e; font-weight: bold; }
-        .btn { display: block; width: 100%; padding: 20px; margin-bottom: 15px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; color: white; transition: opacity 0.2s; }
+        .container { max-width: 900px; margin: 20px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #10b981; }
+        h2 { color: #0f172a; margin-top: 0; font-size: 26px; }
+        .session-info { font-family: monospace; background: #f1f5f9; padding: 10px 15px; border-radius: 8px; font-size: 16px; color: #475569; display: inline-block; margin-bottom: 20px; }
+        
+        /* 采用自适应网格，完美容纳12个状态条 */
+        .status-board { background: #f8fafc; padding: 25px; border-radius: 12px; margin: 20px 0 30px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; border: 1px solid #e2e8f0; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; border-radius: 8px; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid transparent; }
+        .item.is-done { border-left-color: #10b981; }
+        .item.is-pending { border-left-color: #f43f5e; }
+        
+        .done { color: #10b981; font-weight: bold; background: #d1fae5; padding: 4px 8px; border-radius: 4px; font-size: 13px; }
+        .pending { color: #f43f5e; font-weight: bold; background: #ffe4e6; padding: 4px 8px; border-radius: 4px; font-size: 13px; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
+        .btn { display: block; width: 100%; padding: 20px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; color: white; transition: opacity 0.2s, transform 0.1s; }
         .btn:hover { opacity: 0.9; }
-        .btn-export { background: #10b981; }
+        .btn:active { transform: scale(0.99); }
+        .btn-export { background: #10b981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
         .btn-nav { background: #3b82f6; }
+        .btn-danger { background: #f43f5e; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <div class="container">
         <h2>🔬 CAS 复合数字表型数据中心</h2>
-        <p>Session ID: <span id="sess-id" style="font-family:monospace; font-weight:bold;">加载中...</span></p>
+        <div class="session-info">Session ID: <span id="sess-id" style="font-weight:bold;">加载中...</span></div>
         
-        <div class="status-board" id="board"></div>
+        <div class="status-board" id="board">
+            </div>
 
-        <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 一键导出 AI 建模 JSON 包</button>
-        <a href="index.html" class="btn btn-nav">返回测试控制台</a>
-        <button class="btn" style="background:#f43f5e;" onclick="CAS_Storage.clearSession()">⚠️ 清除缓存并开启新会话</button>
+        <div class="btn-group">
+            <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 一键导出 AI 建模 JSON 数据包</button>
+            <a href="index.html" class="btn btn-nav">返回测试控制台继续补充</a>
+            <button class="btn btn-danger" onclick="CAS_Storage.clearSession()">⚠️ 结束测试并清除受试者缓存</button>
+        </div>
     </div>
 
     <script>
@@ -36,24 +49,38 @@
             const session = CAS_Storage.getSession();
             document.getElementById('sess-id').innerText = session.session_id;
             
-            // 完整注册目前开发的 10 个子模块
+            // 完整注册 12 个临床级子模块
             const modules = [
-                { id: 'Cognition_Corsi', name: '🧠 空间记忆 (Corsi)' },
+                // 认知模块 (4)
+                { id: 'Cognition_Corsi', name: '🧠 工作记忆 (Corsi)' },
                 { id: 'Cognition_Stroop', name: '🧠 执行抑制 (Stroop)' },
+                { id: 'Cognition_TMT_B', name: '🧠 认知柔性 (TMT-B)' },
+                { id: 'Cognition_DSST', name: '🧠 处理速度 (DSST)' },
+                // 情感模块 (4)
                 { id: 'Emotion_State_EMA', name: '📊 状态自评 (EMA)' },
                 { id: 'Emotion_Trait_Big5', name: '📊 人格特质 (Big5)' },
                 { id: 'Emotion_Risk_BART', name: '🎈 风险决策 (BART)' },
                 { id: 'Emotion_Affective_Stroop', name: '💔 情绪注意 (E-Stroop)' },
+                // 运动模块 (2)
                 { id: 'Motor_Fitts', name: '🎯 靶向运动 (Fitts)' },
                 { id: 'Motor_Spiral_Tracing', name: '🎯 震颤分析 (Spiral)' },
+                // 感觉模块 (2)
                 { id: 'Sensation_ChoiceRT', name: '⚡ 决策反应 (ChoiceRT)' },
                 { id: 'Sensation_VisualSearch', name: '⚡ 视觉搜索 (V-Search)' }
             ];
 
             const board = document.getElementById('board');
             modules.forEach(m => {
-                const done = session.modules.hasOwnProperty(m.id);
-                board.innerHTML += `<div class="item"><span>${m.name}</span><span class="${done?'done':'pending'}">${done?'✓ 已采录':'待完成'}</span></div>`;
+                const isDone = session.modules.hasOwnProperty(m.id);
+                const statusClass = isDone ? 'is-done' : 'is-pending';
+                const badgeClass = isDone ? 'done' : 'pending';
+                const badgeText = isDone ? '✓ 已采录' : '待完成';
+                
+                board.innerHTML += `
+                    <div class="item ${statusClass}">
+                        <span>${m.name}</span>
+                        <span class="${badgeClass}">${badgeText}</span>
+                    </div>`;
             });
         };
     </script>
