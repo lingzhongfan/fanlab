@@ -3,77 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>主观认知与生物节律</title>
+    <title>CAS-LIF | 主观认知与节律状态</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
-        .container { max-width: 650px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 10px 0; width: 100%; }
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: #f8fafc; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 650px; 
+            margin: 20px auto; 
+            background: white; 
+            padding: 35px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+        }
+        .module-header { 
+            color: #0f172a; 
+            margin-top: 0; 
+            font-size: 24px; 
+            border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px; 
+        }
+        .sys-btn { 
+            background: #0f172a; 
+            color: white; 
+            border: none; 
+            padding: 18px 30px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            margin: 10px 0; 
+            width: 100%; 
+            transition: 0.2s; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .sys-btn:active { transform: scale(0.98); } 
         .hidden { display: none !important; }
-        #nav-back { display: block; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
         
-        .q-group { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
-        .q-group label { display: block; font-weight: bold; color: #1e293b; margin-bottom: 10px; font-size: 16px; }
-        select, input[type="time"] { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 16px; background: #f8fafc; }
+        #nav-back { 
+            display: inline-flex; 
+            align-items: center; 
+            text-decoration: none; 
+            color: #3b82f6; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            padding: 10px 18px; 
+            background: #eff6ff; 
+            border-radius: 10px; 
+            transition: 0.2s; 
+        } 
+        #nav-back:active { background: #dbeafe; }
+        
+        /* 问卷项样式 */
+        .q-group { 
+            margin-bottom: 25px; 
+            padding-bottom: 20px; 
+            border-bottom: 1px dashed #e2e8f0; 
+        } 
+        .q-group label { 
+            display: block; 
+            font-weight: bold; 
+            color: #1e293b; 
+            margin-bottom: 12px; 
+            font-size: 16px; 
+        }
+        select, input[type="time"] { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 2px solid #cbd5e1; 
+            font-size: 16px; 
+            background: #f8fafc; 
+            outline: none; 
+            transition: 0.2s; 
+            box-sizing: border-box; 
+        }
+        select:focus, input[type="time"]:focus { 
+            border-color: #3b82f6; 
+            background: white; 
+        }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <a href="index.html" id="nav-back">← 返回主控台</a>
+    <div style="text-align: left; max-width: 650px; margin: 0 auto;">
+        <a href="index.html" id="nav-back">← 返回控制台</a>
+    </div>
+    
     <div class="container" id="menu">
-        <h2>节律与主观状态评估 (Lifestyle)</h2>
-        <p style="color:#64748b; font-size:14px;">收集 ADL 日常功能下降的早期预警信号与睡眠特征。</p>
-        <button class="sys-btn" onclick="show('scd-area');">1. 主观认知下降问卷 (SCD-Q)</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('sleep-area');">2. 睡眠与生物节律状态 (Sleep)</button>
+        <h2 class="module-header">🌙 衰退预警与生物节律</h2>
+        <button class="sys-btn" onclick="show('scd-area');">1. SCD-Q 主观认知下降问卷</button>
+        <button class="sys-btn" style="background:#3b82f6;" onclick="show('sleep-area');">2. 睡眠结构与节律特征</button>
     </div>
 
     <div class="container hidden" id="scd-area">
-        <h3>主观认知下降 (SCD)</h3>
+        <h2 class="module-header">主观认知下降 (SCD-Q)</h2>
         <div class="q-group">
             <label>1. 您觉得自己的记忆力是否正在下降？</label>
-            <select id="scd-1"><option value="0">没有</option><option value="1">偶尔感觉</option><option value="2">明显感觉下降</option></select>
+            <select id="scd-1">
+                <option value="0">没有明显变化</option>
+                <option value="1">偶尔感觉下降</option>
+                <option value="2">明显感觉下降</option>
+            </select>
         </div>
         <div class="q-group">
             <label>2. 这种记忆下降是否引起了您的担忧？</label>
-            <select id="scd-2"><option value="0">完全不担忧</option><option value="1">有点担忧</option><option value="2">非常担忧</option></select>
+            <select id="scd-2">
+                <option value="0">完全不担忧</option>
+                <option value="1">有一点担忧</option>
+                <option value="2">非常担忧</option>
+            </select>
         </div>
-        <div class="q-group">
-            <label>3. 寻找合适的词语表达(找词困难)是否变得更难了？</label>
-            <select id="scd-3"><option value="0">没有变化</option><option value="1">偶尔困难</option><option value="2">经常卡壳</option></select>
-        </div>
-        <button class="sys-btn" onclick="saveSCD()">保存 SCD 数据</button>
+        <button class="sys-btn" style="background:#10b981;" onclick="saveSCD()">✓ 保存问卷结果</button>
     </div>
 
     <div class="container hidden" id="sleep-area">
-        <h3>睡眠与节律特征</h3>
+        <h2 class="module-header">生物节律质控</h2>
         <div class="q-group">
             <label>1. 过去一个月，您通常晚上几点入睡？</label>
             <input type="time" id="slp-1" value="23:00">
         </div>
         <div class="q-group">
-            <label>2. 您夜间通常会醒来几次？(睡眠碎片化)</label>
-            <select id="slp-2"><option value="0">0次 (一觉到天亮)</option><option value="1">1-2次</option><option value="2">3次及以上</option></select>
+            <label>2. 睡眠碎片化程度 (夜间通常醒来几次？)</label>
+            <select id="slp-2">
+                <option value="0">0次 (一觉到天亮)</option>
+                <option value="1">1-2次</option>
+                <option value="2">3次及以上</option>
+            </select>
         </div>
-        <div class="q-group">
-            <label>3. 整体睡眠质量自评 (0极差 - 100极佳)</label>
-            <input type="range" id="slp-3" min="0" max="100" value="70" style="width:100%;">
-        </div>
-        <button class="sys-btn" onclick="saveSleep()">保存睡眠特征</button>
+        <button class="sys-btn" style="background:#10b981;" onclick="saveSleep()">✓ 保存节律特征</button>
     </div>
 
     <script>
         function show(id) { 
-            ['menu', 'scd-area', 'sleep-area'].forEach(div => document.getElementById(div).classList.add('hidden'));
+            ['menu', 'scd-area', 'sleep-area'].forEach(d => {
+                document.getElementById(d).classList.add('hidden');
+            }); 
             document.getElementById(id).classList.remove('hidden'); 
         }
 
-        function saveSCD() {
-            CAS_Storage.saveModuleData('Lifestyle_SCD', { memory_decline: parseInt(document.getElementById('scd-1').value), worry: parseInt(document.getElementById('scd-2').value), word_finding: parseInt(document.getElementById('scd-3').value) });
-            alert("主观认知问卷已保存"); show('menu');
+        // 保存 SCD 问卷数据
+        function saveSCD() { 
+            CAS_Storage.saveModuleData('Lifestyle_SCD', { 
+                memory_decline: parseInt(document.getElementById('scd-1').value), 
+                worry: parseInt(document.getElementById('scd-2').value) 
+            }); 
+            alert("主观认知预警已同步"); 
+            show('menu'); 
         }
 
-        function saveSleep() {
-            CAS_Storage.saveModuleData('Lifestyle_Sleep', { bedtime: document.getElementById('slp-1').value, awakenings: parseInt(document.getElementById('slp-2').value), quality_score: parseInt(document.getElementById('slp-3').value) });
-            alert("睡眠节律特征已保存"); show('menu');
+        // 保存睡眠节律数据
+        function saveSleep() { 
+            CAS_Storage.saveModuleData('Lifestyle_Sleep', { 
+                bedtime: document.getElementById('slp-1').value, 
+                awakenings: parseInt(document.getElementById('slp-2').value) 
+            }); 
+            alert("生物节律数据已同步"); 
+            show('menu'); 
         }
     </script>
 </body>
