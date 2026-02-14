@@ -3,73 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>情感 - 连续多维评估</title>
+    <title>情感与人格评估</title>
     <style>
         body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .slider-group { margin-bottom: 35px; }
-        .slider-group label { display: block; font-size: 18px; color: #1e293b; margin-bottom: 15px; font-weight: bold; }
-        .slider-container { display: flex; align-items: center; gap: 15px; }
-        input[type=range] { flex: 1; -webkit-appearance: none; height: 8px; background: #e2e8f0; border-radius: 4px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #3b82f6; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .labels { display: flex; justify-content: space-between; font-size: 14px; color: #64748b; margin-top: 8px; }
-        .val-display { width: 40px; text-align: center; font-family: monospace; font-size: 16px; font-weight: bold; color: #3b82f6; }
-        .sys-btn { width: 100%; background: #0f172a; color: white; border: none; padding: 18px; font-size: 18px; border-radius: 12px; cursor: pointer; }
-        #nav-back { display: block; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 20px; }
+        .container { max-width: 600px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 10px; }
+        .slider-group { margin-bottom: 25px; }
+        .slider-group label { display: block; font-weight: bold; margin-bottom: 10px; color: #1e293b; }
+        input[type=range] { width: 100%; }
+        .labels { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
+        .hidden { display: none !important; }
+        #nav-back { display: block; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <a href="index.html" id="nav-back">← 返回主控台</a>
-    <div class="container" id="form-area">
-        <h2 style="margin-top:0;">连续情绪状态评估 (EMA)</h2>
-        <p style="color:#64748b; margin-bottom:30px;">请拖动滑块，指示您<strong>此时此刻</strong>的确切感受程度。</p>
-        
-        <div class="slider-group">
-            <label>1. 我感到情绪低落、沮丧 (抑郁度)</label>
-            <div class="slider-container">
-                <input type="range" id="s1" min="0" max="100" value="50" oninput="updateVal('s1')">
-                <div class="val-display" id="v_s1">50</div>
-            </div>
-            <div class="labels"><span>完全没有 (0)</span><span>极度强烈 (100)</span></div>
-        </div>
+    <div class="container" id="menu">
+        <h2>情绪与人格特征提取</h2>
+        <button class="sys-btn" onclick="show('ema-area')">1. EMA 瞬时状态评估 (State)</button>
+        <button class="sys-btn" onclick="show('b5-area')">2. 大五人格量表 (Trait)</button>
+    </div>
 
-        <div class="slider-group">
-            <label>2. 我感到紧张、焦躁不安 (焦虑度)</label>
-            <div class="slider-container">
-                <input type="range" id="s2" min="0" max="100" value="50" oninput="updateVal('s2')">
-                <div class="val-display" id="v_s2">50</div>
-            </div>
-            <div class="labels"><span>完全没有 (0)</span><span>极度强烈 (100)</span></div>
-        </div>
+    <div class="container hidden" id="ema-area">
+        <h3>当前瞬时状态 (EMA)</h3>
+        <div class="slider-group"><label>抑郁度 (Depression)</label><input type="range" id="e1"><div class="labels"><span>无</span><span>极强</span></div></div>
+        <div class="slider-group"><label>焦虑度 (Anxiety)</label><input type="range" id="e2"><div class="labels"><span>无</span><span>极强</span></div></div>
+        <button class="sys-btn" onclick="saveEMA()">保存 EMA 数据</button>
+    </div>
 
-        <div class="slider-group">
-            <label>3. 我感到精力充沛、思维活跃 (活力度)</label>
-            <div class="slider-container">
-                <input type="range" id="s3" min="0" max="100" value="50" oninput="updateVal('s3')">
-                <div class="val-display" id="v_s3">50</div>
-            </div>
-            <div class="labels"><span>极度疲惫 (0)</span><span>非常充沛 (100)</span></div>
-        </div>
-
-        <button class="sys-btn" onclick="submitData()">保存多维表型数据</button>
+    <div class="container hidden" id="b5-area">
+        <h3>大五人格 (Big Five Mini)</h3>
+        <p style="font-size:14px; color:#666;">请评估您的一般性长期倾向 (Trait)。</p>
+        <div class="slider-group"><label>开放性 (Openness: 乐于尝试新事物)</label><input type="range" id="b1"></div>
+        <div class="slider-group"><label>尽责性 (Conscientiousness: 严谨、自律)</label><input type="range" id="b2"></div>
+        <div class="slider-group"><label>外向性 (Extraversion: 喜欢交际)</label><input type="range" id="b3"></div>
+        <div class="slider-group"><label>宜人性 (Agreeableness: 同情、合作)</label><input type="range" id="b4"></div>
+        <div class="slider-group"><label>神经质 (Neuroticism: 情绪波动、敏感)</label><input type="range" id="b5"></div>
+        <button class="sys-btn" onclick="saveB5()">保存大五人格数据</button>
     </div>
 
     <script>
-        function updateVal(id) { document.getElementById('v_' + id).innerText = document.getElementById(id).value; }
-        
-        function submitData() {
-            const data = {
-                module: "Emotion_Continuous_EMA",
-                timestamp: new Date().toISOString(),
-                dimensions: {
-                    depression_score: parseInt(document.getElementById('s1').value),
-                    anxiety_score: parseInt(document.getElementById('s2').value),
-                    vitality_score: parseInt(document.getElementById('s3').value)
-                }
-            };
-            CAS_Storage.saveModuleData('Emotion_Continuous_EMA', data);
-            document.getElementById('form-area').innerHTML = `<h2>数据已整合至网络</h2><a href="index.html" class="sys-btn" style="text-decoration:none; display:inline-block; text-align:center;">返回主控台</a>`;
+        function show(id) { document.getElementById('menu').classList.add('hidden'); document.getElementById(id).classList.remove('hidden'); }
+        function saveEMA() {
+            CAS_Storage.saveModuleData('Emotion_State_EMA', { depression: document.getElementById('e1').value, anxiety: document.getElementById('e2').value });
+            alert("EMA 数据已保存"); document.getElementById('ema-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');
+        }
+        function saveB5() {
+            CAS_Storage.saveModuleData('Emotion_Trait_Big5', { O: document.getElementById('b1').value, C: document.getElementById('b2').value, E: document.getElementById('b3').value, A: document.getElementById('b4').value, N: document.getElementById('b5').value });
+            alert("Big5 数据已保存"); document.getElementById('b5-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');
         }
     </script>
 </body>
