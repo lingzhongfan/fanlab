@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>感觉 - 选择反应时</title>
+    <style>
+        body { font-family: sans-serif; background: #f8fafc; text-align: center; margin: 0; padding: 20px; touch-action: manipulation; user-select: none; }
+        .container { max-width: 600px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        #stimulus-box { width: 100%; height: 200px; background: #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin: 30px 0; border: 4px solid #cbd5e1; transition: border-color 0.1s;}
+        .btn-group { display: flex; gap: 20px; }
+        .res-btn { flex: 1; padding: 25px; font-size: 20px; font-weight: bold; border: none; border-radius: 12px; background: #3b82f6; color: white; cursor: pointer; transition: background 0.1s; }
+        .res-btn:active { background: #1d4ed8; }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; }
+        #nav-back { display: block; text-align: left; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <a href="index.html" id="nav-back">← 返回主控台</a>
+    <div class="container" id="intro">
+        <h2>选择反应时 (Choice RT)</h2>
+        <p style="color:#64748b; font-size: 18px;">框内会出现<strong>红色</strong>或<strong>蓝色</strong>方块。</p>
+        <p style="color:#64748b; font-size: 18px;">红色请按左侧按钮，蓝色请按右侧按钮。请在保证准确的前提下尽可能快。</p>
+        <button class="sys-btn" onclick="startCRT()">开始测试 (10次)</button>
+    </div>
+
+    <div class="container" id="test-area" style="display:none;">
+        <div id="stimulus-box">等待...</div>
+        <div class="btn-group">
+            <button class="res-btn" id="btn-red" style="background:#ef4444;" onclick="record('red')">红色</button>
+            <button class="res-btn" id="btn-blue" style="background:#3b82f6;" onclick="record('blue')">蓝色</button>
+        </div>
+    </div>
+
+    <script>
+        let maxTrials = 10, currentTrial = 0, onsetTime = 0, timeoutId;
+        let aiData = { module: "Sensation_ChoiceRT", records: [] };
+        let currentTarget = '';
+        const box = document.getElementById('stimulus-box');
+
+        function startCRT() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('test-area').style.display = 'block';
+            nextTrial();
+        }
+
+        function nextTrial() {
+            if (currentTrial >= maxTrials) return finishTest();
+            box.style.background = '#e2e8f0';
+            box.innerText = "+";
+            
+            let delay = Math.random() * 1500 + 1000;
+            timeoutId = setTimeout(() => {
+                currentTarget = Math.random() > 0.5 ? 'red' : 'blue';
+                box.style.background = currentTarget === 'red' ? '#ef4444' : '#3b82f6';
+                box.innerText = "";
+                onsetTime = performance.now();
+            }, delay);
+        }
+
+        function record(response) {
+            if (box.innerText === "+") return; // 防止提前按键
+            
+            const rt = performance.now() - onsetTime;
+            clearTimeout(timeoutId);
+            
+            aiData.records.push({
+                trial: currentTrial + 1,
+                stimulus: currentTarget,
+                response: response,
+                is_correct: currentTarget === response,
+                rt_ms: parseFloat(rt.toFixed(2))
+            });
+
+            currentTrial++;
+            box.innerText = response === currentTarget ? "✓" : "✗";
+            setTimeout(nextTrial, 800);
+        }
+
+        function finishTest() {
+            CAS_Storage.saveModuleData('Sensation_ChoiceRT', aiData);
+            document.getElementById('test-area').innerHTML = `<h2>测试完成</h2><a href="index.html" class="sys-btn" style="text-decoration:none;">返回主控台</a>`;
+        }
+    </script>
+</body>
+</html>
