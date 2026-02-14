@@ -22,7 +22,6 @@
             -webkit-tap-highlight-color: transparent; 
         }
         
-        /* 头部标题区域 */
         header { 
             text-align: center; 
             margin-bottom: 25px; 
@@ -32,23 +31,9 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
             border-top: 6px solid var(--primary); 
         }
-        header h1 { 
-            margin: 0 0 8px 0; 
-            font-size: 26px; 
-            color: var(--primary); 
-        }
-        header p { 
-            margin: 0; 
-            font-size: 15px; 
-            color: var(--muted); 
-        }
-        .eng-title { 
-            font-family: monospace; 
-            color: var(--blue); 
-            font-size: 13px; 
-            margin-top: 8px; 
-            display: block; 
-        }
+        header h1 { margin: 0 0 8px 0; font-size: 26px; color: var(--primary); }
+        header p { margin: 0; font-size: 15px; color: var(--muted); }
+        .eng-title { font-family: monospace; color: var(--blue); font-size: 13px; margin-top: 8px; display: block; }
         
         /* ==================== 2. 受试者建档表单 UI ==================== */
         #setup-container { 
@@ -59,242 +44,78 @@
             border-radius: 20px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
         }
-        #setup-container h2 { 
-            margin-top: 0; 
-            color: var(--primary); 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-        }
-        .form-row { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            margin-bottom: 20px; 
-        }
-        .form-group label { 
-            display: block; 
-            font-weight: bold; 
-            font-size: 14px; 
-            margin-bottom: 8px; 
-            color: #1e293b; 
-        }
-        .form-group label span { color: #ef4444; } /* 必填红星 */
-        .form-group input, .form-group select { 
-            width: 100%; 
-            box-sizing: border-box; 
-            padding: 14px; 
-            border: 2px solid #cbd5e1; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            transition: 0.2s; 
-            background: #f8fafc; 
-        }
-        .form-group input:focus, .form-group select:focus { 
-            border-color: var(--blue); 
-            background: white; 
-            outline: none; 
-        }
+        #setup-container h2 { margin-top: 0; color: var(--primary); border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 25px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #1e293b; }
+        .form-group label span { color: #ef4444; }
+        .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 14px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 16px; transition: 0.2s; background: #f8fafc; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--blue); background: white; outline: none; }
+        
         .submit-btn { 
-            width: 100%; 
-            padding: 18px; 
-            background: var(--blue); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 18px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 15px rgba(59,130,246,0.3); 
+            width: 100%; padding: 18px; background: var(--blue); color: white; border: none; 
+            border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            transition: 0.2s; box-shadow: 0 4px 15px rgba(59,130,246,0.3); 
         }
         .submit-btn:hover { background: #2563eb; transform: translateY(-2px); }
         .submit-btn:active { transform: translateY(0); }
 
         /* ==================== 3. 测试看板仪表盘 UI ==================== */
-        #dashboard-container { 
-            display: none; 
-            animation: fadeIn 0.5s ease-out; 
-        }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        #dashboard-container { display: none; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 主试操作手册与动画区域 */
-        .tutorial-container { 
-            max-width: 1200px; 
-            margin: 0 auto 30px auto; 
-            background: white; 
-            border-radius: 16px; 
-            display: flex; 
-            overflow: hidden; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-            border: 1px solid #e2e8f0; 
-            flex-wrap: wrap; 
-        }
-        .manual-section { 
-            flex: 1.5; 
-            padding: 30px; 
-            background: #f8fafc; 
-            border-right: 1px solid #e2e8f0; 
-            min-width: 300px; 
-        }
+        .tutorial-container { max-width: 1200px; margin: 0 auto 30px auto; background: white; border-radius: 16px; display: flex; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .manual-section { flex: 1.5; padding: 30px; background: #f8fafc; border-right: 1px solid #e2e8f0; min-width: 300px; }
         .manual-section h3 { margin-top: 0; color: var(--primary); }
-        .manual-list { 
-            padding-left: 20px; 
-            color: var(--muted); 
-            font-size: 14.5px; 
-            line-height: 1.8; 
-            margin: 0; 
-        }
+        .manual-list { padding-left: 20px; color: var(--muted); font-size: 14.5px; line-height: 1.8; margin: 0; }
         .manual-list li span { font-weight: bold; color: var(--blue); }
         
-        /* 纯 CSS 交互动画组 */
-        .anim-section { 
-            flex: 1; 
-            padding: 30px; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            background: white; 
-            min-width: 300px; 
-        }
-        .tutorial-step { text-align: center; } 
-        .tutorial-step h4 { margin: 15px 0 0 0; font-size: 14px; color: var(--primary); }
-        .anim-box { 
-            width: 60px; 
-            height: 60px; 
-            margin: 0 auto; 
-            background: #f1f5f9; 
-            border-radius: 12px; 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border: 2px solid #e2e8f0; 
-        }
+        .anim-section { flex: 1; padding: 30px; display: flex; justify-content: space-around; align-items: center; background: white; min-width: 300px; }
+        .tutorial-step { text-align: center; } .tutorial-step h4 { margin: 15px 0 0 0; font-size: 14px; color: var(--primary); }
+        .anim-box { width: 60px; height: 60px; margin: 0 auto; background: #f1f5f9; border-radius: 12px; position: relative; display: flex; align-items: center; justify-content: center; border: 2px solid #e2e8f0; }
         .anim-cursor { position: absolute; font-size: 20px; z-index: 10; animation: moveClick 3s infinite ease-in-out; }
         .anim-btn { width: 30px; height: 15px; background: #cbd5e1; border-radius: 4px; animation: btnPress 3s infinite ease-in-out; }
         .anim-target { width: 20px; height: 20px; border-radius: 50%; background: #ef4444; animation: targetChange 3s infinite ease-in-out; }
-        .anim-data { font-size: 24px; animation: dataFloat 3s infinite ease-in-out; } 
-        .anim-folder { position: absolute; bottom: 5px; font-size: 30px; color: #cbd5e1; }
-        
-        /* 动画关键帧 */
-        @keyframes moveClick { 
-            0% { top: 40px; left: 40px; opacity: 0; } 
-            20% { top: 30px; left: 30px; opacity: 1; } 
-            40%, 60% { top: 20px; left: 20px; transform: scale(0.8); } 
-            80% { top: 40px; left: 40px; opacity: 0; } 
-            100% { opacity: 0; } 
-        }
-        @keyframes btnPress { 
-            0%, 45% { background: #cbd5e1; transform: scale(1); } 
-            50%, 60% { background: var(--blue); transform: scale(0.95); } 
-            65%, 100% { background: #cbd5e1; transform: scale(1); } 
-        }
-        @keyframes targetChange { 
-            0%, 45% { background: #ef4444; transform: scale(1); } 
-            50%, 80% { background: #10b981; transform: scale(1.1); box-shadow: 0 0 10px rgba(16,185,129,0.4); } 
-            100% { background: #ef4444; transform: scale(1); } 
-        }
-        @keyframes dataFloat { 
-            0% { transform: translateY(-15px); opacity: 0; } 
-            30% { transform: translateY(-5px); opacity: 1; } 
-            70%, 100% { transform: translateY(10px) scale(0.5); opacity: 0; } 
-        }
+        .anim-data { font-size: 24px; animation: dataFloat 3s infinite ease-in-out; } .anim-folder { position: absolute; bottom: 5px; font-size: 30px; color: #cbd5e1; }
+        @keyframes moveClick { 0% { top: 40px; left: 40px; opacity: 0; } 20% { top: 30px; left: 30px; opacity: 1; } 40%, 60% { top: 20px; left: 20px; transform: scale(0.8); } 80% { top: 40px; left: 40px; opacity: 0; } 100% { opacity: 0; } }
+        @keyframes btnPress { 0%, 45% { background: #cbd5e1; transform: scale(1); } 50%, 60% { background: var(--blue); transform: scale(0.95); } 65%, 100% { background: #cbd5e1; transform: scale(1); } }
+        @keyframes targetChange { 0%, 45% { background: #ef4444; transform: scale(1); } 50%, 80% { background: #10b981; transform: scale(1.1); box-shadow: 0 0 10px rgba(16,185,129,0.4); } 100% { background: #ef4444; transform: scale(1); } }
+        @keyframes dataFloat { 0% { transform: translateY(-15px); opacity: 0; } 30% { transform: translateY(-5px); opacity: 1; } 70%, 100% { transform: translateY(10px) scale(0.5); opacity: 0; } }
 
-        /* 受试者状态栏 Badge */
-        .subj-badge { 
-            max-width: 1200px; 
-            margin: 0 auto 25px auto; 
-            padding: 15px 20px; 
-            background: #e0f2fe; 
-            color: #0369a1; 
-            border-radius: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-weight: bold; 
-            font-size: 15px; 
-            border: 1px solid #bae6fd; 
-        }
+        .subj-badge { max-width: 1200px; margin: 0 auto 25px auto; padding: 15px 20px; background: #e0f2fe; color: #0369a1; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 15px; border: 1px solid #bae6fd; }
         
-        /* 6大模块网格布局 */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); 
-            gap: 20px; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-        }
+        /* 6大模块网格布局与卡片优化 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
         .card { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-            text-decoration: none; 
-            color: inherit; 
-            border: 2px solid transparent; 
-            transition: 0.2s; 
-            display: flex; 
-            flex-direction: column; 
+            background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+            text-decoration: none; color: inherit; border: 2px solid transparent; transition: 0.2s; 
+            display: flex; flex-direction: column; position: relative;
         }
-        .card:hover { 
-            transform: translateY(-5px); 
-            border-color: var(--blue); 
-            box-shadow: 0 12px 20px rgba(59,130,246,0.1); 
-        }
+        .card:hover { transform: translateY(-5px); border-color: var(--blue); box-shadow: 0 12px 20px rgba(59,130,246,0.1); }
         .card:active { transform: translateY(-2px); }
         
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; } 
-        .icon { font-size: 40px; } 
-        .card h2 { color: var(--primary); margin: 0; font-size: 20px; }
-        .domain-desc { 
-            font-size: 13.5px; 
-            color: #94a3b8; 
-            margin: 0 0 15px 0; 
-            padding-bottom: 15px; 
-            border-bottom: 1px solid #e2e8f0; 
-            line-height: 1.5; 
-        }
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; } .icon { font-size: 40px; } .card h2 { color: var(--primary); margin: 0; font-size: 20px; }
+        .domain-desc { font-size: 13.5px; color: #94a3b8; margin: 0 0 15px 0; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; line-height: 1.5; }
         
-        /* 测试项目列表 */
         .sub-test-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; } 
-        .sub-test-list li { 
-            font-size: 14.5px; 
-            color: var(--text); 
-            margin-bottom: 12px; 
-            display: flex; 
-            align-items: center; 
-            font-weight: 500; 
-        } 
-        .sub-test-list li::before { 
-            content: "•"; 
-            color: var(--blue); 
-            font-size: 22px; 
-            margin-right: 10px; 
-        }
+        .sub-test-list li { font-size: 14.5px; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; font-weight: 500; } 
+        .sub-test-list li::before { content: "•"; color: var(--blue); font-size: 22px; margin-right: 10px; }
         
-        /* 底部汇总按钮 */
-        .data-btn { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 10px; 
-            max-width: 1200px; 
-            margin: 35px auto; 
-            padding: 22px; 
-            background: var(--blue); 
-            color: white; 
-            border-radius: 12px; 
-            text-decoration: none; 
-            font-size: 18px; 
-            font-weight: bold; 
-            box-shadow: 0 4px 15px rgba(59,130,246,0.3); 
-            transition: 0.2s; 
-        } 
-        .data-btn:hover { background: #2563eb; transform: translateY(-2px); }
+        /* 🌟 新增：卡片底部的视觉引导按钮，明确告知用户点击卡片的作用 */
+        .card-action {
+            margin-top: 20px;
+            padding: 14px;
+            background: #eff6ff;
+            color: var(--blue);
+            text-align: center;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            transition: 0.2s;
+            border: 1px dashed #bfdbfe;
+        }
+        .card:hover .card-action { background: var(--blue); color: white; border-style: solid; }
+
+        .data-btn { display: flex; justify-content: center; align-items: center; gap: 10px; max-width: 1200px; margin: 35px auto; padding: 22px; background: var(--blue); color: white; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(59,130,246,0.3); transition: 0.2s; } .data-btn:hover { background: #2563eb; transform: translateY(-2px); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
@@ -308,43 +129,16 @@
     <div id="setup-container">
         <h2>📝 受试者建档 (Subject Registration)</h2>
         <div class="form-row">
-            <div class="form-group">
-                <label>被试编号 (ID) <span>*</span></label>
-                <input type="text" id="subj-id" placeholder="如：CAS_001">
-            </div>
-            <div class="form-group">
-                <label>姓名拼音/缩写 <span>*</span></label>
-                <input type="text" id="subj-name" placeholder="如：ZhangSan">
-            </div>
+            <div class="form-group"><label>被试编号 (ID) <span>*</span></label><input type="text" id="subj-id" placeholder="如：CAS_001"></div>
+            <div class="form-group"><label>姓名拼音/缩写 <span>*</span></label><input type="text" id="subj-name" placeholder="如：ZhangSan"></div>
         </div>
         <div class="form-row">
-            <div class="form-group">
-                <label>出生年月日 <span>*</span></label>
-                <input type="date" id="subj-dob" min="1900-01-01">
-            </div>
-            <div class="form-group">
-                <label>性别 <span>*</span></label>
-                <select id="subj-gender">
-                    <option value="">请选择...</option>
-                    <option value="Male">男 (Male)</option>
-                    <option value="Female">女 (Female)</option>
-                </select>
-            </div>
+            <div class="form-group"><label>出生年月日 <span>*</span></label><input type="date" id="subj-dob" min="1900-01-01"></div>
+            <div class="form-group"><label>性别 <span>*</span></label><select id="subj-gender"><option value="">请选择...</option><option value="Male">男 (Male)</option><option value="Female">女 (Female)</option></select></div>
         </div>
         <div class="form-row">
-            <div class="form-group">
-                <label>利手 (Handedness) <span>*</span></label>
-                <select id="subj-hand">
-                    <option value="">请选择...</option>
-                    <option value="Right">右手 (Right)</option>
-                    <option value="Left">左手 (Left)</option>
-                    <option value="Ambidextrous">双利手 (Ambi)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>受教育年限</label>
-                <input type="number" id="subj-edu" placeholder="如：16" min="0" max="30">
-            </div>
+            <div class="form-group"><label>利手 (Handedness) <span>*</span></label><select id="subj-hand"><option value="">请选择...</option><option value="Right">右手 (Right)</option><option value="Left">左手 (Left)</option><option value="Ambidextrous">双利手 (Ambi)</option></select></div>
+            <div class="form-group"><label>受教育年限</label><input type="number" id="subj-edu" placeholder="如：16" min="0" max="30"></div>
         </div>
         <button class="submit-btn" onclick="registerSubject()">✓ 保存基线信息并开启会话</button>
     </div>
@@ -355,97 +149,91 @@
                 <h3>📋 临床主试操作手册</h3>
                 <ul class="manual-list">
                     <li><span>硬件建议：</span>推荐使用 <strong>iPad 或触控屏设备</strong>（横屏显示），以保障时空特征采集的高分辨率与稳定帧率。</li>
-                    <li><span>操作引导：</span>模块可按需无序选择。进入具体任务前，请主试务必确认受试者已理解顶部的文字指令。</li>
+                    <li><span>操作引导：</span>下方卡片为分类领域入口。进入后即可看到具体测验的启动按钮。</li>
                     <li><span>数据归档：</span>所有 22 项测试完成后，通过底部按钮进入【数据中心】统一导出 AI 格式数据集。</li>
                 </ul>
             </div>
             <div class="anim-section">
-                <div class="tutorial-step">
-                    <div class="anim-box"><div class="anim-btn"></div><div class="anim-cursor">👆</div></div>
-                    <h4>1. 进入模块</h4>
-                </div>
-                <div class="tutorial-step">
-                    <div class="anim-box"><div class="anim-target"></div><div class="anim-cursor" style="animation-delay: 0.2s;">👆</div></div>
-                    <h4>2. 引导交互</h4>
-                </div>
-                <div class="tutorial-step">
-                    <div class="anim-box"><div class="anim-folder">📁</div><div class="anim-data">📄</div></div>
-                    <h4>3. 导出特征</h4>
-                </div>
+                <div class="tutorial-step"><div class="anim-box"><div class="anim-btn"></div><div class="anim-cursor">👆</div></div><h4>1. 进入模块</h4></div>
+                <div class="tutorial-step"><div class="anim-box"><div class="anim-target"></div><div class="anim-cursor" style="animation-delay: 0.2s;">👆</div></div><h4>2. 引导交互</h4></div>
+                <div class="tutorial-step"><div class="anim-box"><div class="anim-folder">📁</div><div class="anim-data">📄</div></div><h4>3. 导出特征</h4></div>
             </div>
         </div>
 
         <div class="subj-badge">
-            <span>
-                当前测试对象: <span id="display-subj-name" style="color:#0f172a; margin:0 15px 0 5px;"></span> 
-                ID: <span id="display-subj-id" style="color:#0f172a; font-family:monospace; margin-left:5px;"></span>
-            </span>
+            <span>当前测试对象: <span id="display-subj-name" style="color:#0f172a; margin:0 15px 0 5px;"></span> ID: <span id="display-subj-id" style="color:#0f172a; font-family:monospace; margin-left:5px;"></span></span>
             <button onclick="CAS_Storage.clearSession()" style="background:white; border:1px solid #0369a1; color:#0369a1; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">结束会话</button>
         </div>
 
         <div class="grid">
             <a href="cognition.html" class="card">
                 <div class="card-header"><div class="icon">🧠</div><h2>认知 (CAS-COG)</h2></div>
-                <p class="domain-desc">靶向额叶与海马体网络，评估执行控制、工作记忆广度、认知柔性及信息处理速度，对早期轻度认知障碍极具敏感性。</p>
+                <p class="domain-desc">靶向额叶与海马体网络，评估执行控制、工作记忆广度、认知柔性及信息处理速度。</p>
                 <ul class="sub-test-list">
                     <li>Corsi 空间工作记忆</li>
                     <li>Stroop 执行控制与抑制</li>
                     <li>TMT-B 连线测试 (任务切换)</li>
                     <li>DSST 数字符号转换</li>
                 </ul>
+                <div class="card-action">进入 认知 测试面板 ➔</div>
             </a>
             
             <a href="emotion.html" class="card">
                 <div class="card-header"><div class="icon">❤️</div><h2>情感 (CAS-EMO)</h2></div>
-                <p class="domain-desc">靶向边缘系统。结合主观量表与客观行为范式，量化情绪状态、人格特质、风险偏好及潜在的注意偏向。</p>
+                <p class="domain-desc">靶向边缘系统。结合主观量表与客观行为范式，量化情绪状态、人格特质及潜在注意偏向。</p>
                 <ul class="sub-test-list">
                     <li>EMA 连续瞬时状态评估</li>
                     <li>Big 5 人格特质量表</li>
                     <li>BART 气球模拟风险决策</li>
                     <li>Emotional Stroop 注意偏向</li>
                 </ul>
+                <div class="card-action">进入 情感 测试面板 ➔</div>
             </a>
             
             <a href="motor.html" class="card">
                 <div class="card-header"><div class="icon">🎯</div><h2>运动 (CAS-MOT)</h2></div>
-                <p class="domain-desc">靶向运动皮层与小脑网络。记录高频触屏轨迹与时延，精准捕捉微弱共济失调、运动迟缓与震颤特征。</p>
+                <p class="domain-desc">靶向运动皮层与小脑网络。精准捕捉微弱共济失调、运动迟缓与高频震颤特征。</p>
                 <ul class="sub-test-list">
                     <li>Simple Tapping 运动疲劳度</li>
                     <li>Fitts' Law 靶向协调性</li>
                     <li>Archimedean 螺旋线微写症分析</li>
                 </ul>
+                <div class="card-action">进入 运动 测试面板 ➔</div>
             </a>
             
             <a href="sensation.html" class="card">
                 <div class="card-header"><div class="icon">⚡</div><h2>感觉与知觉 (CAS-SEN)</h2></div>
-                <p class="domain-desc">分离神经传导基线与高级认知决策耗时。评估视觉信息处理效率、感觉运动抑制网络与特征搜索能力。</p>
+                <p class="domain-desc">分离神经传导基线与高级认知决策耗时。评估视觉信息处理效率与感觉抑制网络。</p>
                 <ul class="sub-test-list">
                     <li>Simple RT (基线传导反应)</li>
                     <li>Choice RT (知觉决策 DDM)</li>
                     <li>Go/No-Go (感觉抑制控制)</li>
                     <li>Visual Search (注意力扫描)</li>
                 </ul>
+                <div class="card-action">进入 感觉 测试面板 ➔</div>
             </a>
             
             <a href="language.html" class="card" style="border-top: 4px solid #8b5cf6;">
                 <div class="card-header"><div class="icon">💬</div><h2>语言 (CAS-LAN)</h2></div>
-                <p class="domain-desc">靶向左颞叶与弓状束。通过词汇检索速度的非线性变化与图像命名提取效率，量化内部语义网络的物理连通性。</p>
+                <p class="domain-desc">靶向左颞叶与弓状束。通过词汇检索速度与图像命名提取效率，量化内部语义网络。</p>
                 <ul class="sub-test-list">
                     <li>VFT 词汇流畅性 (语义提取)</li>
                     <li>Naming 图片命名 (命名时延)</li>
                     <li>Semantic 语义关联与抽象提取</li>
                 </ul>
+                <div class="card-action" style="color: #8b5cf6; background: #f5f3ff; border-color: #ddd6fe;">进入 语言 测试面板 ➔</div>
             </a>
             
             <a href="lifestyle.html" class="card" style="border-top: 4px solid #10b981;">
                 <div class="card-header"><div class="icon">🌙</div><h2>主观与生活 (CAS-LIF)</h2></div>
-                <p class="domain-desc">采集主观衰退自评、日常工具使用能力鉴别，以及与异常蛋白沉积强相关的睡眠指标、抑郁情绪质控。</p>
+                <p class="domain-desc">采集主观衰退自评、日常工具使用能力鉴别，以及相关的睡眠指标、抑郁情绪质控。</p>
                 <ul class="sub-test-list">
                     <li>SCD-Q 主观认知衰退自评</li>
                     <li>微型睡眠结构与节律特征</li>
                     <li>IADL 工具性日常生活能力</li>
                     <li>PHQ-2 抑郁情绪鉴别筛查</li>
                 </ul>
+                <div class="card-action" style="color: #10b981; background: #ecfdf5; border-color: #a7f3d0;">进入 生活 测试面板 ➔</div>
             </a>
         </div>
         
@@ -453,32 +241,25 @@
     </div>
 
     <script>
-        // ==================== 页面加载逻辑 ====================
         window.onload = function() {
-            // 1. 防呆设计：动态设置出生日期(dob)的最大可选值为“今天”，杜绝输入未来年份导致解析异常
+            // 防呆设计：动态设置出生日期(dob)的最大可选值为今天
             const today = new Date().toISOString().split("T")[0];
             document.getElementById('subj-dob').setAttribute("max", today);
 
-            // 2. 路由逻辑：检查底层存储中是否存在该设备的活动测试会话
+            // 路由逻辑：检查底层存储是否有当前会话
             if (CAS_Storage.hasSession()) {
-                // 如果当前正在测试中：隐藏建档表单，展现控制看板
                 document.getElementById('setup-container').style.display = 'none'; 
                 document.getElementById('dashboard-container').style.display = 'block';
-                
-                // 从缓存中读取被试信息并更新至头部 Badge
                 const session = CAS_Storage.getSession();
                 document.getElementById('display-subj-name').innerText = session.demographics.name; 
                 document.getElementById('display-subj-id').innerText = session.session_id;
             } else { 
-                // 如果未建档：强制显示表单页面，隐藏测试入口
                 document.getElementById('setup-container').style.display = 'block'; 
                 document.getElementById('dashboard-container').style.display = 'none'; 
             }
         };
 
-        // ==================== 受试者基线信息注册逻辑 ====================
         function registerSubject() {
-            // 1. 获取所有表单字段的值并去除首尾空格
             const id = document.getElementById('subj-id').value.trim();
             const name = document.getElementById('subj-name').value.trim();
             const dob = document.getElementById('subj-dob').value;
@@ -486,12 +267,10 @@
             const hand = document.getElementById('subj-hand').value;
             const edu = document.getElementById('subj-edu').value;
             
-            // 2. 严格非空校验 (所有带 * 号的均为高优协变量，必须强制主试录入)
             if(!id || !name || !dob || !gender || !hand) {
                 return alert("⚠️ 请完整填写所有带 * 的必填项！");
             }
             
-            // 3. 调用存储引擎初始化会话，建立带有统一身份标识(ID)的空数据容器
             CAS_Storage.initSession({ 
                 subject_id: id, 
                 name: name, 
@@ -501,7 +280,6 @@
                 education_years: edu ? parseInt(edu) : null 
             });
             
-            // 4. 平滑过渡 UI 视图
             document.getElementById('setup-container').style.display = 'none'; 
             document.getElementById('display-subj-name').innerText = name; 
             document.getElementById('display-subj-id').innerText = id; 
