@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAS - 多模态数字表型评估系统</title>
     <style>
-        /* ==================== 1. 全局与重置样式 ==================== */
+        /* ==================== 1. 全局设计规范 ==================== */
         :root { 
             --primary: #0f172a; 
             --blue: #3b82f6; 
@@ -14,7 +14,7 @@
             --muted: #64748b; 
         }
         body { 
-            font-family: -apple-system, sans-serif; 
+            font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
             background: var(--bg); 
             color: var(--text); 
             margin: 0; 
@@ -35,7 +35,7 @@
         header p { margin: 0; font-size: 15px; color: var(--muted); }
         .eng-title { font-family: monospace; color: var(--blue); font-size: 13px; margin-top: 8px; display: block; }
         
-        /* ==================== 2. 受试者建档表单 UI ==================== */
+        /* ==================== 2. 受试者建档表单 ==================== */
         #setup-container { 
             max-width: 700px; 
             margin: 30px auto; 
@@ -59,31 +59,21 @@
         .submit-btn:hover { background: #2563eb; transform: translateY(-2px); }
         .submit-btn:active { transform: translateY(0); }
 
-        /* ==================== 3. 测试看板仪表盘 UI ==================== */
+        /* ==================== 3. 评估看板仪表盘 ==================== */
         #dashboard-container { display: none; animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* 操作手册 */
         .tutorial-container { max-width: 1200px; margin: 0 auto 30px auto; background: white; border-radius: 16px; display: flex; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; flex-wrap: wrap; }
         .manual-section { flex: 1.5; padding: 30px; background: #f8fafc; border-right: 1px solid #e2e8f0; min-width: 300px; }
         .manual-section h3 { margin-top: 0; color: var(--primary); }
-        .manual-list { padding-left: 20px; color: var(--muted); font-size: 14.5px; line-height: 1.8; margin: 0; }
+        .manual-list { padding-left: 20px; color: var(--muted); font-size: 14px; line-height: 1.7; margin: 0; }
         .manual-list li span { font-weight: bold; color: var(--blue); }
         
-        .anim-section { flex: 1; padding: 30px; display: flex; justify-content: space-around; align-items: center; background: white; min-width: 300px; }
-        .tutorial-step { text-align: center; } .tutorial-step h4 { margin: 15px 0 0 0; font-size: 14px; color: var(--primary); }
-        .anim-box { width: 60px; height: 60px; margin: 0 auto; background: #f1f5f9; border-radius: 12px; position: relative; display: flex; align-items: center; justify-content: center; border: 2px solid #e2e8f0; }
-        .anim-cursor { position: absolute; font-size: 20px; z-index: 10; animation: moveClick 3s infinite ease-in-out; }
-        .anim-btn { width: 30px; height: 15px; background: #cbd5e1; border-radius: 4px; animation: btnPress 3s infinite ease-in-out; }
-        .anim-target { width: 20px; height: 20px; border-radius: 50%; background: #ef4444; animation: targetChange 3s infinite ease-in-out; }
-        .anim-data { font-size: 24px; animation: dataFloat 3s infinite ease-in-out; } .anim-folder { position: absolute; bottom: 5px; font-size: 30px; color: #cbd5e1; }
-        @keyframes moveClick { 0% { top: 40px; left: 40px; opacity: 0; } 20% { top: 30px; left: 30px; opacity: 1; } 40%, 60% { top: 20px; left: 20px; transform: scale(0.8); } 80% { top: 40px; left: 40px; opacity: 0; } 100% { opacity: 0; } }
-        @keyframes btnPress { 0%, 45% { background: #cbd5e1; transform: scale(1); } 50%, 60% { background: var(--blue); transform: scale(0.95); } 65%, 100% { background: #cbd5e1; transform: scale(1); } }
-        @keyframes targetChange { 0%, 45% { background: #ef4444; transform: scale(1); } 50%, 80% { background: #10b981; transform: scale(1.1); box-shadow: 0 0 10px rgba(16,185,129,0.4); } 100% { background: #ef4444; transform: scale(1); } }
-        @keyframes dataFloat { 0% { transform: translateY(-15px); opacity: 0; } 30% { transform: translateY(-5px); opacity: 1; } 70%, 100% { transform: translateY(10px) scale(0.5); opacity: 0; } }
-
+        /* 交互反馈组件 */
         .subj-badge { max-width: 1200px; margin: 0 auto 25px auto; padding: 15px 20px; background: #e0f2fe; color: #0369a1; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 15px; border: 1px solid #bae6fd; }
         
-        /* 6大模块网格布局与卡片优化 */
+        /* 六大功能域网格布局 */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
         .card { 
             background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
@@ -91,38 +81,40 @@
             display: flex; flex-direction: column; position: relative;
         }
         .card:hover { transform: translateY(-5px); border-color: var(--blue); box-shadow: 0 12px 20px rgba(59,130,246,0.1); }
-        .card:active { transform: translateY(-2px); }
         
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; } .icon { font-size: 40px; } .card h2 { color: var(--primary); margin: 0; font-size: 20px; }
-        .domain-desc { font-size: 13.5px; color: #94a3b8; margin: 0 0 15px 0; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; line-height: 1.5; }
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; } 
+        .icon { font-size: 40px; } 
+        .card h2 { color: var(--primary); margin: 0; font-size: 19px; }
+        .domain-desc { font-size: 13px; color: #94a3b8; margin: 0 0 15px 0; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; line-height: 1.5; }
         
         .sub-test-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; } 
-        .sub-test-list li { font-size: 14.5px; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; font-weight: 500; } 
-        .sub-test-list li::before { content: "•"; color: var(--blue); font-size: 22px; margin-right: 10px; }
+        .sub-test-list li { font-size: 14px; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; font-weight: 500; } 
+        .sub-test-list li::before { content: "•"; color: var(--blue); font-size: 20px; margin-right: 10px; }
         
-        /* 🌟 新增：卡片底部的视觉引导按钮，明确告知用户点击卡片的作用 */
+        /* 🌟 核心修复：视觉引导按钮，告知用户点击卡片进入面板 */
         .card-action {
             margin-top: 20px;
-            padding: 14px;
+            padding: 12px;
             background: #eff6ff;
             color: var(--blue);
             text-align: center;
             border-radius: 10px;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 14px;
             transition: 0.2s;
             border: 1px dashed #bfdbfe;
         }
         .card:hover .card-action { background: var(--blue); color: white; border-style: solid; }
 
-        .data-btn { display: flex; justify-content: center; align-items: center; gap: 10px; max-width: 1200px; margin: 35px auto; padding: 22px; background: var(--blue); color: white; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(59,130,246,0.3); transition: 0.2s; } .data-btn:hover { background: #2563eb; transform: translateY(-2px); }
+        .data-btn { display: flex; justify-content: center; align-items: center; gap: 10px; max-width: 1200px; margin: 35px auto; padding: 20px; background: var(--blue); color: white; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(59,130,246,0.3); transition: 0.2s; } 
+        .data-btn:hover { background: #2563eb; transform: translateY(-2px); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <header>
         <h1>计算神经心理与数字表型评估系统 (CAS)</h1>
-        <p>支持多模态高维特征提取的临床级认知评估组合</p>
+        <p>基于多模态高维特征提取的临床评估组合</p>
         <span class="eng-title">Computational Assessment Suite for Digital Phenotyping</span>
     </header>
 
@@ -133,7 +125,7 @@
             <div class="form-group"><label>姓名拼音/缩写 <span>*</span></label><input type="text" id="subj-name" placeholder="如：ZhangSan"></div>
         </div>
         <div class="form-row">
-            <div class="form-group"><label>出生年月日 <span>*</span></label><input type="date" id="subj-dob" min="1900-01-01"></div>
+            <div class="form-group"><label>出生年月日 <span>*</span></label><input type="date" id="subj-dob" min="1900-01-01" max="2099-12-31"></div>
             <div class="form-group"><label>性别 <span>*</span></label><select id="subj-gender"><option value="">请选择...</option><option value="Male">男 (Male)</option><option value="Female">女 (Female)</option></select></div>
         </div>
         <div class="form-row">
@@ -148,31 +140,26 @@
             <div class="manual-section">
                 <h3>📋 临床主试操作手册</h3>
                 <ul class="manual-list">
-                    <li><span>硬件建议：</span>推荐使用 <strong>iPad 或触控屏设备</strong>（横屏显示），以保障时空特征采集的高分辨率与稳定帧率。</li>
-                    <li><span>操作引导：</span>下方卡片为分类领域入口。进入后即可看到具体测验的启动按钮。</li>
-                    <li><span>数据归档：</span>所有 22 项测试完成后，通过底部按钮进入【数据中心】统一导出 AI 格式数据集。</li>
+                    <li><span>硬件建议：</span>推荐使用 <strong>iPad 或触控屏设备</strong>，以保障运动特征采集的精度。</li>
+                    <li><span>交互引导：</span>点击下方各领域卡片进入对应的测试面板。</li>
+                    <li><span>数据导出：</span>所有 22 项测验完成后，通过底部“数据中心”导出 JSON 结果包。</li>
                 </ul>
-            </div>
-            <div class="anim-section">
-                <div class="tutorial-step"><div class="anim-box"><div class="anim-btn"></div><div class="anim-cursor">👆</div></div><h4>1. 进入模块</h4></div>
-                <div class="tutorial-step"><div class="anim-box"><div class="anim-target"></div><div class="anim-cursor" style="animation-delay: 0.2s;">👆</div></div><h4>2. 引导交互</h4></div>
-                <div class="tutorial-step"><div class="anim-box"><div class="anim-folder">📁</div><div class="anim-data">📄</div></div><h4>3. 导出特征</h4></div>
             </div>
         </div>
 
         <div class="subj-badge">
-            <span>当前测试对象: <span id="display-subj-name" style="color:#0f172a; margin:0 15px 0 5px;"></span> ID: <span id="display-subj-id" style="color:#0f172a; font-family:monospace; margin-left:5px;"></span></span>
-            <button onclick="CAS_Storage.clearSession()" style="background:white; border:1px solid #0369a1; color:#0369a1; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s;">结束会话</button>
+            <span>当前测试对象: <span id="display-subj-name" style="color:#0f172a; margin:0 5px;"></span> ID: <span id="display-subj-id" style="color:#0f172a; font-family:monospace;"></span></span>
+            <button onclick="CAS_Storage.clearSession()" style="background:white; border:1px solid #0369a1; color:#0369a1; padding:6px 15px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:12px;">结束会话</button>
         </div>
 
         <div class="grid">
             <a href="cognition.html" class="card">
                 <div class="card-header"><div class="icon">🧠</div><h2>认知 (CAS-COG)</h2></div>
-                <p class="domain-desc">靶向额叶与海马体网络，评估执行控制、工作记忆广度、认知柔性及信息处理速度。</p>
+                <p class="domain-desc">靶向额叶与海马体，评估执行控制、记忆广度与处理速度。</p>
                 <ul class="sub-test-list">
                     <li>Corsi 空间工作记忆</li>
-                    <li>Stroop 执行控制与抑制</li>
-                    <li>TMT-B 连线测试 (任务切换)</li>
+                    <li>Stroop 执行抑制测试</li>
+                    <li>TMT-B 认知柔性连线</li>
                     <li>DSST 数字符号转换</li>
                 </ul>
                 <div class="card-action">进入 认知 测试面板 ➔</div>
@@ -180,7 +167,7 @@
             
             <a href="emotion.html" class="card">
                 <div class="card-header"><div class="icon">❤️</div><h2>情感 (CAS-EMO)</h2></div>
-                <p class="domain-desc">靶向边缘系统。结合主观量表与客观行为范式，量化情绪状态、人格特质及潜在注意偏向。</p>
+                <p class="domain-desc">靶向边缘系统，量化情绪状态、人格特质及风险偏好。</p>
                 <ul class="sub-test-list">
                     <li>EMA 连续瞬时状态评估</li>
                     <li>Big 5 人格特质量表</li>
@@ -192,73 +179,74 @@
             
             <a href="motor.html" class="card">
                 <div class="card-header"><div class="icon">🎯</div><h2>运动 (CAS-MOT)</h2></div>
-                <p class="domain-desc">靶向运动皮层与小脑网络。精准捕捉微弱共济失调、运动迟缓与高频震颤特征。</p>
+                <p class="domain-desc">靶向运动皮层与小脑，记录震颤特征与运动协调性。</p>
                 <ul class="sub-test-list">
                     <li>Simple Tapping 运动疲劳度</li>
                     <li>Fitts' Law 靶向协调性</li>
-                    <li>Archimedean 螺旋线微写症分析</li>
+                    <li>Archimedean 螺旋线震颤分析</li>
                 </ul>
                 <div class="card-action">进入 运动 测试面板 ➔</div>
             </a>
             
             <a href="sensation.html" class="card">
-                <div class="card-header"><div class="icon">⚡</div><h2>感觉与知觉 (CAS-SEN)</h2></div>
-                <p class="domain-desc">分离神经传导基线与高级认知决策耗时。评估视觉信息处理效率与感觉抑制网络。</p>
+                <div class="card-header"><div class="icon">⚡</div><h2>感觉知觉 (CAS-SEN)</h2></div>
+                <p class="domain-desc">评估视觉信息处理效率、感觉传导与注意力扫描。</p>
                 <ul class="sub-test-list">
-                    <li>Simple RT (基线传导反应)</li>
-                    <li>Choice RT (知觉决策 DDM)</li>
-                    <li>Go/No-Go (感觉抑制控制)</li>
-                    <li>Visual Search (注意力扫描)</li>
+                    <li>Simple RT / Choice RT 反应时</li>
+                    <li>Go/No-Go 冲动抑制控制</li>
+                    <li>Visual Search 视觉搜索</li>
                 </ul>
                 <div class="card-action">进入 感觉 测试面板 ➔</div>
             </a>
             
             <a href="language.html" class="card" style="border-top: 4px solid #8b5cf6;">
                 <div class="card-header"><div class="icon">💬</div><h2>语言 (CAS-LAN)</h2></div>
-                <p class="domain-desc">靶向左颞叶与弓状束。通过词汇检索速度与图像命名提取效率，量化内部语义网络。</p>
+                <p class="domain-desc">评估词汇检索、命名时延及内部语义网络物理连通性。</p>
                 <ul class="sub-test-list">
-                    <li>VFT 词汇流畅性 (语义提取)</li>
-                    <li>Naming 图片命名 (命名时延)</li>
-                    <li>Semantic 语义关联与抽象提取</li>
+                    <li>VFT 词汇流畅性提取</li>
+                    <li>Naming 图片数字化命名</li>
+                    <li>Semantic 语义关联与抽象判别</li>
                 </ul>
-                <div class="card-action" style="color: #8b5cf6; background: #f5f3ff; border-color: #ddd6fe;">进入 语言 测试面板 ➔</div>
+                <div class="card-action" style="color: #8b5cf6; background: #f5f3ff;">进入 语言 测试面板 ➔</div>
             </a>
             
             <a href="lifestyle.html" class="card" style="border-top: 4px solid #10b981;">
-                <div class="card-header"><div class="icon">🌙</div><h2>主观与生活 (CAS-LIF)</h2></div>
-                <p class="domain-desc">采集主观衰退自评、日常工具使用能力鉴别，以及相关的睡眠指标、抑郁情绪质控。</p>
+                <div class="card-header"><div class="icon">🌙</div><h2>生活主观 (CAS-LIF)</h2></div>
+                <p class="domain-desc">采集主观认知评价、日常功能鉴别及睡眠抑郁质控指标。</p>
                 <ul class="sub-test-list">
-                    <li>SCD-Q 主观认知衰退自评</li>
-                    <li>微型睡眠结构与节律特征</li>
-                    <li>IADL 工具性日常生活能力</li>
+                    <li>SCD-Q 主观认知下降自评</li>
+                    <li>睡眠结构与生物节律特征</li>
+                    <li>IADL 工具性日常生活能力评估</li>
                     <li>PHQ-2 抑郁情绪鉴别筛查</li>
                 </ul>
-                <div class="card-action" style="color: #10b981; background: #ecfdf5; border-color: #a7f3d0;">进入 生活 测试面板 ➔</div>
+                <div class="card-action" style="color: #10b981; background: #ecfdf5;">进入 生活 测试面板 ➔</div>
             </a>
         </div>
         
-        <a href="report.html" class="data-btn"><span>📊</span> 进入临床数据中心 (查看全部 22 项测试进度与汇总导出)</a>
+        <a href="report.html" class="data-btn"><span>📊</span> 查看 22 项测试进度与数据中心 ➔</a>
     </div>
 
     <script>
+        // 初始化设置
         window.onload = function() {
-            // 防呆设计：动态设置出生日期(dob)的最大可选值为今天
+            // 锁定日期上限为今天
             const today = new Date().toISOString().split("T")[0];
             document.getElementById('subj-dob').setAttribute("max", today);
 
-            // 路由逻辑：检查底层存储是否有当前会话
+            // 会话检查
             if (CAS_Storage.hasSession()) {
                 document.getElementById('setup-container').style.display = 'none'; 
                 document.getElementById('dashboard-container').style.display = 'block';
                 const session = CAS_Storage.getSession();
                 document.getElementById('display-subj-name').innerText = session.demographics.name; 
-                document.getElementById('display-subj-id').innerText = session.session_id;
+                document.getElementById('display-subj-id').innerText = session.demographics.subject_id;
             } else { 
                 document.getElementById('setup-container').style.display = 'block'; 
                 document.getElementById('dashboard-container').style.display = 'none'; 
             }
         };
 
+        // 注册受试者
         function registerSubject() {
             const id = document.getElementById('subj-id').value.trim();
             const name = document.getElementById('subj-name').value.trim();
@@ -268,7 +256,7 @@
             const edu = document.getElementById('subj-edu').value;
             
             if(!id || !name || !dob || !gender || !hand) {
-                return alert("⚠️ 请完整填写所有带 * 的必填项！");
+                return alert("⚠️ 请完整填写所有必填项！");
             }
             
             CAS_Storage.initSession({ 
@@ -280,10 +268,7 @@
                 education_years: edu ? parseInt(edu) : null 
             });
             
-            document.getElementById('setup-container').style.display = 'none'; 
-            document.getElementById('display-subj-name').innerText = name; 
-            document.getElementById('display-subj-id').innerText = id; 
-            document.getElementById('dashboard-container').style.display = 'block';
+            location.reload(); // 刷新以进入看板
         }
     </script>
 </body>
