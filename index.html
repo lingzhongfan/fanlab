@@ -1,35 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAS - 数字表型与认知评估系统</title>
+    <title>CAS - 临床级综合认知评估量表</title>
     <style>
         :root { --primary: #0f172a; --bg: #f8fafc; --text: #334155; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        header { text-align: center; margin-bottom: 40px; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
+        header { text-align: center; margin-bottom: 30px; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; text-decoration: none; color: inherit; border: 2px solid transparent; transition: all 0.2s; }
+        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; text-decoration: none; color: inherit; border: 2px solid transparent; transition: all 0.2s; }
         .card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .card h2 { color: var(--primary); margin: 15px 0 5px; font-size: 20px; }
-        .icon { font-size: 48px; }
-        .data-btn { display: block; max-width: 1000px; margin: 30px auto; padding: 20px; background: #3b82f6; color: white; text-align: center; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; transition: background 0.2s; }
-        .data-btn:hover { background: #2563eb; }
+        .sub-text { color: #64748b; font-size: 14px; margin: 5px 0; }
+        .icon { font-size: 40px; }
+        .data-btn { display: block; max-width: 1000px; margin: 30px auto; padding: 20px; background: #3b82f6; color: white; text-align: center; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <header>
-        <h1 style="margin:0 0 10px 0; color: #0f172a;">多模态数字认知评估系统 (CAS)</h1>
-        <p style="margin:0; font-size: 16px; color: #64748b;">面向 AI 模型优化的临床级数字表型采集终端</p>
+        <h1 style="margin:0 0 10px 0;">多模态数字认知评估组合 (CAS Battery)</h1>
+        <p style="margin:0; color:#64748b;">支持高维度特征提取的神经心理学评估环境</p>
     </header>
     <div class="grid">
-        <a href="cognition.html" class="card"><div class="icon">🧠</div><h2>认知 (Cognition)</h2><p style="color:#64748b;">空间工作记忆 (Corsi Span)</p></a>
-        <a href="emotion.html" class="card"><div class="icon">📊</div><h2>情感 (Emotion)</h2><p style="color:#64748b;">连续生态瞬时评估 (EMA)</p></a>
-        <a href="motor.html" class="card"><div class="icon">🎯</div><h2>运动 (Motor)</h2><p style="color:#64748b;">菲茨交替点击 (Fitts' Law)</p></a>
-        <a href="sensation.html" class="card"><div class="icon">⚡</div><h2>感觉 (Sensation)</h2><p style="color:#64748b;">选择反应时 (Choice RT)</p></a>
+        <a href="cognition.html" class="card"><div class="icon">🧠</div><h2>认知 (Cognition)</h2><p class="sub-text">1. Corsi 空间记忆</p><p class="sub-text">2. Stroop 执行抑制</p></a>
+        <a href="emotion.html" class="card"><div class="icon">📊</div><h2>情感 (Emotion)</h2><p class="sub-text">1. EMA 瞬时状态评估</p><p class="sub-text">2. 大五人格 (Big 5) 特质</p></a>
+        <a href="motor.html" class="card"><div class="icon">🎯</div><h2>运动 (Motor)</h2><p class="sub-text">1. Fitts 靶向运动学</p><p class="sub-text">2. 螺旋线描摹 (震颤分析)</p></a>
+        <a href="sensation.html" class="card"><div class="icon">⚡</div><h2>感觉 (Sensation)</h2><p class="sub-text">1. 选择反应时 (Choice RT)</p><p class="sub-text">2. 特征视觉搜索 (Visual Search)</p></a>
     </div>
-    <a href="report.html" class="data-btn">进入数据集成与导出中心 ➔</a>
+    <a href="report.html" class="data-btn">📊 进入临床数据集成与导出中心</a>
 </body>
 </html>
