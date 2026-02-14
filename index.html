@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAS - 临床级综合认知评估量表</title>
+    <title>CAS - 多模态数字认知与表型评估系统</title>
     <style>
         :root { 
             --primary-dark: #0f172a; 
@@ -66,16 +66,17 @@
         .sub-test-list li { 
             font-size: 15px; 
             color: var(--text-muted); 
-            margin-bottom: 10px; 
+            margin-bottom: 12px; 
             display: flex; 
             align-items: center; 
+            font-weight: 500;
         }
         .sub-test-list li::before {
             content: "•";
             color: var(--primary-blue);
             font-weight: bold;
-            font-size: 20px;
-            margin-right: 8px;
+            font-size: 22px;
+            margin-right: 10px;
         }
 
         .data-btn { 
@@ -100,7 +101,7 @@
 <body>
     <header>
         <h1>多模态数字认知与表型评估组合 (CAS Battery)</h1>
-        <p>基于计算神经心理学的 10 项高维度数字化特征采集环境</p>
+        <p>基于计算神经心理学的 12 项高维度数字化特征采集环境</p>
     </header>
 
     <div class="grid">
@@ -112,6 +113,8 @@
             <ul class="sub-test-list">
                 <li>Corsi 空间工作记忆 (Span)</li>
                 <li>Stroop 执行控制与抑制</li>
+                <li>TMT 连线测试 (认知柔性)</li>
+                <li>DSST 数字符号转换 (处理速度)</li>
             </ul>
         </a>
 
@@ -121,10 +124,10 @@
                 <h2>情感 (Emotion)</h2>
             </div>
             <ul class="sub-test-list">
-                <li>连续生态瞬时评估 (EMA)</li>
-                <li>大五人格特质量表 (Big 5)</li>
+                <li>EMA 连续生态瞬时评估</li>
+                <li>Big 5 大五人格特质量表</li>
                 <li>BART 气球模拟风险决策</li>
-                <li>Emotional Stroop 情绪偏向</li>
+                <li>E-Stroop 情绪注意偏向</li>
             </ul>
         </a>
 
@@ -145,14 +148,14 @@
                 <h2>感觉 (Sensation)</h2>
             </div>
             <ul class="sub-test-list">
-                <li>Choice RT 基于 DDM 的选择反应</li>
-                <li>Conjunction Search 特征视觉搜索</li>
+                <li>Choice RT 选择反应时 (DDM)</li>
+                <li>Conjunction 结合特征视觉搜索</li>
             </ul>
         </a>
     </div>
 
     <a href="report.html" class="data-btn">
-        📥 进入临床数据中心 (查看 10 项模块进度与导出 JSON)
+        📥 进入临床数据中心 (查看 12 项模块进度与导出 JSON)
     </a>
 </body>
 </html>
