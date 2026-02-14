@@ -5,30 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAS - 临床级综合认知评估量表</title>
     <style>
-        :root { --primary: #0f172a; --bg: #f8fafc; --text: #334155; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        header { text-align: center; margin-bottom: 30px; padding: 30px; background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; text-decoration: none; color: inherit; border: 2px solid transparent; transition: all 0.2s; }
-        .card:hover { transform: translateY(-5px); border-color: #3b82f6; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .card h2 { color: var(--primary); margin: 15px 0 5px; font-size: 20px; }
-        .sub-text { color: #64748b; font-size: 14px; margin: 5px 0; }
-        .icon { font-size: 40px; }
-        .data-btn { display: block; max-width: 1000px; margin: 30px auto; padding: 20px; background: #3b82f6; color: white; text-align: center; border-radius: 12px; text-decoration: none; font-size: 18px; font-weight: bold; }
+        :root { 
+            --primary-dark: #0f172a; 
+            --primary-blue: #3b82f6;
+            --bg-color: #f8fafc; 
+            --text-main: #334155; 
+            --text-muted: #64748b;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            -webkit-font-smoothing: antialiased;
+        }
+        header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding: 35px 20px; 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+            border-top: 6px solid var(--primary-dark); 
+        }
+        header h1 { margin: 0 0 10px 0; font-size: 28px; color: var(--primary-dark); }
+        header p { margin: 0; font-size: 16px; color: var(--text-muted); }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            max-width: 1100px; 
+            margin: 0 auto; 
+        }
+        
+        .card { 
+            background: white; 
+            padding: 25px 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+            text-decoration: none; 
+            color: inherit; 
+            border: 2px solid transparent; 
+            transition: all 0.2s ease-in-out; 
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { 
+            transform: translateY(-5px); 
+            border-color: var(--primary-blue); 
+            box-shadow: 0 12px 20px rgba(59, 130, 246, 0.1); 
+        }
+        
+        .card-header { text-align: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
+        .icon { font-size: 45px; margin-bottom: 10px; }
+        .card h2 { color: var(--primary-dark); margin: 0; font-size: 22px; }
+        
+        .sub-test-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+        .sub-test-list li { 
+            font-size: 15px; 
+            color: var(--text-muted); 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+        }
+        .sub-test-list li::before {
+            content: "•";
+            color: var(--primary-blue);
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .data-btn { 
+            display: block; 
+            max-width: 1100px; 
+            margin: 35px auto; 
+            padding: 22px; 
+            background: var(--primary-blue); 
+            color: white; 
+            text-align: center; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            font-size: 18px; 
+            font-weight: bold; 
+            transition: background 0.2s;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .data-btn:hover { background: #2563eb; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <header>
-        <h1 style="margin:0 0 10px 0;">多模态数字认知评估组合 (CAS Battery)</h1>
-        <p style="margin:0; color:#64748b;">支持高维度特征提取的神经心理学评估环境</p>
+        <h1>多模态数字认知与表型评估组合 (CAS Battery)</h1>
+        <p>基于计算神经心理学的 10 项高维度数字化特征采集环境</p>
     </header>
+
     <div class="grid">
-        <a href="cognition.html" class="card"><div class="icon">🧠</div><h2>认知 (Cognition)</h2><p class="sub-text">1. Corsi 空间记忆</p><p class="sub-text">2. Stroop 执行抑制</p></a>
-        <a href="emotion.html" class="card"><div class="icon">📊</div><h2>情感 (Emotion)</h2><p class="sub-text">1. EMA 瞬时状态评估</p><p class="sub-text">2. 大五人格 (Big 5) 特质</p></a>
-        <a href="motor.html" class="card"><div class="icon">🎯</div><h2>运动 (Motor)</h2><p class="sub-text">1. Fitts 靶向运动学</p><p class="sub-text">2. 螺旋线描摹 (震颤分析)</p></a>
-        <a href="sensation.html" class="card"><div class="icon">⚡</div><h2>感觉 (Sensation)</h2><p class="sub-text">1. 选择反应时 (Choice RT)</p><p class="sub-text">2. 特征视觉搜索 (Visual Search)</p></a>
+        <a href="cognition.html" class="card">
+            <div class="card-header">
+                <div class="icon">🧠</div>
+                <h2>认知 (Cognition)</h2>
+            </div>
+            <ul class="sub-test-list">
+                <li>Corsi 空间工作记忆 (Span)</li>
+                <li>Stroop 执行控制与抑制</li>
+            </ul>
+        </a>
+
+        <a href="emotion.html" class="card">
+            <div class="card-header">
+                <div class="icon">❤️</div>
+                <h2>情感 (Emotion)</h2>
+            </div>
+            <ul class="sub-test-list">
+                <li>连续生态瞬时评估 (EMA)</li>
+                <li>大五人格特质量表 (Big 5)</li>
+                <li>BART 气球模拟风险决策</li>
+                <li>Emotional Stroop 情绪偏向</li>
+            </ul>
+        </a>
+
+        <a href="motor.html" class="card">
+            <div class="card-header">
+                <div class="icon">🎯</div>
+                <h2>运动 (Motor)</h2>
+            </div>
+            <ul class="sub-test-list">
+                <li>Fitts' Law 靶向运动迟缓</li>
+                <li>Archimedean 螺旋线震颤描摹</li>
+            </ul>
+        </a>
+
+        <a href="sensation.html" class="card">
+            <div class="card-header">
+                <div class="icon">⚡</div>
+                <h2>感觉 (Sensation)</h2>
+            </div>
+            <ul class="sub-test-list">
+                <li>Choice RT 基于 DDM 的选择反应</li>
+                <li>Conjunction Search 特征视觉搜索</li>
+            </ul>
+        </a>
     </div>
-    <a href="report.html" class="data-btn">📊 进入临床数据集成与导出中心</a>
+
+    <a href="report.html" class="data-btn">
+        📥 进入临床数据中心 (查看 10 项模块进度与导出 JSON)
+    </a>
 </body>
 </html>
