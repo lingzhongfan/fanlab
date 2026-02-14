@@ -14,7 +14,12 @@
         .btn-blue { background: var(--blue); color: white; }
         .btn-green { background: var(--green); color: white; }
         .sys-btn:active:not(:disabled) { transform: scale(0.98); opacity: 0.9; }
-        .sys-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* 量表滑块样式 */
+        .q-group { margin-bottom: 30px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; }
+        .q-group label { display: block; font-weight: bold; margin-bottom: 15px; color: #1e293b; }
+        input[type=range] { width: 100%; height: 8px; border-radius: 5px; background: #e2e8f0; outline: none; -webkit-appearance: none; }
+        .labels { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-top: 10px; }
 
         /* BART 气球效果 */
         #bart-workspace { width: 100%; height: 300px; background: #f1f5f9; border-radius: 16px; display: flex; align-items: flex-end; justify-content: center; position: relative; margin-bottom: 20px; overflow: hidden; }
@@ -27,9 +32,47 @@
 
     <div class="container" id="menu">
         <h2 style="margin-top:0;">❤️ 情感倾向与决策量表</h2>
-        <p style="color:#64748b;">行为学范式 (Behavioral)</p>
+        <p style="color:#64748b; font-size: 14px;">请选择测试模块开始评估：</p>
+        <button class="sys-btn btn-dark" onclick="show('ema-area')">1. 实时状态评估 (EMA)</button>
+        <button class="sys-btn btn-dark" onclick="show('b5-area')">2. 人格特质倾向量表 (Big 5)</button>
         <button class="sys-btn btn-blue" onclick="startBART()">3. BART 气球风险决策任务</button>
         <button class="sys-btn btn-blue" onclick="startEmoStroop()">4. 情绪 Stroop 注意偏向提取</button>
+    </div>
+
+    <div class="container hidden" id="ema-area">
+        <h2 class="module-header">EMA 瞬时情绪评估</h2>
+        <div class="q-group">
+            <label>1. 此时此刻，您感到【焦虑/紧张】的程度？</label>
+            <input type="range" id="ema-1" min="0" max="10" step="1" value="0">
+            <div class="labels"><span>完全没有</span><span>中等</span><span>极度强烈</span></div>
+        </div>
+        <div class="q-group">
+            <label>2. 此时此刻，您感到【忧郁/低落】的程度？</label>
+            <input type="range" id="ema-2" min="0" max="10" step="1" value="0">
+            <div class="labels"><span>完全没有</span><span>中等</span><span>极度强烈</span></div>
+        </div>
+        <button class="sys-btn btn-green" onclick="saveEMA()">✓ 保存状态数据</button>
+    </div>
+
+    <div class="container hidden" id="b5-area">
+        <h2 class="module-header">大五人格 (简版)</h2>
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">请评估您在一般情况下的表现 (1=很不符合, 5=非常符合)：</p>
+        <div class="q-group"><label>O - 开放性 (乐于接受新想法、新事物)</label>
+            <input type="range" id="b5-o" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="q-group"><label>C - 尽责性 (做事可靠、自律且有条理)</label>
+            <input type="range" id="b5-c" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="q-group"><label>E - 外向性 (喜爱社交、充满活力)</label>
+            <input type="range" id="b5-e" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="q-group"><label>A - 宜人性 (富有同情心、乐于助人)</label>
+            <input type="range" id="b5-a" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="q-group"><label>N - 神经质 (情绪易波动、易感到压力)</label>
+            <input type="range" id="b5-n" min="1" max="5" step="1" value="3">
+        </div>
+        <button class="sys-btn btn-green" onclick="saveB5()">✓ 保存人格模型</button>
     </div>
 
     <div class="container hidden" id="bart-area">
@@ -45,7 +88,7 @@
     </div>
 
     <div class="container hidden" id="emo-area">
-        <h2 id="emo-word" style="font-size: 70px; margin: 60px 0;">+</h2>
+        <div id="emo-word" style="font-size: 70px; margin: 60px 0; font-weight: bold;">+</div>
         <div id="emo-controls" class="hidden" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
             <button class="sys-btn" style="background:red;" onclick="recordEmoStroop('red')"></button>
             <button class="sys-btn" style="background:green;" onclick="recordEmoStroop('green')"></button>
@@ -54,41 +97,46 @@
     </div>
 
     <script>
-        // 核心显示切换逻辑
         function show(id) {
-            ['menu', 'bart-area', 'emo-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            ['menu', 'ema-area', 'b5-area', 'bart-area', 'emo-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
         }
 
-        /* ==================== 3. BART 逻辑 (修复收集点击) ==================== */
+        // 保存 EMA
+        function saveEMA() {
+            CAS_Storage.saveModuleData('Emotion_EMA', { 
+                anxiety: document.getElementById('ema-1').value,
+                depression: document.getElementById('ema-2').value 
+            });
+            alert("状态评估已保存"); show('menu');
+        }
+
+        // 保存 Big 5
+        function saveB5() {
+            CAS_Storage.saveModuleData('Emotion_Big5', { 
+                O: document.getElementById('b5-o').value,
+                C: document.getElementById('b5-c').value,
+                E: document.getElementById('b5-e').value,
+                A: document.getElementById('b5-a').value,
+                N: document.getElementById('b5-n').value 
+            });
+            alert("人格量表已保存"); show('menu');
+        }
+
+        /* BART 逻辑 (修复版本) */
         let bartData = { module: "Emotion_BART", trials: [] };
         let b_round = 1, b_pumps = 0, b_popLimit = 0;
 
-        function startBART() {
-            b_round = 1;
-            bartData.trials = [];
-            show('bart-area');
-            initRound();
-        }
+        function startBART() { b_round = 1; bartData.trials = []; show('bart-area'); initRound(); }
 
         function initRound() {
-            if(b_round > 5) {
-                CAS_Storage.saveModuleData('Emotion_BART', bartData);
-                alert("BART 测试完成，数据已同步。");
-                show('menu');
-                return;
-            }
-            b_pumps = 0;
-            b_popLimit = Math.floor(Math.random() * 12) + 2; // 随机爆炸点
+            if(b_round > 5) { CAS_Storage.saveModuleData('Emotion_BART', bartData); alert("BART 完成"); show('menu'); return; }
+            b_pumps = 0; b_popLimit = Math.floor(Math.random() * 10) + 3;
             document.getElementById('bart-round').innerText = `第 ${b_round} / 5 轮`;
             document.getElementById('bart-pot').innerText = `气球内: $0`;
-            
             const b = document.getElementById('balloon');
-            b.innerText = "";
-            b.style.width = '40px'; b.style.height = '50px';
-            b.style.background = 'radial-gradient(circle at 30% 30%, #f87171, #dc2626)';
-            
-            // 🌟 核心修复：重置按钮状态，确保收集可点
+            b.innerText = ""; b.style.width = '40px'; b.style.height = '50px'; b.style.background = 'red';
             document.getElementById('btn-pump').disabled = false;
             document.getElementById('btn-collect').disabled = false;
         }
@@ -96,13 +144,10 @@
         function pumpBalloon() {
             b_pumps++;
             if(b_pumps >= b_popLimit) {
-                // 爆炸逻辑
                 document.getElementById('btn-pump').disabled = true;
                 document.getElementById('btn-collect').disabled = true;
-                const b = document.getElementById('balloon');
-                b.style.background = 'transparent';
-                b.innerText = "💥";
-                bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'exploded', earned: 0 });
+                document.getElementById('balloon').innerText = "💥";
+                bartData.trials.push({ round: b_round, result: 'exploded' });
                 setTimeout(() => { b_round++; initRound(); }, 1200);
             } else {
                 const b = document.getElementById('balloon');
@@ -113,33 +158,27 @@
         }
 
         function collectMoney() {
-            // 🌟 核心修复：点击收集后立即保存本轮数据
-            bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'collected', earned: b_pumps });
-            alert(`本轮获得: $${b_pumps}`);
-            b_round++;
-            initRound();
+            bartData.trials.push({ round: b_round, result: 'collected', earned: b_pumps });
+            alert(`收集成功：$${b_pumps}`); b_round++; initRound();
         }
 
-        /* ==================== 4. EmoStroop 逻辑 ==================== */
+        /* EmoStroop 逻辑 */
         let es_trial = 0, es_onset = 0;
         function startEmoStroop() { es_trial = 0; show('emo-area'); nextES(); }
         function nextES() {
             if(es_trial >= 10) { show('menu'); return; }
             document.getElementById('emo-controls').classList.add('hidden');
             document.getElementById('emo-word').innerText = "+";
-            document.getElementById('emo-word').style.color = "#ccc";
             setTimeout(() => {
-                document.getElementById('emo-word').innerText = "失败";
-                document.getElementById('emo-word').style.color = "red";
+                document.getElementById('emo-word').innerText = "疾病";
+                document.getElementById('emo-word').style.color = "blue";
                 document.getElementById('emo-controls').classList.remove('hidden');
                 es_onset = performance.now();
             }, 800);
         }
         function recordEmoStroop(color) {
-            const rt = Math.round(performance.now() - es_onset);
-            CAS_Storage.saveModuleData('Emotion_Stroop', { trial: es_trial, rt: rt });
-            es_trial++;
-            nextES();
+            CAS_Storage.saveModuleData('Emotion_Stroop', { rt: Math.round(performance.now() - es_onset) });
+            es_trial++; nextES();
         }
     </script>
 </body>
