@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAS 结构化数据中心</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
+        .container { max-width: 800px; margin: 20px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid #10b981; }
+        h2 { color: #0f172a; margin-top: 0; }
+        .status-board { background: #f1f5f9; padding: 20px; border-radius: 12px; margin: 30px 0; }
+        .item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 18px; }
+        .item:last-child { border-bottom: none; }
+        .done { color: #10b981; font-weight: bold; }
+        .pending { color: #f43f5e; font-weight: bold; }
+        .btn { display: block; width: 100%; padding: 20px; margin-bottom: 15px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; color: white; }
+        .btn-export { background: #10b981; }
+        .btn-nav { background: #3b82f6; }
+        .btn-danger { background: #f43f5e; }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>🔬 数字表型数据中心 (Data Hub)</h2>
+        <p style="font-family: monospace; font-size: 16px;">Session ID: <span id="sess-id">加载中...</span></p>
+        
+        <div class="status-board" id="board"></div>
+
+        <button class="btn btn-export" onclick="CAS_Storage.exportJSON()">📥 导出多维 JSON 数据包</button>
+        <a href="index.html" class="btn btn-nav">继续补充测试</a>
+        <button class="btn btn-danger" onclick="CAS_Storage.clearSession()">⚠️ 清除当前受试者数据</button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const session = CAS_Storage.getSession();
+            document.getElementById('sess-id').innerText = session.session_id;
+            
+            const modules = [
+                { id: 'Cognition_Corsi', name: '空间工作记忆' },
+                { id: 'Emotion_Continuous_EMA', name: '连续生态瞬时评估' },
+                { id: 'Motor_Fitts_Kinematics', name: '运动学 Fitts 追踪' },
+                { id: 'Sensation_ChoiceRT', name: '选择反应时 DDM' }
+            ];
+
+            const board = document.getElementById('board');
+            modules.forEach(m => {
+                const done = session.modules.hasOwnProperty(m.id);
+                board.innerHTML += `<div class="item"><span>${m.name}</span><span class="${done?'done':'pending'}">${done?'✓ 已采录':'○ 未完成'}</span></div>`;
+            });
+        };
+    </script>
+</body>
+</html>
