@@ -64,7 +64,7 @@
         } 
         #nav-back:active { background: #dbeafe; }
         
-        /* 1 & 2. 量表滑块样式优化 */
+        /* ================= 1 & 2. 量表滑块样式优化 ================= */
         .slider-group { margin-bottom: 30px; } 
         .slider-group label { 
             display: block; 
@@ -90,6 +90,11 @@
             cursor: pointer; 
             border: 4px solid white; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.2); 
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+            background: #2563eb;
         }
         .labels { 
             display: flex; 
@@ -100,7 +105,7 @@
             font-weight: 500;
         }
         
-        /* 3. BART 气球样式 */
+        /* ================= 3. BART 气球风险决策样式 ================= */
         #bart-workspace { 
             width: 100%; 
             height: 320px; 
@@ -124,6 +129,9 @@
             position: relative; 
             bottom: 25px; 
             box-shadow: -5px -5px 15px rgba(0,0,0,0.1) inset, 0 10px 10px rgba(0,0,0,0.1); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .bart-controls { display: flex; gap: 15px; } 
         .bart-btn { 
@@ -141,7 +149,7 @@
         .bart-btn:active:not(:disabled) { transform: scale(0.96); } 
         .bart-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        /* 4. 情绪 Stroop 样式 */
+        /* ================= 4. 情绪 Stroop 样式 ================= */
         #emo-word { 
             font-size: 80px; 
             font-weight: bold; 
@@ -185,25 +193,36 @@
         <h2 class="module-header">瞬时状态评估 (EMA)</h2>
         <div class="slider-group">
             <label>感受：您当下的【情绪低落/抑郁】程度</label>
-            <input type="range" id="e1" value="0">
-            <div class="labels"><span>完全没有</span><span>极度强烈</span></div>
+            <input type="range" id="e1" min="0" max="10" step="1" value="0">
+            <div class="labels"><span>完全没有 (0)</span><span>极度强烈 (10)</span></div>
         </div>
         <div class="slider-group">
             <label>感受：您当下的【紧张不安/焦虑】程度</label>
-            <input type="range" id="e2" value="0">
-            <div class="labels"><span>完全没有</span><span>极度强烈</span></div>
+            <input type="range" id="e2" min="0" max="10" step="1" value="0">
+            <div class="labels"><span>完全没有 (0)</span><span>极度强烈 (10)</span></div>
         </div>
         <button class="sys-btn" style="margin-top:20px; background:#10b981;" onclick="saveEMA()">✓ 保存状态数据</button>
     </div>
 
     <div class="container hidden" id="b5-area">
         <h2 class="module-header">大五人格 (Big 5)</h2>
-        <p style="color:#64748b; font-size:14px; margin-bottom:25px;">请评估您长期的性格特征倾向。</p>
-        <div class="slider-group"><label>O - 开放性 (乐于接受新事物)</label><input type="range" id="b1"></div>
-        <div class="slider-group"><label>C - 尽责性 (严谨细致、自律)</label><input type="range" id="b2"></div>
-        <div class="slider-group"><label>E - 外向性 (喜爱交际、充满活力)</label><input type="range" id="b3"></div>
-        <div class="slider-group"><label>A - 宜人性 (富有同情心、乐于合作)</label><input type="range" id="b4"></div>
-        <div class="slider-group"><label>N - 神经质 (情绪易波动、敏感)</label><input type="range" id="b5"></div>
+        <p style="color:#64748b; font-size:14px; margin-bottom:25px;">请评估您长期的性格特征倾向 (1=极不符合，5=完全符合)。</p>
+        <div class="slider-group"><label>O - 开放性 (乐于接受新事物)</label>
+            <input type="range" id="b1" min="1" max="5" step="1" value="3">
+            <div class="labels"><span>极不符合</span><span>中立</span><span>完全符合</span></div>
+        </div>
+        <div class="slider-group"><label>C - 尽责性 (严谨细致、自律)</label>
+            <input type="range" id="b2" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="slider-group"><label>E - 外向性 (喜爱交际、充满活力)</label>
+            <input type="range" id="b3" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="slider-group"><label>A - 宜人性 (富有同情心、乐于合作)</label>
+            <input type="range" id="b4" min="1" max="5" step="1" value="3">
+        </div>
+        <div class="slider-group"><label>N - 神经质 (情绪易波动、敏感)</label>
+            <input type="range" id="b5" min="1" max="5" step="1" value="3">
+        </div>
         <button class="sys-btn" style="margin-top:15px; background:#10b981;" onclick="saveB5()">✓ 保存人格特质</button>
     </div>
 
@@ -245,23 +264,25 @@
 
         /* ==================== 1 & 2. 量表保存逻辑 ==================== */
         function saveEMA() { 
+            // 解析为整型，确保数据格式干净
             CAS_Storage.saveModuleData('Emotion_State_EMA', { 
-                depression: document.getElementById('e1').value, 
-                anxiety: document.getElementById('e2').value 
+                depression: parseInt(document.getElementById('e1').value), 
+                anxiety: parseInt(document.getElementById('e2').value) 
             }); 
-            alert("瞬时状态数据已成功录入系统。"); 
+            alert("瞬时状态数据 (0-10) 已成功录入系统。"); 
             show('menu'); 
         }
 
         function saveB5() { 
+            // 解析为整型，输出 1-5 规范格式
             CAS_Storage.saveModuleData('Emotion_Trait_Big5', { 
-                O: document.getElementById('b1').value, 
-                C: document.getElementById('b2').value, 
-                E: document.getElementById('b3').value, 
-                A: document.getElementById('b4').value, 
-                N: document.getElementById('b5').value 
+                O: parseInt(document.getElementById('b1').value), 
+                C: parseInt(document.getElementById('b2').value), 
+                E: parseInt(document.getElementById('b3').value), 
+                A: parseInt(document.getElementById('b4').value), 
+                N: parseInt(document.getElementById('b5').value) 
             }); 
-            alert("大五人格特质数据已录入。"); 
+            alert("大五人格特质数据 (Likert 1-5) 已录入。"); 
             show('menu'); 
         }
         
@@ -289,8 +310,8 @@
             
             b_pumps = 0; 
             b_pumpRTs = []; 
-            // 设定当前气球的爆炸阈值 (5 到 30 之间随机)
-            b_popLimit = Math.floor(Math.random() * 25) + 5; 
+            // 设定当前气球的爆炸阈值 (5 到 25 之间随机)
+            b_popLimit = Math.floor(Math.random() * 20) + 5; 
             
             // 重置气球 UI
             document.getElementById('balloon').style.width = '40px'; 
@@ -318,14 +339,14 @@
             
             // 判断是否爆炸
             if (b_pumps >= b_popLimit) { 
+                // 禁用操作，防止在动画期间连击导致逻辑错误
+                document.getElementById('btn-pump').disabled = true; 
+                document.getElementById('btn-collect').disabled = true; 
+
                 // 爆炸视觉效果
                 document.getElementById('balloon').style.background = 'transparent'; 
                 document.getElementById('balloon').innerText = "💥"; 
                 document.getElementById('balloon').style.fontSize = "40px"; 
-                
-                // 禁用操作
-                document.getElementById('btn-pump').disabled = true; 
-                document.getElementById('btn-collect').disabled = true; 
                 
                 // 记录数据：爆炸导致本轮收益为 0
                 bartData.trials.push({ 
@@ -336,7 +357,7 @@
                     rt_array: [...b_pumpRTs] 
                 }); 
                 
-                // 延迟进入下一轮
+                // 延迟 1.2 秒后进入下一轮
                 setTimeout(() => { 
                     b_trial++; 
                     initBalloon(); 
@@ -390,17 +411,17 @@
         function nextEmoStroop() { 
             if(es_trial >= es_max) { 
                 CAS_Storage.saveModuleData('Emotion_Affective_Stroop', esData); 
-                alert("偏向提取完成"); 
+                alert("情绪注意偏向提取完成。数据已入库。"); 
                 show('menu'); 
                 return; 
             } 
             
-            // 隐藏控制按钮，展示注视点
+            // 隐藏控制按钮，展示注视点 +
             document.getElementById('emo-controls').classList.add('hidden'); 
             document.getElementById('emo-word').innerText = "+"; 
             document.getElementById('emo-word').style.color = "#94a3b8"; 
             
-            // 刺激呈现延迟 (ITI)
+            // 刺激呈现延迟 (ITI) 800ms
             setTimeout(() => { 
                 let wordObj = emoWords[Math.floor(Math.random() * emoWords.length)]; 
                 es_targetColor = colors[Math.floor(Math.random() * colors.length)]; 
