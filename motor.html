@@ -3,109 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>运动 - 菲茨交替点击</title>
+    <title>运动学表型测试</title>
     <style>
-        body { margin: 0; padding: 20px; font-family: sans-serif; background: #f8fafc; touch-action: none; user-select: none; }
-        #workspace { width: 100%; height: 60vh; background: white; border: 2px solid #cbd5e1; border-radius: 12px; position: relative; overflow: hidden; margin-top: 20px; }
-        .target { position: absolute; background: #ef4444; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer; }
-        .target.active { background: #22c55e; box-shadow: 0 0 15px rgba(34,197,94,0.5); z-index: 10;}
-        #nav-back { text-decoration: none; color: #3b82f6; font-weight: bold; }
-        .sys-btn { background: #0f172a; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-left: 20px; }
+        body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; touch-action: none; user-select: none; }
+        .container { max-width: 700px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin: 10px; }
+        .hidden { display: none !important; }
+        /* Fitts */
+        #fitts-workspace { width: 100%; height: 300px; background: #e2e8f0; position: relative; overflow: hidden; border-radius: 12px; }
+        .target { position: absolute; background: #ef4444; border-radius: 50%; transform: translate(-50%, -50%); }
+        .target.active { background: #22c55e; }
+        /* Spiral */
+        canvas { border: 2px solid #cbd5e1; background: #fff; cursor: crosshair; touch-action: none; border-radius: 12px; }
+        #nav-back { display: block; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="display: flex; align-items: center;">
-        <a href="index.html" id="nav-back">← 返回</a>
-        <button class="sys-btn" id="start-btn" onclick="startFitts()">开始运动学采集</button>
-        <span id="counter" style="margin-left:20px; font-weight:bold; font-size:18px;">剩余: 10 次</span>
+    <a href="index.html" id="nav-back">← 返回主控台</a>
+    <div class="container" id="menu">
+        <h2>精细运动组合</h2>
+        <button class="sys-btn" onclick="startFitts()">1. Fitts 靶向运动 (运动迟缓)</button>
+        <button class="sys-btn" onclick="startSpiral()">2. 螺旋线描摹 (震颤追踪)</button>
     </div>
-    <div id="workspace"></div>
+
+    <div class="container hidden" id="fitts-area">
+        <h3>点击绿色的圆</h3>
+        <div id="fitts-workspace"></div>
+        <p id="fitts-status"></p>
+        <button class="sys-btn" onclick="endFitts()">返回菜单</button>
+    </div>
+
+    <div class="container hidden" id="spiral-area" style="text-align: center;">
+        <h3>请用食指尽可能平稳地描摹螺旋线</h3>
+        <canvas id="spiral-canvas" width="400" height="400"></canvas>
+        <br>
+        <button class="sys-btn" style="background:#10b981;" onclick="saveSpiral()">完成并保存坐标序列</button>
+        <button class="sys-btn" onclick="document.getElementById('spiral-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden');">返回菜单</button>
+    </div>
 
     <script>
-        const workspace = document.getElementById('workspace');
-        let trials = 10, current = 0;
-        let lastClickTime = 0;
-        let aiData = { module: "Motor_Fitts_Kinematics", records: [] };
-
-        // 预设坐标对 (模拟不同难度指数 ID)
-        const targetPairs = [
-            { x1: 20, y1: 50, x2: 80, y2: 50, size: 60 },
-            { x1: 10, y1: 20, x2: 90, y2: 80, size: 40 },
-            { x1: 50, y1: 10, x2: 50, y2: 90, size: 30 }
-        ];
-
-        let t1, t2;
-        let activeTarget = 1;
-
-        function startFitts() {
-            document.getElementById('start-btn').style.display = 'none';
-            current = 0; nextPair();
+        // --- Fitts ---
+        let fData = { module: "Motor_Fitts", records: [] }, f_tr=0, lastT=0, ws = document.getElementById('fitts-workspace');
+        function startFitts() { document.getElementById('menu').classList.add('hidden'); document.getElementById('fitts-area').classList.remove('hidden'); f_tr=0; fData.records=[]; nextFitts(); }
+        function nextFitts() {
+            if(f_tr>=10) { CAS_Storage.saveModuleData('Motor_Fitts', fData); document.getElementById('fitts-status').innerText="Fitts已保存"; return; }
+            ws.innerHTML=''; let size = Math.random()*30+30;
+            let t1 = document.createElement('div'); t1.className='target active'; t1.style.width=t1.style.height=size+'px'; t1.style.left='20%'; t1.style.top='50%';
+            let t2 = document.createElement('div'); t2.className='target'; t2.style.width=t2.style.height=size+'px'; t2.style.left='80%'; t2.style.top='50%';
+            t1.ontouchstart = t1.onmousedown = (e)=>{ e.preventDefault(); let t=performance.now()-lastT; if(f_tr>0) fData.records.push({mt:Math.round(t)}); lastT=performance.now(); t1.classList.remove('active'); t2.classList.add('active'); };
+            t2.ontouchstart = t2.onmousedown = (e)=>{ e.preventDefault(); let t=performance.now()-lastT; fData.records.push({mt:Math.round(t)}); lastT=performance.now(); f_tr++; nextFitts(); };
+            ws.appendChild(t1); ws.appendChild(t2); lastT=performance.now();
         }
+        function endFitts() { document.getElementById('fitts-area').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
 
-        function nextPair() {
-            if (current >= trials) return finishTest();
-            workspace.innerHTML = '';
-            let pair = targetPairs[current % targetPairs.length];
-            
-            t1 = createTarget(pair.x1, pair.y1, pair.size, 1);
-            t2 = createTarget(pair.x2, pair.y2, pair.size, 2);
-            
-            workspace.appendChild(t1);
-            workspace.appendChild(t2);
-            
-            activeTarget = 1;
-            t1.classList.add('active');
-            document.getElementById('counter').innerText = `剩余: ${trials - current} 次`;
-            lastClickTime = performance.now();
+        // --- Spiral ---
+        const cvs = document.getElementById('spiral-canvas'), ctx = cvs.getContext('2d');
+        let drawing = false, spiralData = { module: "Motor_Spiral", trajectory: [] };
+        
+        function drawTemplate() {
+            ctx.clearRect(0,0,400,400); ctx.beginPath(); ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 15;
+            for(let i=0; i<150; i++) { let angle = 0.1 * i; let x = 200 + (1 + angle)*10 * Math.cos(angle); let y = 200 + (1 + angle)*10 * Math.sin(angle); ctx.lineTo(x, y); }
+            ctx.stroke();
         }
+        function startSpiral() { document.getElementById('menu').classList.add('hidden'); document.getElementById('spiral-area').classList.remove('hidden'); spiralData.trajectory=[]; drawTemplate(); }
+        
+        function getPos(e) { let r = cvs.getBoundingClientRect(); let ev = e.touches ? e.touches[0] : e; return { x: ev.clientX - r.left, y: ev.clientY - r.top }; }
+        cvs.onmousedown = cvs.ontouchstart = (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 4; let p = getPos(e); ctx.moveTo(p.x, p.y); spiralData.trajectory.push({x: Math.round(p.x), y: Math.round(p.y), t: Math.round(performance.now())}); };
+        cvs.onmousemove = cvs.ontouchmove = (e) => { e.preventDefault(); if(!drawing) return; let p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); spiralData.trajectory.push({x: Math.round(p.x), y: Math.round(p.y), t: Math.round(performance.now())}); };
+        cvs.onmouseup = cvs.ontouchend = () => drawing = false;
 
-        function createTarget(x_pct, y_pct, size, id) {
-            let el = document.createElement('div');
-            el.className = 'target';
-            el.style.width = size + 'px'; el.style.height = size + 'px';
-            el.style.left = x_pct + '%'; el.style.top = y_pct + '%';
-            
-            // 绑定触控与鼠标
-            el.onmousedown = (e) => handleHit(id, e.clientX, e.clientY);
-            el.ontouchstart = (e) => { e.preventDefault(); handleHit(id, e.touches[0].clientX, e.touches[0].clientY); };
-            return el;
-        }
-
-        function handleHit(id, hitX, hitY) {
-            if (id !== activeTarget) return; // 点错目标无效
-            
-            let timeTaken = performance.now() - lastClickTime;
-            let pair = targetPairs[current % targetPairs.length];
-            
-            // 计算屏幕实际坐标与距离 (用于严格计算 Fitts定律特征)
-            let rect1 = t1.getBoundingClientRect();
-            let rect2 = t2.getBoundingClientRect();
-            let dist = Math.hypot(rect1.left - rect2.left, rect1.top - rect2.top);
-
-            if (current > 0) { // 忽略第一次初始化的点击
-                aiData.records.push({
-                    trial: current,
-                    target_width_px: pair.size,
-                    amplitude_distance_px: parseFloat(dist.toFixed(2)),
-                    movement_time_ms: parseFloat(timeTaken.toFixed(2)),
-                    hit_x: parseFloat(hitX.toFixed(2)),
-                    hit_y: parseFloat(hitY.toFixed(2))
-                });
-            }
-
-            lastClickTime = performance.now();
-            t1.classList.toggle('active');
-            t2.classList.toggle('active');
-            activeTarget = activeTarget === 1 ? 2 : 1;
-            
-            if(id === 2) { current++; nextPair(); } // 每来回一次算一个 trial
-        }
-
-        function finishTest() {
-            workspace.innerHTML = '<div style="padding:40px;text-align:center;font-size:24px;">运动学特征采集完成。</div>';
-            CAS_Storage.saveModuleData('Motor_Fitts_Kinematics', aiData);
-        }
+        function saveSpiral() { CAS_Storage.saveModuleData('Motor_Spiral_Tracing', spiralData); alert("螺旋线时空序列已保存"); }
     </script>
 </body>
 </html>
