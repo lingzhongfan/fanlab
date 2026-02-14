@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>语言与言语功能评估</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 650px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .sys-btn { background: #0f172a; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 10px 0; width: 100%; transition: 0.1s; }
+        .sys-btn:active { background: #334155; }
+        .hidden { display: none !important; }
+        #nav-back { display: block; text-align: left; text-decoration: none; color: #3b82f6; font-weight: bold; margin-bottom: 10px; }
+        
+        /* VFT UI */
+        #vft-input { width: 70%; padding: 15px; font-size: 18px; border: 2px solid #cbd5e1; border-radius: 8px; margin-right: 10px; outline: none; }
+        #vft-input:focus { border-color: #3b82f6; }
+        .vft-word-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+        .vft-tag { background: #e0f2fe; color: #0369a1; padding: 8px 15px; border-radius: 20px; font-weight: bold; animation: fadeIn 0.3s; }
+        
+        /* Naming UI */
+        #naming-pic { font-size: 100px; margin: 30px 0; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <a href="index.html" id="nav-back">← 返回主控台</a>
+    <div class="container" id="menu">
+        <h2>语言与语义网络评估 (Language)</h2>
+        <p style="color:#64748b; font-size:14px;">评估词汇提取速度与语义网络的完整性。</p>
+        <button class="sys-btn" onclick="show('vft-area'); startVFT();">1. 词汇流畅性测试 (VFT - 动物类)</button>
+        <button class="sys-btn" style="background:#3b82f6;" onclick="show('naming-area'); startNaming();">2. 数字化图片命名测试 (Naming)</button>
+    </div>
+
+    <div class="container hidden" id="vft-area">
+        <h3>词汇流畅性 (VFT)</h3>
+        <p style="color:#ef4444; font-weight:bold; font-size:20px;" id="vft-timer">剩余: 60 s</p>
+        <p style="color:#64748b; margin-bottom: 20px;">请在 60 秒内，输入尽可能多的<strong>动物名称</strong>。输入一个后点击提交或按回车。</p>
+        
+        <div style="display: flex; justify-content: center;">
+            <input type="text" id="vft-input" placeholder="例如：大象" autocomplete="off">
+            <button class="sys-btn" style="width:auto; margin:0;" onclick="submitVFTWord()">提交</button>
+        </div>
+        <div class="vft-word-list" id="vft-list"></div>
+    </div>
+
+    <div class="container hidden" id="naming-area">
+        <h3>图片命名测试</h3>
+        <p style="color:#64748b;">请以最快速度写出下方图像的名称。</p>
+        <div id="naming-pic">🐫</div>
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <input type="text" id="naming-input" style="width: 60%; padding: 15px; font-size: 18px; border: 2px solid #cbd5e1; border-radius: 8px;" placeholder="输入名称...">
+            <button class="sys-btn" style="width:auto; margin:0; margin-left: 10px;" onclick="submitNaming()">确认</button>
+        </div>
+        <p id="naming-progress">进度: 1 / 3</p>
+    </div>
+
+    <script>
+        function show(id) { 
+            ['menu', 'vft-area', 'naming-area'].forEach(div => document.getElementById(div).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+
+        // --- 1. VFT ---
+        let vftData = { module: "Language_VFT", category: "Animals", total_words: 0, words_array: [] };
+        let vftTime = 60, vftTimerId, vftStartTime = 0;
+        
+        function startVFT() {
+            vftData.words_array = []; document.getElementById('vft-list').innerHTML = '';
+            document.getElementById('vft-input').value = ''; vftTime = 60;
+            vftStartTime = performance.now();
+            vftTimerId = setInterval(() => {
+                vftTime--; document.getElementById('vft-timer').innerText = `剩余: ${vftTime} s`;
+                if(vftTime <= 0) finishVFT();
+            }, 1000);
+            
+            // 监听回车键 (注意处理中文输入法的组合状态)
+            document.getElementById('vft-input').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter' && !e.isComposing) submitVFTWord();
+            });
+        }
+        
+        function submitVFTWord() {
+            if(vftTime <= 0) return;
+            let input = document.getElementById('vft-input');
+            let word = input.value.trim();
+            if(word) {
+                let rt = performance.now() - vftStartTime;
+                vftData.words_array.push({ word: word, timestamp_ms: Math.round(rt) });
+                let tag = document.createElement('div'); tag.className = 'vft-tag'; tag.innerText = word;
+                document.getElementById('vft-list').appendChild(tag);
+                input.value = '';
+            }
+        }
+        
+        function finishVFT() {
+            clearInterval(vftTimerId); vftData.total_words = vftData.words_array.length;
+            CAS_Storage.saveModuleData('Language_VFT', vftData);
+            alert(`VFT 时间到！共生成 ${vftData.total_words} 个词汇。`); show('menu');
+        }
+
+        // --- 2. Naming ---
+        const namingStimuli = [ { pic: '🐫', ans: ['骆驼'] }, { pic: '🦏', ans: ['犀牛'] }, { pic: '🛶', ans: ['独木舟', '船', '小船'] } ];
+        let nData = { module: "Language_Naming", records: [] }, nTr = 0, nOnset = 0;
+        
+        function startNaming() { nTr = 0; nData.records = []; nextNaming(); }
+        function nextNaming() {
+            if(nTr >= namingStimuli.length) { CAS_Storage.saveModuleData('Language_Naming', nData); alert("命名测试完成"); show('menu'); return; }
+            document.getElementById('naming-pic').innerText = namingStimuli[nTr].pic;
+            document.getElementById('naming-input').value = '';
+            document.getElementById('naming-progress').innerText = `进度: ${nTr+1} / ${namingStimuli.length}`;
+            nOnset = performance.now();
+            
+            document.getElementById('naming-input').onkeyup = function(e) {
+                if(e.key === 'Enter' && !e.isComposing) submitNaming();
+            };
+        }
+        function submitNaming() {
+            let val = document.getElementById('naming-input').value.trim();
+            if(!val) return;
+            let rt = performance.now() - nOnset;
+            let isCorrect = namingStimuli[nTr].ans.some(a => val.includes(a)); // 简单包容匹配
+            nData.records.push({ item: namingStimuli[nTr].pic, user_input: val, correct: isCorrect, rt_ms: Math.round(rt) });
+            nTr++; nextNaming();
+        }
+    </script>
+</body>
+</html>
