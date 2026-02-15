@@ -2,18 +2,17 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAS - 多模态数字表型评估系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAS - 临床神经心理与数字表型评估</title>
     <style>
         :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --bg: #fcfcfd; --text: #334155; }
         body { font-family: "PingFang SC", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
         
         header { text-align: center; margin-bottom: 30px; padding: 40px 20px; background: white; border-radius: 24px; box-shadow: 0 10px 40px rgba(79, 70, 229, 0.05); border-top: 6px solid var(--blue); }
-        header h1 { margin: 0 0 10px 0; font-size: 26px; color: var(--primary); }
+        header h1 { margin: 0 0 10px 0; font-size: 28px; color: var(--primary); }
         .eng-title { font-family: monospace; color: var(--blue); font-size: 14px; opacity: 0.8; }
 
-        /* 建档表单 */
-        #setup-container { max-width: 750px; margin: 0 auto; background: white; padding: 45px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        #setup-container { max-width: 800px; margin: 0 auto; background: white; padding: 45px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 10px; color: #475569; }
         .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 16px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 16px; background: #f8fafc; outline: none; transition: 0.3s; }
@@ -24,27 +23,21 @@
         #dashboard-container { display: none; max-width: 1200px; margin: 0 auto; animation: fadeUp 0.6s ease; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 找回的教程模块 */
-        .tutorial-container { background: white; border-radius: 20px; display: flex; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; margin-bottom: 30px; }
-        .manual-section { flex: 1.5; padding: 30px; background: #f8fafc; border-right: 1px solid #e2e8f0; }
-        .anim-section { flex: 1; padding: 30px; display: flex; justify-content: space-around; align-items: center; background: white; }
-        .tutorial-step { text-align: center; font-size: 14px; font-weight: bold; color: var(--primary); }
-        .anim-box { width: 60px; height: 60px; margin: 0 auto 10px; background: var(--light-blue); border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .anim-cursor { position: absolute; font-size: 20px; animation: click 2s infinite; }
-        @keyframes click { 0% { transform: scale(1); } 50% { transform: scale(0.8); } 100% { transform: scale(1); } }
+        .subj-badge { padding: 20px 30px; background: var(--light-blue); color: var(--blue); border-radius: 18px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 30px; border: 1px solid #c7d2fe; }
 
-        .subj-badge { padding: 20px 30px; background: var(--light-blue); color: var(--blue); border-radius: 18px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 30px; }
-
-        /* 六大面板 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        /* 六大领域导航卡片 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 25px; margin-bottom: 40px; }
         .card { background: white; padding: 30px; border-radius: 24px; transition: 0.3s; display: flex; flex-direction: column; text-decoration: none; color: inherit; border: 1px solid #f1f5f9; }
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .icon { font-size: 38px; background: #f8fafc; padding: 15px; border-radius: 20px; }
         .card h2 { margin: 0; font-size: 20px; color: var(--primary); }
+        .domain-desc { font-size: 13.5px; color: #64748b; margin-bottom: 15px; line-height: 1.6; }
+        
         .sub-test-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
-        .sub-test-list li { font-size: 15px; margin-bottom: 12px; font-weight: 500;}
-        .sub-test-list li::before { content: "•"; font-size: 24px; margin-right: 12px; color: var(--blue); }
+        .sub-test-list li { font-size: 14px; margin-bottom: 8px; font-weight: 500; color: #475569; display: flex; align-items: center;}
+        .sub-test-list li::before { content: "•"; font-size: 24px; margin-right: 10px; color: var(--blue); }
+        
         .card-action { margin-top: 25px; padding: 16px; text-align: center; border-radius: 14px; font-weight: bold; background: #f8fafc; color: #64748b; transition: 0.3s; border: 2px dashed #e2e8f0;}
         .card:hover .card-action { background: var(--blue); color: white; border-style: solid; }
         
@@ -56,10 +49,10 @@
     <header><h1>计算神经心理与数字表型评估系统 (CAS)</h1><div class="eng-title">Computational Assessment Suite</div></header>
 
     <div id="setup-container">
-        <h2>📝 受试者建档 (临床版)</h2>
+        <h2>📝 受试者建档 (社区筛查版)</h2>
         <div class="form-row">
-            <div class="form-group"><label>被试编号 ID *</label><input type="text" id="subj-id"></div>
-            <div class="form-group"><label>姓名缩写 *</label><input type="text" id="subj-name"></div>
+            <div class="form-group"><label>被试编号 ID *</label><input type="text" id="subj-id" placeholder="如：CAS_001"></div>
+            <div class="form-group"><label>姓名缩写 *</label><input type="text" id="subj-name" placeholder="如：ZS"></div>
         </div>
         <div class="form-row">
             <div class="form-group"><label>出生日期 *</label><input type="date" id="subj-dob"></div>
@@ -67,41 +60,59 @@
         </div>
         <div class="form-row">
             <div class="form-group"><label>利手 (Handedness) *</label><select id="subj-hand"><option value="">选择</option><option value="Right">右手</option><option value="Left">左手</option></select></div>
-            <div class="form-group"><label>教育水平 (Education) *</label><select id="subj-edu"><option value="">选择</option><option value="Primary">小学及以下</option><option value="Middle">初中</option><option value="High">高中/中专</option><option value="Bachelor">本科/大专</option><option value="Master">研究生及以上</option></select></div>
+            <div class="form-group"><label>教育水平 (Education) *</label><select id="subj-edu"><option value="">选择</option><option value="Primary">小学及以下 (≤6年)</option><option value="Middle">初中 (9年)</option><option value="High">高中/中专 (12年)</option><option value="Bachelor">本科/大专 (16年)</option><option value="Master">研究生及以上</option></select></div>
         </div>
-        <button class="btn-main" onclick="registerSubject()">进入评估面板 ➔</button>
+        <button class="btn-main" onclick="registerSubject()">进入标准化评估面板 ➔</button>
     </div>
 
     <div id="dashboard-container">
-        <div class="tutorial-container">
-            <div class="manual-section">
-                <h3 style="margin-top:0; color:var(--primary);">📋 临床主试操作手册</h3>
-                <p style="color:#64748b; font-size: 14px; line-height: 1.6;">1. 请使用触控屏设备（横屏显示）。<br>2. 任务无强制顺序，点击下方模块进入即可。<br>3. 完成所有 22 项测试后，通过底部进入数据中心导出。</p>
-            </div>
-            <div class="anim-section">
-                <div class="tutorial-step"><div class="anim-box"><div class="anim-cursor">👆</div></div>1. 进入面板</div>
-                <div class="tutorial-step"><div class="anim-box" style="background:#dbeafe;"><span style="font-size:30px;">✓</span></div>2. 引导交互</div>
-                <div class="tutorial-step"><div class="anim-box" style="background:#e0e7ff;"><span style="font-size:30px;">📊</span></div>3. 导出结果</div>
-            </div>
-        </div>
-
         <div class="subj-badge">
             <span>👤 当前会话: <span id="display-subj-name"></span> | ID: <span id="display-subj-id"></span></span>
             <button onclick="CAS_Storage.clearSession()" style="background:white; border:none; color:#f43f5e; padding:8px 16px; border-radius:12px; font-weight:bold; cursor:pointer;">结束会话</button>
         </div>
 
         <div class="grid">
-            <a href="cognition.html" class="card"><div class="card-header"><div class="icon">🧠</div><h2>认知 (COG)</h2></div><ul class="sub-test-list"><li>Corsi 空间跨度记忆</li><li>Stroop 色词干扰控制</li><li>DSST 数字符号匹配</li></ul><div class="card-action">启动测试</div></a>
-            <a href="emotion.html" class="card"><div class="card-header"><div class="icon">❤️</div><h2>情感 (EMO)</h2></div><ul class="sub-test-list"><li>EMA 4维度瞬时状态</li><li>Big5 大五人格画像</li><li>BART 气球风险决策</li></ul><div class="card-action">启动测试</div></a>
-            <a href="motor.html" class="card"><div class="card-header"><div class="icon">🎯</div><h2>运动 (MOT)</h2></div><ul class="sub-test-list"><li>Tapping 敲击频率测试</li><li>Fitts 运动靶向协调</li><li>Spiral 螺旋线轨迹分析</li></ul><div class="card-action">启动测试</div></a>
-            <a href="sensation.html" class="card"><div class="card-header"><div class="icon">⚡</div><h2>感觉 (SEN)</h2></div><ul class="sub-test-list"><li>RT 简单/选择反应时</li><li>Go/No-Go 冲动抑制</li><li>Visual Search 特征搜索</li></ul><div class="card-action">启动测试</div></a>
-            <a href="language.html" class="card"><div class="card-header"><div class="icon">💬</div><h2>语言 (LAN)</h2></div><ul class="sub-test-list"><li>VFT 语音流利性提取</li><li>Naming 数字化图片命名</li><li>Semantic 语义关联判别</li></ul><div class="card-action">启动测试</div></a>
-            <a href="lifestyle.html" class="card"><div class="card-header"><div class="icon">🌙</div><h2>生活 (LIF)</h2></div><ul class="sub-test-list"><li>SCD-Q 主观下降自评</li><li>IADL 工具性日常能力</li><li>PHQ-2 抑郁鉴别筛查</li></ul><div class="card-action">启动测试</div></a>
+            <a href="cognition.html" class="card">
+                <div class="card-header"><div class="icon">🧠</div><h2>认知 (COG)</h2></div>
+                <p class="domain-desc">包含经典测验与 NIH 推荐前沿执行功能范式。</p>
+                <ul class="sub-test-list"><li>Corsi 广度 / Stroop 抑制 / TMT-B / DSST</li><li>Flanker 侧抑制 / DCCS 柔性 / Pattern 速度</li></ul>
+                <div class="card-action">启动测试</div>
+            </a>
+            <a href="emotion.html" class="card">
+                <div class="card-header"><div class="icon">❤️</div><h2>情感与社会 (EMO)</h2></div>
+                <p class="domain-desc">情绪状态、心理幸福感与社会认知维度提取。</p>
+                <ul class="sub-test-list"><li>EMA+ 状态与幸福感 / 社会关系支持 / Big5</li><li>FER 面孔情绪识别 / BART 决策 / Emo-Stroop</li></ul>
+                <div class="card-action">启动测试</div>
+            </a>
+            <a href="motor.html" class="card">
+                <div class="card-header"><div class="icon">🎯</div><h2>运动共济 (MOT)</h2></div>
+                <p class="domain-desc">靶向运动皮层与基底节的微小震颤与协调分析。</p>
+                <ul class="sub-test-list"><li>Tapping 疲劳度 / Fitts 靶向 / Spiral 震颤轨迹</li></ul>
+                <div class="card-action">启动测试</div>
+            </a>
+            <a href="sensation.html" class="card">
+                <div class="card-header"><div class="icon">⚡</div><h2>感觉知觉 (SEN)</h2></div>
+                <p class="domain-desc">底层的神经传导基线与自下而上的注意力扫描。</p>
+                <ul class="sub-test-list"><li>Simple & Choice RT 反应时 / Go-NoGo 抑制</li><li>Visual Search 特征视觉搜索</li></ul>
+                <div class="card-action">启动测试</div>
+            </a>
+            <a href="language.html" class="card">
+                <div class="card-header"><div class="icon">💬</div><h2>语言语义 (LAN)</h2></div>
+                <p class="domain-desc">基于语音交互的语义网络通达度提取。</p>
+                <ul class="sub-test-list"><li>VFT 流畅性 (语音) / BNT 图片命名 / 语义关联</li></ul>
+                <div class="card-action">启动测试</div>
+            </a>
+            <a href="lifestyle.html" class="card">
+                <div class="card-header"><div class="icon">🌙</div><h2>生活与衰退 (LIF)</h2></div>
+                <p class="domain-desc">MCI 的临床鉴别诊断与假性痴呆筛查防线。</p>
+                <ul class="sub-test-list"><li>SCD-Q 主观下降 / IADL 工具能力</li><li>Sleep 节律与 RBD / PHQ-2 抑郁排查</li></ul>
+                <div class="card-action">启动测试</div>
+            </a>
         </div>
         
         <div class="footer-nav">
-            <a href="manual.html" class="btn-main" style="background:#f1f5f9; color:#475569; text-align:center; text-decoration:none; box-shadow:none;">📖 详尽范式动画手册</a>
-            <a href="report.html" class="btn-main" style="text-align:center; text-decoration:none;">📊 进入临床数据中心 (解析与导出)</a>
+            <a href="manual.html" class="btn-main" style="background:#f1f5f9; color:#475569; text-align:center; text-decoration:none; box-shadow:none;">📖 临床主试交互指南 (动画版)</a>
+            <a href="report.html" class="btn-main" style="text-align:center; text-decoration:none;">📊 结束测试，进入数据解析与导出中心</a>
         </div>
     </div>
 
@@ -123,7 +134,7 @@
                 dob: document.getElementById('subj-dob').value, gender: document.getElementById('subj-gender').value,
                 handedness: document.getElementById('subj-hand').value, education_level: document.getElementById('subj-edu').value 
             };
-            if(!data.subject_id || !data.dob || !data.education_level) return alert("⚠️ 请完整填写信息");
+            if(!data.subject_id || !data.dob || !data.education_level || !data.handedness) return alert("⚠️ 请完整填写带星号的基线协变量信息");
             CAS_Storage.initSession(data); location.reload();
         }
     </script>
