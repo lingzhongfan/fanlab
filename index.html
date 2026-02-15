@@ -5,93 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAS - 多模态数字表型评估系统</title>
     <style>
-        /* 核心视觉规范 */
+        /* 科技温情风 (Warm-Tech UI) */
         :root { 
-            --primary: #0f172a; --blue: #3b82f6; --purple: #8b5cf6; --green: #10b981;
-            --rose: #f43f5e; --amber: #f59e0b; --bg: #f8fafc; --text: #334155; --muted: #64748b; 
+            --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff;
+            --purple: #8b5cf6; --green: #10b981; --rose: #f43f5e; 
+            --bg: #fcfcfd; --card-bg: #ffffff; --text: #334155; --muted: #64748b; 
         }
-        body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
         
-        /* 头部装饰 */
         header { 
             text-align: center; margin-bottom: 30px; padding: 40px 20px; 
-            background: white; border-radius: 20px; box-shadow: 0 4px 25px rgba(0,0,0,0.05); 
-            border-top: 8px solid var(--primary); 
+            background: var(--card-bg); border-radius: 24px; 
+            box-shadow: 0 10px 40px rgba(79, 70, 229, 0.05); border-top: 6px solid var(--blue); 
         }
-        header h1 { margin: 0 0 10px 0; font-size: 28px; color: var(--primary); letter-spacing: 1px; }
-        .eng-title { font-family: "SF Mono", monospace; color: var(--blue); font-size: 14px; font-weight: bold; text-transform: uppercase; }
+        header h1 { margin: 0 0 10px 0; font-size: 26px; color: var(--primary); font-weight: 800; }
+        .eng-title { font-family: monospace; color: var(--blue); font-size: 14px; opacity: 0.8; }
 
-        /* 建档表单卡片 */
         #setup-container { 
-            max-width: 750px; margin: 40px auto; background: white; padding: 45px; 
-            border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.07); 
+            max-width: 750px; margin: 0 auto; background: var(--card-bg); padding: 45px; 
+            border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;
         }
-        #setup-container h2 { margin-top: 0; color: var(--primary); font-size: 22px; border-left: 5px solid var(--blue); padding-left: 15px; margin-bottom: 30px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
-        .form-group label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #475569; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .form-group label { display: block; font-weight: 600; font-size: 14.5px; margin-bottom: 10px; color: #475569; }
         .form-group input, .form-group select { 
-            width: 100%; box-sizing: border-box; padding: 15px; border: 2px solid #e2e8f0; 
-            border-radius: 12px; font-size: 16px; background: #fcfdfe; transition: 0.3s;
+            width: 100%; box-sizing: border-box; padding: 16px; border: 2px solid #e2e8f0; 
+            border-radius: 14px; font-size: 16px; background: #f8fafc; transition: 0.3s; color: var(--primary);
         }
-        .form-group input:focus, .form-group select:focus { border-color: var(--blue); outline: none; background: white; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
-        .submit-btn { 
+        .form-group input:focus, .form-group select:focus { border-color: var(--blue); background: white; outline: none; box-shadow: 0 0 0 4px var(--light-blue); }
+        
+        .btn-main { 
             width: 100%; padding: 20px; background: var(--blue); color: white; border: none; 
-            border-radius: 14px; font-size: 18px; font-weight: bold; cursor: pointer; 
-            transition: 0.3s; box-shadow: 0 8px 20px rgba(59,130,246,0.3); margin-top: 10px;
+            border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            transition: 0.3s; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); margin-top: 10px;
         }
-        .submit-btn:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(79, 70, 229, 0.35); }
 
-        /* 仪表盘样式 */
-        #dashboard-container { display: none; max-width: 1200px; margin: 0 auto; animation: fadeInUp 0.6s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #dashboard-container { display: none; max-width: 1200px; margin: 0 auto; animation: fadeUp 0.6s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .subj-badge { 
-            padding: 18px 25px; background: #eff6ff; color: #1e40af; border-radius: 15px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            font-weight: bold; border: 1px solid #bfdbfe; margin-bottom: 30px;
+            padding: 20px 30px; background: var(--light-blue); color: var(--blue); border-radius: 18px; 
+            display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 30px;
         }
 
-        /* 六大领域网格 */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
         .card { 
             background: white; padding: 30px; border-radius: 24px; transition: 0.3s; 
-            display: flex; flex-direction: column; height: 100%; box-sizing: border-box; text-decoration: none; color: inherit;
-            border: 1px solid #f1f5f9;
+            display: flex; flex-direction: column; text-decoration: none; color: inherit; border: 1px solid #f1f5f9;
         }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 30px rgba(0,0,0,0.08); }
-
-        /* 彩色页标 */
-        .card.cog { border-top: 6px solid var(--blue); } .card.emo { border-top: 6px solid var(--rose); }
-        .card.mot { border-top: 6px solid var(--amber); } .card.sen { border-top: 6px solid #fbbf24; }
-        .card.lan { border-top: 6px solid var(--purple); } .card.lif { border-top: 6px solid var(--green); }
-
-        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; } 
-        .icon { font-size: 36px; }
-        .card h2 { color: var(--primary); margin: 0; font-size: 20px; }
-        .domain-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; min-height: 40px; }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
+        
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .icon { font-size: 38px; background: #f8fafc; padding: 15px; border-radius: 20px; }
+        .card h2 { margin: 0; font-size: 20px; color: var(--primary); }
+        .domain-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
         
         .sub-test-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
-        .sub-test-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; color: #475569; }
-        .sub-test-list li::before { content: "•"; font-size: 22px; margin-right: 12px; font-weight: bold; }
-        .cog li::before { color: var(--blue); } .emo li::before { color: var(--rose); }
-        .lan li::before { color: var(--purple); } .lif li::before { color: var(--green); }
+        .sub-test-list li { font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; color: #475569; font-weight: 500;}
+        .sub-test-list li::before { content: "•"; font-size: 24px; margin-right: 12px; color: var(--blue); }
 
         .card-action { 
-            margin-top: 25px; padding: 15px; text-align: center; border-radius: 12px; font-weight: bold; 
-            border: 2px dashed #e2e8f0; background: #f8fafc; transition: 0.2s; color: #64748b;
+            margin-top: 25px; padding: 16px; text-align: center; border-radius: 14px; font-weight: bold; 
+            background: #f8fafc; color: var(--muted); transition: 0.3s;
         }
-        .card:hover .card-action { background: var(--primary); color: white; border-style: solid; border-color: var(--primary); }
-
-        /* 底部操作区 */
-        .nav-footer { margin-top: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .footer-btn { 
-            display: flex; justify-content: center; align-items: center; gap: 10px; padding: 22px; 
-            border-radius: 18px; text-decoration: none; font-weight: bold; font-size: 17px; transition: 0.3s;
-        }
-        .btn-manual { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-        .btn-manual:hover { background: #e2e8f0; }
-        .btn-report { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2); }
-        .btn-report:hover { background: #000; transform: translateY(-3px); }
+        .card:hover .card-action { background: var(--blue); color: white; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
@@ -103,85 +80,74 @@
     </header>
 
     <div id="setup-container">
-        <h2>📝 受试者基线信息录入</h2>
+        <h2>📝 受试者建档 (社区筛查版)</h2>
         <div class="form-row">
-            <div class="form-group"><label>被试编号 (Subject ID) *</label><input type="text" id="subj-id" placeholder="如：CAS_2026_001"></div>
-            <div class="form-group"><label>姓名缩写 (Initial) *</label><input type="text" id="subj-name" placeholder="如：LY"></div>
+            <div class="form-group"><label>被试编号 ID *</label><input type="text" id="subj-id" placeholder="如: CAS_001"></div>
+            <div class="form-group"><label>姓名缩写 *</label><input type="text" id="subj-name" placeholder="如: ZS"></div>
         </div>
         <div class="form-row">
             <div class="form-group"><label>出生日期 *</label><input type="date" id="subj-dob"></div>
-            <div class="form-group"><label>性别 *</label><select id="subj-gender"><option value="">请选择...</option><option value="Male">男</option><option value="Female">女</option></select></div>
+            <div class="form-group"><label>性别 *</label><select id="subj-gender"><option value="">选择</option><option value="Male">男</option><option value="Female">女</option></select></div>
         </div>
         <div class="form-row">
-            <div class="form-group"><label>利手 (Handedness) *</label><select id="subj-hand"><option value="">请选择...</option><option value="Right">右手</option><option value="Left">左手</option><option value="Ambi">双利手</option></select></div>
+            <div class="form-group"><label>利手 (Handedness) *</label><select id="subj-hand"><option value="">选择</option><option value="Right">右手</option><option value="Left">左手</option><option value="Ambi">双利手</option></select></div>
             <div class="form-group">
                 <label>教育水平 (Education) *</label>
                 <select id="subj-edu">
-                    <option value="">请选择...</option>
-                    <option value="Primary">小学及以下</option>
-                    <option value="Middle">初中</option>
-                    <option value="High">高中/中专</option>
-                    <option value="Bachelor">本科/大专</option>
-                    <option value="Master">硕士及以上</option>
+                    <option value="">选择</option>
+                    <option value="Primary">小学及以下 (≤6年)</option>
+                    <option value="Middle">初中 (9年)</option>
+                    <option value="High">高中/中专 (12年)</option>
+                    <option value="Bachelor">本科/大专 (16年)</option>
+                    <option value="Master">研究生及以上</option>
                 </select>
             </div>
         </div>
-        <button class="submit-btn" onclick="registerSubject()">✓ 开启数字化评估会话</button>
+        <button class="btn-main" onclick="registerSubject()">进入评估面板 ➔</button>
     </div>
 
     <div id="dashboard-container">
         <div class="subj-badge">
-            <span>当前会话: <span id="display-subj-name"></span> [ID: <span id="display-subj-id"></span>]</span>
-            <button onclick="CAS_Storage.clearSession()" style="background:#fff; border:1px solid #f43f5e; color:#f43f5e; padding:6px 15px; border-radius:10px; cursor:pointer; font-weight:bold;">清除会话</button>
+            <span>👤 当前会话: <span id="display-subj-name"></span> | ID: <span id="display-subj-id"></span></span>
+            <button onclick="CAS_Storage.clearSession()" style="background:white; border:none; color:var(--rose); padding:8px 16px; border-radius:12px; font-weight:bold; cursor:pointer;">结束会话</button>
         </div>
 
         <div class="grid">
-            <a href="cognition.html" class="card cog"><div class="card-header"><span class="icon">🧠</span><h2>认知 (COG)</h2></div><p class="domain-desc">高级执行功能、工作记忆与加工速度。</p><ul class="sub-test-list"><li>Corsi 空间跨度记忆</li><li>Stroop 色词干扰控制</li><li>DSST 数字符号匹配</li></ul><div class="card-action">进入 认知 域测试 ➔</div></a>
-            <a href="emotion.html" class="card emo"><div class="card-header"><span class="icon">❤️</span><h2>情感 (EMO)</h2></div><p class="domain-desc">瞬时情绪状态、人格特质与决策倾向。</p><ul class="sub-test-list"><li>EMA 瞬时状态评估</li><li>BART 气球风险决策</li><li>E-Stroop 注意偏向提取</li></ul><div class="card-action">进入 情感 域测试 ➔</div></a>
-            <a href="motor.html" class="card mot"><div class="card-header"><span class="icon">🎯</span><h2>运动 (MOT)</h2></div><p class="domain-desc">精细运动控制、协调性与震颤分析。</p><ul class="sub-test-list"><li>Tapping 敲击频率测试</li><li>Fitts 运动靶向协调</li><li>Spiral 螺旋线轨迹分析</li></ul><div class="card-action">进入 运动 域测试 ➔</div></a>
-            <a href="sensation.html" class="card sen"><div class="card-header"><span class="icon">⚡</span><h2>感觉 (SEN)</h2></div><p class="domain-desc">底层反应时基线与知觉搜索能力。</p><ul class="sub-test-list"><li>RT 简单/选择反应时</li><li>Go/No-Go 冲动抑制</li><li>Visual Search 特征搜索</li></ul><div class="card-action">进入 感觉 域测试 ➔</div></a>
-            <a href="language.html" class="card lan"><div class="card-header"><span class="icon">💬</span><h2>语言 (LAN)</h2></div><p class="domain-desc">语义检索效率与语义网络连通性。</p><ul class="sub-test-list"><li>VFT 词汇流畅性提取</li><li>Naming 数字化图片命名</li><li>Semantic 语义关联判别</li></ul><div class="card-action">进入 语言 域测试 ➔</div></a>
-            <a href="lifestyle.html" class="card lif"><div class="card-header"><span class="icon">🌙</span><h2>生活 (LIF)</h2></div><p class="domain-desc">日常功能评估与生物节律质控。</p><ul class="sub-test-list"><li>SCD-Q 主观下降自评</li><li>Sleep 生物节律与质量</li><li>IADL/PHQ 综合筛查</li></ul><div class="card-action">进入 生活 域测试 ➔</div></a>
+            <a href="cognition.html" class="card"><div class="card-header"><div class="icon">🧠</div><h2>认知 (COG)</h2></div><p class="domain-desc">高级执行功能、工作记忆与多重加工速度评估。</p><ul class="sub-test-list"><li>Corsi 空间跨度记忆</li><li>Stroop 色词干扰控制</li><li>DSST 数字符号匹配</li></ul><div class="card-action">启动测试</div></a>
+            <a href="emotion.html" class="card"><div class="card-header"><div class="icon">❤️</div><h2>情感 (EMO)</h2></div><p class="domain-desc">多维度状态自评、人格特质计算与风险决策偏好。</p><ul class="sub-test-list"><li>EMA 4维度瞬时状态</li><li>Big5 大五人格画像</li><li>BART 气球风险决策</li></ul><div class="card-action">启动测试</div></a>
+            <a href="motor.html" class="card"><div class="card-header"><div class="icon">🎯</div><h2>运动 (MOT)</h2></div><p class="domain-desc">精细运动控制、空间协调性与微弱震颤分析。</p><ul class="sub-test-list"><li>Tapping 敲击频率测试</li><li>Fitts 运动靶向协调</li><li>Spiral 螺旋线轨迹分析</li></ul><div class="card-action">启动测试</div></a>
+            <a href="sensation.html" class="card"><div class="card-header"><div class="icon">⚡</div><h2>感觉 (SEN)</h2></div><p class="domain-desc">底层神经反应时基线与高阶知觉搜索能力。</p><ul class="sub-test-list"><li>RT 简单/选择反应时</li><li>Go/No-Go 冲动抑制</li><li>Visual Search 特征搜索</li></ul><div class="card-action">启动测试</div></a>
+            <a href="language.html" class="card"><div class="card-header"><div class="icon">💬</div><h2>语言 (LAN)</h2></div><p class="domain-desc">结合语音识别的语义检索效率与网络连通性测试。</p><ul class="sub-test-list"><li>VFT 语音流利性提取</li><li>Naming 数字化图片命名</li><li>Semantic 语义关联判别</li></ul><div class="card-action">启动测试</div></a>
+            <a href="lifestyle.html" class="card"><div class="card-header"><div class="icon">🌙</div><h2>生活 (LIF)</h2></div><p class="domain-desc">主观衰退指标、日常独立功能鉴别与抑郁筛查。</p><ul class="sub-test-list"><li>SCD-Q 主观下降自评</li><li>IADL 工具性日常能力</li><li>PHQ-2 抑郁鉴别筛查</li></ul><div class="card-action">启动测试</div></a>
         </div>
         
-        <div class="nav-footer">
-            <a href="manual.html" class="footer-btn btn-manual">📖 交互指南与手册</a>
-            <a href="report.html" class="footer-btn btn-report">📊 数据中心与导出</a>
-        </div>
+        <button onclick="location.href='report.html'" class="btn-main" style="max-width: 1200px; margin: 40px auto; display: block; padding: 25px; border-radius: 20px;">📊 进入临床数据中心 (导出 JSON 数据集)</button>
     </div>
 
     <script>
         window.onload = function() {
-            // 锁定日期上限
-            const today = new Date().toISOString().split("T")[0];
-            document.getElementById('subj-dob').setAttribute("max", today);
-
-            // 检查现有会话
+            document.getElementById('subj-dob').setAttribute("max", new Date().toISOString().split("T")[0]);
             if (CAS_Storage.hasSession()) {
-                initDashboard();
+                document.getElementById('setup-container').style.display = 'none'; 
+                document.getElementById('dashboard-container').style.display = 'block';
+                const session = CAS_Storage.getSession();
+                document.getElementById('display-subj-name').innerText = session.demographics.name; 
+                document.getElementById('display-subj-id').innerText = session.demographics.subject_id;
             }
         };
 
-        function initDashboard() {
-            document.getElementById('setup-container').style.display = 'none'; 
-            document.getElementById('dashboard-container').style.display = 'block';
-            const session = CAS_Storage.getSession();
-            document.getElementById('display-subj-name').innerText = session.demographics.name || "Anonymous"; 
-            document.getElementById('display-subj-id').innerText = session.demographics.subject_id || "N/A";
-        }
-
         function registerSubject() {
-            const fields = ['subj-id', 'subj-name', 'subj-dob', 'subj-gender', 'subj-hand', 'subj-edu'];
-            let data = {};
-            for(let f of fields) {
-                const val = document.getElementById(f).value;
-                if(!val) return alert("⚠️ 请完整填写带 * 号的必填项！");
-                data[f.replace('subj-', '')] = val;
-            }
-            
+            const data = {
+                subject_id: document.getElementById('subj-id').value,
+                name: document.getElementById('subj-name').value,
+                dob: document.getElementById('subj-dob').value,
+                gender: document.getElementById('subj-gender').value,
+                handedness: document.getElementById('subj-hand').value, // 完美捕获
+                education_level: document.getElementById('subj-edu').value // 完美捕获
+            };
+            if(!data.subject_id || !data.dob || !data.education_level) return alert("⚠️ 请完整填写信息");
             CAS_Storage.initSession(data);
-            initDashboard();
-            window.scrollTo(0,0);
+            location.reload();
         }
     </script>
 </body>
