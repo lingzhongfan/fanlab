@@ -3,159 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAS - 临床全流程交互指南</title>
+    <title>CAS - 临床主试标准化操作手册</title>
     <style>
-        :root { --blue: #3b82f6; --green: #10b981; --red: #ef4444; --slate: #1e293b; }
-        body { font-family: -apple-system, sans-serif; background: #f1f5f9; margin: 0; padding: 0; color: var(--slate); line-height: 1.6; }
-        .wrapper { max-width: 1000px; margin: 40px auto; background: white; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; }
-        
-        /* 侧边导航与头部 */
-        header { background: var(--slate); color: white; padding: 40px; text-align: center; }
-        header h1 { margin: 0; font-size: 32px; letter-spacing: 1px; }
-        header p { opacity: 0.8; margin: 10px 0 0 0; }
-
-        .content { padding: 40px; }
-        .section-title { border-left: 6px solid var(--blue); padding-left: 15px; margin: 40px 0 25px 0; color: var(--slate); font-size: 24px; }
-        
-        /* 指南卡片布局 */
-        .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-        .guide-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 25px; transition: 0.3s; }
-        .guide-card h3 { margin-top: 0; color: var(--blue); display: flex; align-items: center; gap: 10px; }
-        
-        /* 交互动画预览区 */
-        .anim-box { 
-            height: 160px; background: white; border-radius: 12px; margin-top: 15px; 
-            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
-            border: 1px solid #e2e8f0;
+        /* 科技温情风 UI 规范 */
+        :root { 
+            --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; 
+            --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --purple: #8b5cf6; --slate: #64748b; 
         }
+        body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f8fafc; margin: 0; padding: 0; color: #334155; line-height: 1.6; }
+        .wrapper { max-width: 1100px; margin: 40px auto; background: white; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        /* 头部 */
+        header { background: var(--primary); color: white; padding: 50px 40px; text-align: center; border-bottom: 8px solid var(--blue); }
+        header h1 { margin: 0; font-size: 34px; letter-spacing: 2px; }
+        header p { opacity: 0.85; margin: 15px 0 0 0; font-size: 16px; }
 
-        /* --- 动画关键帧定义 --- */
-        /* 1. 空间跨度 (Corsi) */
-        .corsi-grid { display: grid; grid-template-columns: repeat(3, 30px); gap: 10px; }
-        .corsi-block { width: 30px; height: 30px; background: #cbd5e1; border-radius: 4px; }
-        .corsi-active { animation: corsi-flash 3s infinite; }
-        @keyframes corsi-flash { 0%, 10% { background: #3b82f6; } 20%, 100% { background: #cbd5e1; } }
+        .content { padding: 40px 50px; }
+        .domain-title { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin: 50px 0 30px 0; font-size: 24px; color: var(--primary); }
+        .domain-title span { background: var(--light-blue); color: var(--blue); padding: 10px 15px; border-radius: 16px; font-size: 28px; }
+        
+        /* 卡片网格布局 */
+        .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        .guide-card { background: #fcfcfd; border: 1px solid #e2e8f0; border-radius: 20px; padding: 30px; transition: 0.3s; }
+        .guide-card:hover { border-color: var(--blue); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.08); transform: translateY(-3px); }
+        .guide-card h3 { margin-top: 0; color: var(--blue); font-size: 20px; border-left: 4px solid var(--blue); padding-left: 10px; }
+        .guide-text strong { color: var(--primary); }
+        .alert-text { display: inline-block; background: #fff1f2; color: var(--red); padding: 4px 10px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-top: 10px; }
 
-        /* 2. 气球充气 (BART) */
-        .balloon { width: 30px; height: 40px; background: var(--red); border-radius: 50%; animation: pump 3s infinite; }
-        @keyframes pump { 0% { transform: scale(1); } 50% { transform: scale(1.8); } 60% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        /* 动画预览通用视窗 */
+        .anim-box { height: 180px; background: white; border-radius: 16px; margin-top: 25px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; }
 
-        /* 3. 追踪/螺旋线 (Motor) */
-        .path-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; position: absolute; animation: trace 3s infinite linear; }
-        @keyframes trace { 
-            0% { top: 80px; left: 140px; } 
-            100% { transform: rotate(360deg) translateX(60px); }
-        }
+        /* ================= 纯 CSS 核心机制动画 ================= */
+        
+        /* 1. Corsi 动画 (空间闪烁) */
+        .c-grid { display: grid; grid-template-columns: repeat(3, 35px); gap: 10px; }
+        .c-box { width: 35px; height: 35px; background: #e2e8f0; border-radius: 8px; }
+        .c-flash-1 { animation: flash 4s infinite 0.5s; }
+        .c-flash-2 { animation: flash 4s infinite 1.5s; }
+        .c-flash-3 { animation: flash 4s infinite 2.5s; }
+        @keyframes flash { 0%, 10% { background: var(--blue); transform: scale(0.9); box-shadow: 0 0 10px rgba(79,70,229,0.5); } 15%, 100% { background: #e2e8f0; transform: scale(1); } }
 
-        /* 4. 语义判别 (Language) */
-        .sema-word { font-weight: bold; border: 2px solid var(--blue); padding: 5px 15px; border-radius: 8px; animation: select-box 2s infinite; }
-        @keyframes select-box { 0%, 50% { background: transparent; } 60%, 100% { background: #dbeafe; } }
+        /* 2. TMT-B 动画 (连线) */
+        .tmt-node { position: absolute; width: 30px; height: 30px; border: 2px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; background: white; z-index: 2; }
+        .tmt-line { position: absolute; height: 3px; background: var(--green); transform-origin: left center; z-index: 1; }
+        .tmt-l1 { top: 65px; left: 65px; width: 0; transform: rotate(45deg); animation: draw-l1 4s infinite; }
+        .tmt-l2 { top: 115px; left: 115px; width: 0; transform: rotate(-20deg); animation: draw-l2 4s infinite; }
+        @keyframes draw-l1 { 0%, 20% { width: 0; } 30%, 100% { width: 70px; } }
+        @keyframes draw-l2 { 0%, 50% { width: 0; } 60%, 100% { width: 60px; } }
 
-        .back-btn { 
-            display: block; width: fit-content; margin: 40px auto; padding: 15px 40px; 
-            background: var(--slate); color: white; border-radius: 12px; text-decoration: none; font-weight: bold;
-        }
+        /* 3. Flanker 动画 (侧抑制) */
+        .flanker-anim { font-family: monospace; font-size: 35px; font-weight: bold; letter-spacing: 8px; animation: flanker-switch 4s infinite; }
+        @keyframes flanker-switch { 0%, 45% { content: '>>>>>'; color: var(--slate); } 50%, 95% { content: '<<><<'; color: var(--red); } }
+
+        /* 4. DCCS 动画 (柔性切换) */
+        .dccs-rule { position: absolute; top: 15px; font-size: 14px; font-weight: bold; padding: 6px 15px; border-radius: 10px; border: 2px dashed #cbd5e1; animation: dccs-rule-switch 4s infinite; }
+        .dccs-target { font-size: 50px; animation: dccs-target-switch 4s infinite; }
+        @keyframes dccs-rule-switch { 0%, 45% { content: '按【颜色】匹配'; background: #fee2e2; color: var(--red); border-color: var(--red); } 50%, 95% { content: '按【形状】匹配'; background: #e0e7ff; color: var(--blue); border-color: var(--blue); } }
+        @keyframes dccs-target-switch { 0%, 45% { content: '🔴🐰'; } 50%, 95% { content: '🔵⛵'; } }
+
+        /* 5. FER 动画 (面孔识别) */
+        .fer-anim { font-size: 60px; animation: fer-switch 4s infinite; }
+        @keyframes fer-switch { 0%, 20% { content: '😐'; } 25%, 45% { content: '😠'; transform: scale(1.1); } 50%, 70% { content: '😨'; } 75%, 95% { content: '😊'; } }
+
+        /* 6. BART 动画 (气球风险) */
+        .bart-anim { width: 30px; height: 40px; background: radial-gradient(circle at 30% 30%, #fb7185, #e11d48); border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; animation: bart-pump 4s infinite; position: relative; bottom: 10px;}
+        @keyframes bart-pump { 0%, 10% { transform: scale(1); } 20%, 30% { transform: scale(1.4); } 40%, 50% { transform: scale(1.8); } 60% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1;} }
+
+        /* 7. Spiral 动画 (螺旋震颤) */
+        .spiral-dot { position: absolute; width: 12px; height: 12px; background: var(--amber); border-radius: 50%; animation: spiral-trace 3s infinite linear; }
+        @keyframes spiral-trace { 0% { transform: rotate(0deg) translateX(10px); } 100% { transform: rotate(360deg) translateX(60px); } }
+
+        /* 8. VFT 语音动画 */
+        .mic-anim { width: 50px; height: 50px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; animation: mic-pulse 1.5s infinite; }
+        @keyframes mic-pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); } 70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+        .back-btn { display: block; width: fit-content; margin: 50px auto 20px; padding: 20px 50px; background: var(--primary); color: white; border-radius: 16px; text-decoration: none; font-size: 18px; font-weight: bold; box-shadow: 0 8px 20px rgba(30, 41, 59, 0.3); transition: 0.2s; }
+        .back-btn:hover { background: black; transform: translateY(-3px); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
-
 <div class="wrapper">
     <header>
-        <h1>CAS 系统交互与操作手册</h1>
-        <p>数字化表型采集终端 - 临床主试标准化手册 (v2.0)</p>
+        <h1>CAS 主试标准化操作手册</h1>
+        <p>NIH Toolbox 数字化范式全集 · 交互演示与主试指导语 (SOP)</p>
     </header>
 
     <div class="content">
-        <h2 class="section-title">🧠 认知功能 (Cognition)</h2>
+        <div class="domain-title"><span>🧠</span> 认知功能 (Cognition)</div>
         <div class="guide-grid">
             <div class="guide-card">
-                <h3>空间跨度 (Corsi)</h3>
-                <p><strong>操作：</strong>观察方块亮起的随机顺序，结束后按原顺序点击。</p>
-                <p><strong>注意：</strong>等级会随正确率提升，请提醒受试者保持高度专注。</p>
+                <h3>1. Corsi 自适应空间记忆</h3>
+                <p class="guide-text"><strong>指导语:</strong> “请仔细观察方块亮起的顺序，等结束提示出现后，请按原顺序点击方块。”</p>
+                <div class="alert-text">💡 临床注意: 连续答对会增加难度，连续错2次系统自动终止。请提醒老人不要着急抢答。</div>
                 <div class="anim-box">
-                    <div class="corsi-grid">
-                        <div class="corsi-block corsi-active"></div><div class="corsi-block"></div><div class="corsi-block"></div>
-                        <div class="corsi-block"></div><div class="corsi-block"></div><div class="corsi-block"></div>
+                    <div class="c-grid">
+                        <div class="c-box c-flash-1"></div><div class="c-box"></div><div class="c-box c-flash-3"></div>
+                        <div class="c-box"></div><div class="c-box c-flash-2"></div><div class="c-box"></div>
                     </div>
                 </div>
             </div>
-            <div class="guide-card">
-                <h3>符号转换 (DSST)</h3>
-                <p><strong>操作：</strong>根据顶部的对照表，为出现的图形填入对应的数字。</p>
-                <p><strong>指标：</strong>测试持续60秒，评估处理速度与工作记忆切换。</p>
-            </div>
-        </div>
 
-        <h2 class="section-title">❤️ 情感与决策 (Emotion)</h2>
-        <div class="guide-grid">
             <div class="guide-card">
-                <h3>风险决策 (BART)</h3>
-                <p><strong>操作：</strong>点击充气获取积分。气球越大收益越高，但爆炸则清零。</p>
-                <p><strong>注意：</strong>观察受试者是在爆炸后变得保守还是更激进（风险敏感度）。</p>
+                <h3>2. Flanker 侧抑制与冲突解决</h3>
+                <p class="guide-text"><strong>指导语:</strong> “忽略两边箭头的干扰，只根据【最中间箭头】的方向，点击下方对应的左/右按钮。”</p>
+                <div class="alert-text">💡 临床注意: 考察前扣带回(ACC)。若老人出现高频错误，提示抑制控制能力严重衰退。</div>
+                <div class="anim-box"><div class="flanker-anim"><span style="color:#cbd5e1">&lt;&lt;</span><span style="color:var(--blue);">&gt;</span><span style="color:#cbd5e1">&lt;&lt;</span></div></div>
+            </div>
+
+            <div class="guide-card">
+                <h3>3. DCCS 维度变化卡片</h3>
+                <p class="guide-text"><strong>指导语:</strong> “请紧盯上方提示框。如果提示【按颜色】，就选颜色一样的卡片；如果提示【按形状】，就选形状一样的。”</p>
+                <div class="alert-text">💡 临床注意: 重点观察“规则切换”瞬间老人的反应时是否异常飙升 (Switch Cost)。</div>
                 <div class="anim-box">
-                    <div class="balloon"></div>
+                    <div class="dccs-rule">按颜色匹配</div>
+                    <div class="dccs-target">🔴🐰</div>
                 </div>
             </div>
-            <div class="guide-card">
-                <h3>情绪 Stroop</h3>
-                <p><strong>操作：</strong>忽略单词内容（如“失败”、“痛苦”），只识别文字的颜色。</p>
-                <p><strong>意义：</strong>评估负性情绪信息对注意力的干扰程度。</p>
-            </div>
-        </div>
 
-        <h2 class="section-title">🎯 运动与共济 (Motor)</h2>
-        
-        <div class="guide-grid">
             <div class="guide-card">
-                <h3>螺旋线描摹 (Spiral)</h3>
-                <p><strong>操作：</strong>沿虚线轨迹从中心向外平稳画出螺旋线。</p>
-                <p><strong>技术：</strong>系统将分析轨迹的压力震颤频率 (Hz) 与加速度波动。</p>
+                <h3>4. TMT-B 任务切换连线</h3>
+                <p class="guide-text"><strong>指导语:</strong> “请按照 1 ➔ A ➔ 2 ➔ B 的交替顺序点击圆圈。如果点错了，圆圈会变红震动，请继续寻找正确的。”</p>
                 <div class="anim-box">
-                    <div class="path-dot"></div>
-                    <div style="width:100px; height:100px; border:2px dashed #cbd5e1; border-radius:50%;"></div>
+                    <div class="tmt-node" style="top:50px; left:50px; border-color:var(--green); background:var(--green); color:white;">1</div>
+                    <div class="tmt-node" style="top:100px; left:100px; border-color:var(--green); background:var(--green); color:white;">A</div>
+                    <div class="tmt-node" style="top:50px; left:150px;">2</div>
+                    <div class="tmt-line tmt-l1"></div><div class="tmt-line tmt-l2"></div>
                 </div>
             </div>
-            <div class="guide-card">
-                <h3>Tapping 频率</h3>
-                <p><strong>操作：</strong>用食指在10秒内尽可能快地连续敲击屏幕。</p>
-                <p><strong>关键：</strong>反映运动神经传导的疲劳度与上限。</p>
-            </div>
         </div>
 
-        <h2 class="section-title">💬 语言与语义 (Language)</h2>
+        <div class="domain-title"><span style="color:var(--red); background:#ffe4e6;">❤️</span> 情感与社会 (Emotion & Social)</div>
         <div class="guide-grid">
             <div class="guide-card">
-                <h3>语义关联判别</h3>
-                <p><strong>操作：</strong>在选项中选出与目标词意义最接近的项目（如：医生-医院）。</p>
-                <p><strong>维度：</strong>测试语义网络的通达深度与逻辑分类能力。</p>
+                <h3>5. FER 面孔情绪识别</h3>
+                <p class="guide-text"><strong>指导语:</strong> “屏幕上会闪现不同表情的面孔，请以最快速度指出它代表的情绪。”</p>
+                <div class="alert-text">💡 临床注意: 额颞叶痴呆(FTD)患者极易将“恐惧”或“愤怒”误判为“中性”。</div>
+                <div class="anim-box"><div class="fer-anim">😐</div></div>
+            </div>
+
+            <div class="guide-card">
+                <h3>6. BART 气球风险决策</h3>
+                <p class="guide-text"><strong>指导语:</strong> “点击充气赚金币。气球越大金币越多，但如果爆炸，本轮收益清零。请在合适时机点击收集。”</p>
                 <div class="anim-box">
-                    <div class="sema-word">医院</div>
+                    <div class="bart-anim"></div><div style="position:absolute; bottom:15px; font-weight:bold; color:var(--red); font-size:20px;">💥</div>
                 </div>
             </div>
-            <div class="guide-card">
-                <h3>词汇流畅性 (VFT)</h3>
-                <p><strong>操作：</strong>在1分钟内说出或录入尽可能多的特定类别（如动物）词汇。</p>
-                <p><strong>注意：</strong>重复词汇不计分，考察语言搜索与额叶执行功能。</p>
-            </div>
         </div>
 
-        <h2 class="section-title">🌙 感觉与生活 (Sensation & Life)</h2>
+        <div class="domain-title"><span style="color:var(--amber); background:#fef3c7;">🎯</span> 运动与感觉 (Motor & Sensation)</div>
         <div class="guide-grid">
             <div class="guide-card">
-                <h3>冲动抑制 (Go/No-Go)</h3>
-                <p><strong>规则：</strong>看到绿色点击（Go），看到红色必须忍住不点（No-Go）。</p>
-                <p><strong>分析：</strong>记录“误报率”，评估前额叶的抑制控制能力。</p>
+                <h3>7. Spiral 螺旋线震颤分析</h3>
+                <p class="guide-text"><strong>指导语:</strong> “请用食指（或触控笔），尽可能平稳地沿着底部的虚线，从内向外画出螺旋。”</p>
+                <div class="alert-text">💡 临床注意: 记录的高频轨迹数据将用于算法提取小脑共济失调与特发性震颤特征。</div>
+                <div class="anim-box">
+                    <div style="width:100px; height:100px; border:2px dashed #cbd5e1; border-radius:50%; position:absolute;"></div>
+                    <div class="spiral-dot"></div>
+                </div>
             </div>
+            
             <div class="guide-card">
-                <h3>日常生活评估 (IADL)</h3>
-                <p><strong>规则：</strong>由主试协助，评估受试者财务、服药及出行的独立性。</p>
-                <p><strong>分水岭：</strong>这是鉴别 MCI（轻度损害）与痴呆的关键指标。</p>
+                <h3>8. Go / No-Go 冲动抑制</h3>
+                <p class="guide-text"><strong>指导语:</strong> “这是拼手速的测试。看到绿灯(🟢)立刻按，但看到红叉(❌)绝对不能按。”</p>
+                <div class="alert-text">💡 临床注意: 评估底层的感觉神经抑制能力（误报率 False Alarm 是核心指标）。</div>
             </div>
         </div>
 
-        <a href="index.html" class="back-btn">确认理解，返回系统 ➔</a>
+        <div class="domain-title"><span style="color:var(--purple); background:#f3e8ff;">💬</span> 语言网络 (Language)</div>
+        <div class="guide-grid">
+            <div class="guide-card">
+                <h3>9. VFT 词汇流畅性 (语音版)</h3>
+                <p class="guide-text"><strong>操作说明:</strong> “点击麦克风，让受试者在1分钟内说出动物名称。系统会自动进行语音识别并填入面板。”</p>
+                <div class="alert-text">💡 提示: 遇到识别错误的同音字无需干预，后台 NLP 算法会通过语音容错词典进行聚类分析。</div>
+                <div class="anim-box"><div class="mic-anim">🎤</div></div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-btn">已了解施测规范，返回主控制台 ➔</a>
     </div>
 </div>
-
 </body>
 </html>
