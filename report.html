@@ -190,6 +190,15 @@
                 resHTML += `<div class="result-item"><span>⏱️ Tapping 10秒快速敲击总数:</span> <strong>${taps} 次</strong></div>`;
                 chartScores.MOT = Math.min(100, Math.round((taps / 60) * 100)); // 假设10秒60次为100分
             }
+            // 【书写动力学 dCDT】
+           if(mods['MOT_dCDT']) {
+               const dcdt = mods['MOT_dCDT'].data.summary;
+              // 临床阈值：空中思考时间(In-air time)占总耗时的比例过高，或绝对值大于10秒
+              let alert = dcdt.in_air_sec > 10 ? `<span class="alert-text">思考停顿异常增多</span>` : "";
+              resHTML += `<div class="result-item"><span>✍️ 画钟动力学 (落笔 / 空中思考):</span> <strong>${dcdt.on_surface_sec}s / ${dcdt.in_air_sec}s ${alert}</strong></div>`;
+              // 若需计入图表，可做适当换算
+              chartScores.MOT = (chartScores.MOT + Math.max(0, 100 - (dcdt.in_air_sec * 2))) / 2;
+            }
 
             // 【感觉 SEN】
             if(mods['SEN_GoNoGo']) {
