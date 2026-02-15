@@ -205,7 +205,15 @@
                 resHTML += `<div class="result-item"><span>🗣️ VFT 语音词汇提取数量 (1分钟):</span> <strong>${words} 词</strong></div>`;
                 chartScores.LAN = Math.min(100, Math.round((words / 20) * 100)); // 假设1分钟20词为100分
             }
-
+           // 【语音标志物 VBM】
+            if(mods['Voice_Biomarkers']) {
+               const vbm = mods['Voice_Biomarkers'].data;
+           // 临床阈值：停顿比超过 40% 提示可能存在找词困难或执行功能下降
+               let alert = vbm.pause_ratio > 40 ? `<span class="alert-text">词间停顿异常增多</span>` : "";
+            resHTML += `<div class="result-item"><span>🎙️ VBM 语音特征 (总时长 / 停顿比):</span> <strong>${vbm.duration_sec}s / ${vbm.pause_ratio}% ${alert}</strong></div>`;
+           // 若需加入雷达图，可根据停顿比反向换算分数
+           chartScores.LAN = (chartScores.LAN + Math.max(0, 100 - vbm.pause_ratio)) / 2; // 与语义流畅性融合计分
+           }
             // 【生活 LIF】
             if(mods['Lifestyle_IADL']) {
                 const iadlScore = mods['Lifestyle_IADL'].data.iadl_impairment_score;
