@@ -3,340 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAS-MOT | 精细运动与共济表型</title>
+    <title>CAS-MOT | 运动控制与共济分析</title>
     <style>
-        /* 全局防划动与防误触配置 (针对高频触摸画布优化) */
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: #f8fafc; 
-            margin: 0; 
-            padding: 20px; 
-            touch-action: none; 
-            user-select: none; 
-            -webkit-user-select: none; 
-            -webkit-tap-highlight-color: transparent; 
-            overscroll-behavior: none; 
-        }
-        .container { 
-            max-width: 750px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 35px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        }
-        .module-header { 
-            color: #0f172a; 
-            margin-top: 0; 
-            font-size: 24px; 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-        }
-        
-        .sys-btn { 
-            background: #0f172a; 
-            color: white; 
-            border: none; 
-            padding: 18px 30px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            margin: 10px 0; 
-            width: 100%; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-        .sys-btn:active { transform: scale(0.98); } 
+        /* ==================== 1. 科技温情风 UI (Warm-Tech UI) ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --slate: #64748b; }
+        body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: none; user-select: none; }
+        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        #nav-back { 
-            display: inline-flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: #3b82f6; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            padding: 10px 18px; 
-            background: #eff6ff; 
-            border-radius: 10px; 
-            transition: 0.2s; 
-        } 
-        #nav-back:active { background: #dbeafe; }
-        
-        /* 1. 单指敲击 UI */
-        #tap-pad { 
-            width: 100%; 
-            height: 280px; 
-            background: #e2e8f0; 
-            border: 4px dashed #94a3b8; 
-            border-radius: 16px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 50px; 
-            font-weight: bold; 
-            color: #334155; 
-            margin: 20px 0; 
-            transition: background 0.05s; 
-            touch-action: none; 
-        }
-        #tap-pad:active { background: #cbd5e1; border-color: #64748b; }
-        
-        /* 2. Fitts 靶向 UI */
-        #fitts-workspace { 
-            width: 100%; 
-            height: 400px; 
-            background: #f1f5f9; 
-            position: relative; 
-            overflow: hidden; 
-            border-radius: 16px; 
-            border: 2px solid #cbd5e1; 
-            touch-action: none; 
-        }
-        .target { 
-            position: absolute; 
-            background: #ef4444; 
-            border-radius: 50%; 
-            transform: translate(-50%, -50%); 
-            cursor: pointer; 
-            z-index: 10; 
-            transition: background 0.1s, box-shadow 0.1s; 
-        } 
-        .target.active { background: #10b981; box-shadow: 0 0 20px rgba(16,185,129,0.6); } 
-        .target:active { transform: translate(-50%, -50%) scale(0.9); }
-        
-        /* 3. Spiral Canvas UI */
-        canvas { 
-            border: 2px solid #cbd5e1; 
-            background: #fff; 
-            cursor: crosshair; 
-            touch-action: none; 
-            border-radius: 16px; 
-            display: block; 
-            margin: 0 auto; 
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.03); 
-            width: 400px; 
-            height: 400px; 
-        }
+        .module-header { border-left: 6px solid var(--amber); padding-left: 15px; margin-bottom: 30px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .btn-menu { background: #fffbeb; color: #b45309; border: 1px solid #fef3c7; }
+        .btn-menu:hover { background: var(--amber); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(245, 158, 11, 0.2); }
+        .btn-action { background: var(--amber); color: white; justify-content: center; margin-top: 20px; }
+
+        /* ==================== 2. 专项实验 UI ==================== */
+        /* [范式1] Tapping 敲击板 */
+        .tap-board { width: 100%; height: 250px; background: #f8fafc; border: 3px dashed #cbd5e1; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #94a3b8; cursor: pointer; transition: 0.1s; }
+        .tap-board:active { background: var(--light-blue); border-color: var(--blue); color: var(--blue); transform: scale(0.98); }
+
+        /* [范式2] Fitts' Law 靶向点击区 */
+        #fitts-workspace { position: relative; width: 100%; height: 350px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 20px; }
+        .fitts-target { position: absolute; border-radius: 50%; background: var(--amber); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: background 0.1s; }
+        .fitts-target:active { background: #b45309; }
+
+        /* [范式3] Spiral 螺旋线描摹画板 */
+        .canvas-wrapper { position: relative; display: flex; justify-content: center; margin: 20px 0; }
+        #spiral-canvas { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; touch-action: none; /* 必须禁用浏览器默认滑动，确保画笔流畅 */ }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="text-align: left; max-width: 750px; margin: 0 auto;">
-        <a href="index.html" id="nav-back">← 返回控制台</a>
-    </div>
-    
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--amber); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+
     <div class="container" id="menu">
-        <h2 class="module-header">🎯 运动神经与共济特征</h2>
-        <button class="sys-btn" onclick="show('tap-area'); startTapping();">1. 单指快速敲击 (运动迟缓/疲劳度)</button>
-        <button class="sys-btn" onclick="show('fitts-area'); startFitts();">2. Fitts 交替靶向 (小脑协调性)</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('spiral-area'); startSpiral();">3. 螺旋线描摹 (微写症与震颤分析)</button>
+        <div class="module-header">
+            <h2>🎯 运动与共济 (CAS-MOT)</h2>
+            <p>靶向运动皮层与基底节，量化运动迟缓、精细协调与微弱震颤。</p>
+        </div>
+        <button class="sys-btn btn-menu" onclick="startTapping()">⏱️ 1. Simple Tapping (运动速度与疲劳度)</button>
+        <button class="sys-btn btn-menu" onclick="startFitts()">🎯 2. Fitts' Law 靶向测试 (手眼协调与空间定位)</button>
+        <button class="sys-btn btn-menu" onclick="startSpiral()">🌀 3. Archimedean Spiral (高频震颤与共济失调分析)</button>
     </div>
 
     <div class="container hidden" id="tap-area">
-        <h2 class="module-header">单指快速敲击</h2>
-        <p style="color:#ef4444; font-weight:bold; font-size:22px;" id="tap-timer">剩余: 10.0 s</p>
-        <p style="color:#64748b;">使用惯用手食指，以最快速度点击下方区域。</p>
-        <div id="tap-pad">TAP</div>
-        <button class="sys-btn" style="background:#94a3b8;" onclick="show('menu')">提前结束</button>
+        <div class="module-header"><h2>食指快速敲击 (Index Finger Tapping)</h2>
+        <p>临床意义: 帕金森病 (PD) 早期运动迟缓 (Bradykinesia) 与神经传导疲劳度评估。</p></div>
+        <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:bold; margin-bottom:15px; color:var(--primary);">
+            <span>倒计时: <span id="tap-time" style="color:var(--red);">10s</span></span>
+            <span>敲击数: <span id="tap-count" style="color:var(--blue);">0</span></span>
+        </div>
+        <div class="tap-board" id="tap-board" onclick="recordTap()">👇 点击此处开始</div>
     </div>
 
     <div class="container hidden" id="fitts-area">
-        <h2 class="module-header">Fitts 交替靶向</h2>
-        <p style="color:#64748b;">快速交替点击<strong>亮起绿色</strong>的圆圈。</p>
+        <div class="module-header"><h2>Fitts 靶向协调测试</h2>
+        <p>临床意义: 运动规划、小脑共济功能。通过“速度-准确率权衡”提取运动控制模型。</p></div>
+        <div style="font-weight:bold; color:var(--amber); margin-bottom: 10px;">进度: <span id="fitts-prog">1/10</span></div>
         <div id="fitts-workspace"></div>
-        <button class="sys-btn" style="background:#94a3b8; margin-top:20px;" onclick="show('menu')">强行终止</button>
     </div>
 
-    <div class="container hidden" id="spiral-area" style="text-align:center;">
-        <h2 class="module-header">螺旋线震颤分析</h2>
-        <p style="color:#64748b; margin-bottom:20px;">请用食指尽可能平稳地沿虚线从内向外描摹。</p>
-        <canvas id="spiral-canvas" width="800" height="800" style="width: 400px; height: 400px;"></canvas>
-        <button class="sys-btn" style="background:#10b981; margin-top:25px;" onclick="saveSpiral()">✓ 完成描摹并保存序列</button>
+    <div class="container hidden" id="spiral-area">
+        <div class="module-header"><h2>阿基米德螺旋线 (Archimedean Spiral)</h2>
+        <p>临床意义: 鉴别特发性震颤 (Essential Tremor, 4-12Hz) 与静止性震颤。</p></div>
+        <p style="text-align:center; color:var(--slate); font-size:14px;">请使用食指或触控笔，沿虚线平稳画出螺旋线 (从内向外)。</p>
+        
+        <div class="canvas-wrapper">
+            <canvas id="spiral-canvas" width="300" height="300"></canvas>
+        </div>
+        
+        <div style="display:flex; gap:15px;">
+            <button class="sys-btn" style="background:#f1f5f9; color:var(--slate); justify-content:center;" onclick="clearCanvas()">重画</button>
+            <button class="sys-btn btn-action" style="margin-top:0;" onclick="saveSpiral()">保存轨迹特征</button>
+        </div>
     </div>
 
     <script>
-        // 视图路由
-        function show(id) { 
+        function show(id) {
             ['menu', 'tap-area', 'fitts-area', 'spiral-area'].forEach(d => {
-                document.getElementById(d).classList.add('hidden');
-            }); 
-            document.getElementById(id).classList.remove('hidden'); 
+                const el = document.getElementById(d); if(el) el.classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
         }
 
-        /* ==================== 1. Tapping (单指敲击) 逻辑 ==================== */
-        let tData = { module: "Motor_SimpleTapping", total_taps: 0, timestamps: [] };
-        let tCount = 0, tTime = 10, tTesting = false, tTimerId; 
-        const tapPad = document.getElementById('tap-pad');
+        /* ==================== 1. Simple Tapping (运动疲劳度测算) ==================== */
+        let tapData = { module: "MOT_Tapping", total_taps: 0, timestamps: [] };
+        let tapTimer = null, tapTimeLeft = 10, isTapping = false;
+
+        function startTapping() {
+            tapData.total_taps = 0; tapData.timestamps = []; tapTimeLeft = 10; isTapping = false;
+            document.getElementById('tap-count').innerText = "0";
+            document.getElementById('tap-time').innerText = "10s";
+            document.getElementById('tap-board').innerText = "👇 点击此处开始";
+            show('tap-area');
+        }
+
+        function recordTap() {
+            if (tapTimeLeft <= 0) return; // 时间到停止记录
+            
+            // 首次点击触发计时器
+            if (!isTapping) {
+                isTapping = true;
+                document.getElementById('tap-board').innerText = "继续快速点击！";
+                tapTimer = setInterval(() => {
+                    tapTimeLeft--;
+                    document.getElementById('tap-time').innerText = tapTimeLeft + "s";
+                    if (tapTimeLeft <= 0) {
+                        clearInterval(tapTimer);
+                        document.getElementById('tap-board').innerText = "测试结束";
+                        CAS_Storage.saveModuleData('MOT_Tapping', tapData);
+                        // 后期数据分析建议：通过 timestamps 数组计算各阶段的点击频率(Hz)，下降斜率即为疲劳指数(Fatigue Index)
+                        alert(`测试完成！总敲击数: ${tapData.total_taps} 次`); show('menu');
+                    }
+                }, 1000);
+            }
+            
+            // 记录每次点击的高精度时间戳 (Performance API)
+            tapData.timestamps.push(Math.round(performance.now()));
+            tapData.total_taps++;
+            document.getElementById('tap-count').innerText = tapData.total_taps;
+        }
+
+        /* ==================== 2. Fitts' Law (靶向运动协调) ==================== */
+        // 根据 Fitts' Law: Index of Difficulty (ID) = log2(2D/W)。D为距离，W为靶子宽度。
+        let fittsData = { module: "MOT_Fitts", records: [] };
+        let f_trial = 0, f_onset = 0, f_target = null;
         
-        // 绑定触摸与鼠标点击事件 (兼容多端)
-        tapPad.ontouchstart = tapPad.onmousedown = (e) => { 
-            e.preventDefault(); 
-            if (tTime <= 0) return; 
-            
-            // 首次点击激活定时器
-            if (!tTesting) { 
-                tTesting = true; 
-                tTimerId = setInterval(updateTapTimer, 100); 
-            } 
-            
-            tCount++; 
-            // 记录每次敲击的毫秒级相对时间戳
-            tData.timestamps.push(Math.round(performance.now())); 
-            tapPad.innerText = tCount; 
-        };
-
-        function startTapping() { 
-            tCount = 0; 
-            tTime = 10; 
-            tTesting = false; 
-            tapPad.innerText = "TAP"; 
-            document.getElementById('tap-timer').innerText = "剩余: 10.0 s"; 
-            tData.timestamps = []; 
-        }
-
-        function updateTapTimer() { 
-            tTime -= 0.1; 
-            document.getElementById('tap-timer').innerText = `剩余: ${tTime.toFixed(1)} s`; 
-            
-            if (tTime <= 0.05) { 
-                clearInterval(tTimerId); 
-                tapPad.innerText = "DONE"; 
-                tData.total_taps = tCount; 
-                CAS_Storage.saveModuleData('Motor_SimpleTapping', tData); 
-                alert(`测试完毕。共敲击 ${tCount} 次。`); 
-                show('menu'); 
-            } 
-        }
-
-        /* ==================== 2. Fitts (交替靶向) 逻辑 ==================== */
-        let fData = { module: "Motor_Fitts", records: [] };
-        let f_tr = 0, f_lastT = 0;
-        let ws = document.getElementById('fitts-workspace');
-
-        function startFitts() { 
-            f_tr = 0; 
-            fData.records = []; 
-            nextFitts(); 
-        }
-
-        function nextFitts() { 
-            if(f_tr >= 10) { 
-                CAS_Storage.saveModuleData('Motor_Fitts', fData); 
-                alert("Fitts 运动时空特征捕捉完毕"); 
-                show('menu'); 
-                return; 
-            } 
-            
-            ws.innerHTML = ''; 
-            // 随机生成目标直径 (40px 到 90px 之间)
-            let size = Math.random() * 50 + 40; 
-            
-            // 创建左右两个靶点
-            let t1 = document.createElement('div'); 
-            t1.className = 'target active'; 
-            t1.style.width = t1.style.height = size + 'px'; 
-            t1.style.left = '20%'; 
-            t1.style.top = '50%'; 
-            
-            let t2 = document.createElement('div'); 
-            t2.className = 'target'; 
-            t2.style.width = t2.style.height = size + 'px'; 
-            t2.style.left = '80%'; 
-            t2.style.top = '50%'; 
-            
-            // 交互逻辑：点绿的变红，红的变绿
-            t1.ontouchstart = t1.onmousedown = (e) => { 
-                e.preventDefault(); 
-                if(f_tr > 0) fData.records.push({ mt_ms: Math.round(performance.now() - f_lastT) }); 
-                f_lastT = performance.now(); 
-                t1.classList.remove('active'); 
-                t2.classList.add('active'); 
-            }; 
-            
-            t2.ontouchstart = t2.onmousedown = (e) => { 
-                e.preventDefault(); 
-                fData.records.push({ mt_ms: Math.round(performance.now() - f_lastT) }); 
-                f_lastT = performance.now(); 
-                f_tr++; 
-                nextFitts(); 
-            }; 
-            
-            ws.appendChild(t1); 
-            ws.appendChild(t2); 
-            f_lastT = performance.now(); 
-        }
-
-        /* ==================== 3. Spiral (螺旋线描摹) 逻辑 ==================== */
-        const cvs = document.getElementById('spiral-canvas');
-        const ctx = cvs.getContext('2d'); 
-        ctx.scale(2, 2); // 适配 Retina 高分屏 (800x800 画布缩放到 400x400 容器)
+        function startFitts() { f_trial = 0; fittsData.records = []; show('fitts-area'); nextFitts(); }
         
-        let drawing = false;
-        let spiralData = { module: "Motor_Spiral_Tracing", trajectory: [] };
-
-        function startSpiral() { 
-            spiralData.trajectory = []; 
-            ctx.clearRect(0, 0, 400, 400); 
-            drawTemplate(); 
-        }
-
-        function drawTemplate() { 
-            ctx.beginPath(); 
-            ctx.strokeStyle = "#e2e8f0"; 
-            ctx.lineWidth = 15; 
-            ctx.lineCap = "round"; 
+        function nextFitts() {
+            const ws = document.getElementById('fitts-workspace');
+            ws.innerHTML = ''; // 清理上一轮靶子
             
-            // 绘制阿基米德螺旋线模板
-            for(let i = 0; i < 150; i++) { 
-                let a = 0.1 * i; 
-                let x = 200 + (1 + a) * 10 * Math.cos(a);
-                let y = 200 + (1 + a) * 10 * Math.sin(a); 
-                ctx.lineTo(x, y); 
-            } 
-            ctx.stroke(); 
-        }
-
-        // 获取鼠标或触摸点的相对坐标
-        function getPos(e) { 
-            let r = cvs.getBoundingClientRect(); 
-            let ev = e.touches ? e.touches[0] : e; 
-            return { x: ev.clientX - r.left, y: ev.clientY - r.top }; 
-        }
-
-        // 监听绘制事件
-        cvs.onmousedown = cvs.ontouchstart = (e) => { 
-            e.preventDefault(); 
-            drawing = true; 
-            ctx.beginPath(); 
-            ctx.strokeStyle = "#0f172a"; 
-            ctx.lineWidth = 4; 
-            ctx.lineCap = "round"; 
+            if (f_trial >= 10) { 
+                CAS_Storage.saveModuleData('MOT_Fitts', fittsData); 
+                alert("靶向测试完成！"); show('menu'); return; 
+            }
             
-            let p = getPos(e); 
-            ctx.moveTo(p.x, p.y); 
-            spiralData.trajectory.push({x: Math.round(p.x), y: Math.round(p.y), t: Math.round(performance.now())}); 
-        };
-        
-        cvs.onmousemove = cvs.ontouchmove = (e) => { 
-            e.preventDefault(); 
-            if(!drawing) return; 
+            document.getElementById('fitts-prog').innerText = `${f_trial + 1}/10`;
             
-            let p = getPos(e); 
-            ctx.lineTo(p.x, p.y); 
-            ctx.stroke(); 
-            spiralData.trajectory.push({x: Math.round(p.x), y: Math.round(p.y), t: Math.round(performance.now())}); 
-        };
-        
-        cvs.onmouseup = cvs.ontouchend = () => { drawing = false; };
+            // 随机生成靶子大小 (宽度 W: 30px ~ 70px) 和位置 (坐标 X/Y)
+            const w = Math.floor(Math.random() * 40) + 30; 
+            const maxX = ws.clientWidth - w;
+            const maxY = ws.clientHeight - w;
+            const x = Math.floor(Math.random() * maxX);
+            const y = Math.floor(Math.random() * maxY);
 
-        function saveSpiral() { 
-            CAS_Storage.saveModuleData('Motor_Spiral_Tracing', spiralData); 
-            alert("螺旋线时空坐标序列已存入数据库。"); 
-            show('menu'); 
+            let tgt = document.createElement('div');
+            tgt.className = 'fitts-target';
+            tgt.style.width = w + 'px'; tgt.style.height = w + 'px';
+            tgt.style.left = x + 'px'; tgt.style.top = y + 'px';
+            
+            // 将靶子属性保存在闭包外，用于记录
+            f_target = { width: w, x: x, y: y };
+            
+            tgt.onclick = () => {
+                const rt = Math.round(performance.now() - f_onset);
+                // 记录每一步的 RT、靶大小和坐标，供后续算法计算运动斜率(Information Capacity)
+                fittsData.records.push({ trial: f_trial+1, target_w: w, target_x: x, target_y: y, rt_ms: rt });
+                f_trial++; nextFitts();
+            };
+            
+            ws.appendChild(tgt);
+            f_onset = performance.now();
         }
+
+        /* ==================== 3. Archimedean Spiral (震颤轨迹引擎) ==================== */
+        let spiralData = { module: "MOT_Spiral", trajectory: [] };
+        const canvas = document.getElementById('spiral-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function startSpiral() { spiralData.trajectory = []; show('spiral-area'); drawTemplate(); }
+
+        // 绘制底层阿基米德螺旋线模板 (灰色虚线)
+        function drawTemplate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            let a = 5; // 螺旋密度参数
+            for (let i = 0; i < 720; i++) {
+                let angle = 0.1 * i;
+                let x = canvas.width / 2 + (a * angle) * Math.cos(angle);
+                let y = canvas.height / 2 + (a * angle) * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3; ctx.setLineDash([5, 5]); ctx.stroke();
+            ctx.setLineDash([]); // 恢复实线
+        }
+
+        function clearCanvas() { spiralData.trajectory = []; drawTemplate(); }
+
+        function saveSpiral() {
+            if(spiralData.trajectory.length < 10) return alert("轨迹太短，请充分描摹螺旋线。");
+            CAS_Storage.saveModuleData('MOT_Spiral', spiralData);
+            // 临床提取特征建议：对 trajectory.x 和 y 序列进行 FFT (快速傅里叶变换) 提取频段特征。
+            alert("高频轨迹数据采集完成！"); show('menu');
+        }
+
+        // 核心绘图事件与轨迹坐标记录 (兼容 Mouse 和 Touch)
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            // 区分触屏与鼠标事件提取坐标
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top, t: Math.round(performance.now()) };
+        }
+
+        function startDraw(e) {
+            e.preventDefault(); isDrawing = true;
+            const pos = getPos(e);
+            ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+            spiralData.trajectory.push(pos);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 2; ctx.stroke(); // 用蓝色实线记录受试者轨迹
+            spiralData.trajectory.push(pos); // 连续压入时空数组
+        }
+
+        function endDraw() { isDrawing = false; ctx.closePath(); }
+
+        // 绑定事件监听器
+        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDraw); canvas.addEventListener('mouseleave', endDraw);
+        canvas.addEventListener('touchstart', startDraw, {passive: false}); canvas.addEventListener('touchmove', draw, {passive: false});
+        canvas.addEventListener('touchend', endDraw);
     </script>
 </body>
 </html>
