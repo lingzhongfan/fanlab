@@ -245,6 +245,27 @@
                 resHTML += `<div class="result-item"><span>🌧️ PHQ-2 抑郁筛查 (≥3分阳性):</span> <strong>${phqScore} 分 ${alert}</strong></div>`;
                 chartScores.LIF -= (phqScore * 10); // PHQ扣分权重
             }
+            // ================= 新增：影像血流与按键动力学解析 =================
+            
+            // 【影像与血流动力学 PHY】
+            if(mods['PHY_Face_rPPG']) {
+                const rppg = mods['PHY_Face_rPPG'].data;
+                // 此处提示医生数据已就绪，等待后端解算
+                resHTML += `<div class="result-item"><span>🎥 面部影像 (录制时长 / 视频包体积):</span> <strong>${rppg.duration_sec}s / ${rppg.video_size_mb} MB <span style="font-size:12px;color:#64748b;">(待Python后端解算HRV)</span></strong></div>`;
+            }
+
+            // 【按键动力学 KEY / MOT子集】
+            if(mods['MOT_Keystroke']) {
+                const keystroke = mods['MOT_Keystroke'].data.summary;
+                // 临床阈值预警：Dwell Time > 200ms 提示严重的按键粘滞（强直/运动迟缓）
+                let alert = keystroke.avg_dwell_ms > 200 ? `<span class="alert-text">⚠️ 滞留异常(提示运动迟缓)</span>` : "";
+                resHTML += `<div class="result-item"><span>⌨️ 按键动力学 (滞留 Dwell / 飞行 Flight):</span> <strong>${keystroke.avg_dwell_ms} ms / ${keystroke.avg_flight_ms} ms ${alert}</strong></div>`;
+                
+                // 将按键滞留时间融入【运动 MOT】维度的雷达图惩罚计分中
+                // 假设正常人 Dwell 为 100ms，超过部分将按比例扣除 MOT 分数
+                let dwellPenalty = Math.max(0, (keystroke.avg_dwell_ms - 100) / 2);
+                chartScores.MOT = Math.max(0, chartScores.MOT - dwellPenalty);
+            }
 
             // 渲染提取的文字内容
             if(resHTML !== '') document.getElementById('results-content').innerHTML = resHTML;
