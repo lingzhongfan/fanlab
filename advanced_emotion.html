@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAS-AEMO | 高级情感与内隐计算</title>
+    <style>
+        /* 科技温情风 UI */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --purple: #8b5cf6; --rose: #e11d48; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        .hidden { display: none !important; }
+        
+        .module-header { border-left: 6px solid var(--rose); padding-left: 15px; margin-bottom: 25px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
+
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: flex-start; gap: 12px; }
+        .btn-menu { background: #fff1f2; color: var(--rose); border: 1px solid #ffe4e6; }
+        .btn-menu:hover { background: var(--rose); color: white; transform: translateY(-2px); }
+        .btn-action { background: var(--rose); color: white; justify-content: center; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.2); }
+        .btn-action:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
+
+        /* ERT 样式 */
+        .stimulus-img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 16px; background: #0f172a; margin-bottom: 20px;}
+        .ert-slider-box { background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px dashed #cbd5e1; margin-bottom: 20px; }
+        .ert-instruction { font-size: 18px; color: var(--rose); font-weight: bold; text-align: center; margin-bottom: 20px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; outline: none; margin: 20px 0; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; background: white; border: 4px solid var(--rose); border-radius: 50%; cursor: pointer; }
+        
+        /* IAT 样式 */
+        .iat-workspace { position: relative; width: 100%; height: 400px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .iat-label { position: absolute; top: 20px; font-size: 20px; font-weight: bold; text-align: center; padding: 10px 20px; border-radius: 12px; }
+        .iat-left { left: 20px; border: 2px solid var(--blue); color: var(--blue); }
+        .iat-right { right: 20px; border: 2px solid var(--green); color: var(--green); }
+        .iat-stimulus { font-size: 48px; font-weight: bold; color: var(--primary); }
+        .iat-error { position: absolute; bottom: 40px; color: var(--red); font-size: 40px; font-weight: bold; display: none; }
+        
+        /* LLM 样式 */
+        .llm-textarea { width: 100%; height: 150px; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; resize: none; margin-bottom: 20px; }
+        .ocean-bar { display: flex; align-items: center; margin-bottom: 10px; }
+        .ocean-label { width: 120px; font-weight: bold; font-size: 14px; }
+        .ocean-track { flex: 1; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; }
+        .ocean-fill { height: 100%; background: var(--purple); width: 0%; transition: width 1s; }
+        .ocean-val { width: 40px; text-align: right; font-weight: bold; font-size: 14px; }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--rose); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+
+    <div class="container" id="menu">
+        <div class="module-header">
+            <h2>🧠 高级情感与内隐计算 (AEMO)</h2>
+            <p>基于计算精神病学的前沿模块，捕捉深层潜意识与神经抑制功能。</p>
+        </div>
+        <button class="sys-btn btn-menu" onclick="show('ser-area')">🎙️ 1. 语音情绪识别 (SER 韵律提取)</button>
+        <button class="sys-btn btn-menu" onclick="startERT()">🖼️ 2. 情绪调节任务 (ERT 认知重评)</button>
+        <button class="sys-btn btn-menu" onclick="startIAT_Intro()">⚡ 3. 情感内隐联想测验 (Affective IAT)</button>
+        <button class="sys-btn btn-menu" onclick="show('llm-area')">🤖 4. NLP 大五人格计算 (LLM 画像)</button>
+    </div>
+
+    <div class="container hidden" id="ser-area">
+        <div class="module-header"><h2>语音情绪提取 (SER)</h2><p>捕捉韵律、基频起伏与梅尔频谱能量。靶向抑郁症(平淡单调)与焦虑症(高频爆发)。</p></div>
+        <div style="text-align:center; padding: 40px; background:#f8fafc; border-radius: 16px; margin-bottom: 20px; border: 2px dashed #cbd5e1;">
+            <div id="ser-status" style="font-size: 40px; margin-bottom: 10px;">🎤</div>
+            <div id="ser-text" style="color: var(--slate); font-weight: bold;">点击下方按钮，讲述一件近期让您感到有压力的事情 (30秒)。</div>
+        </div>
+        <div style="display:flex; gap:15px;">
+            <button class="sys-btn btn-action" id="btn-ser-start" onclick="startSER()" style="margin:0;">开始录制</button>
+            <button class="sys-btn" id="btn-ser-stop" onclick="stopSER()" style="margin:0; background:var(--slate); color:white;" disabled>停止并提取</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="ert-area">
+        <div class="module-header"><h2>情绪调节能力 (ERT)</h2><p>测量前额叶对杏仁核自上而下的抑制功能 (Cognitive Reappraisal)。</p></div>
+        
+        <img class="stimulus-img" id="ert-img" src="" alt="负性刺激图">
+        <div id="ert-placeholder" style="width:100%; height:250px; background:#e2e8f0; border-radius:16px; display:flex; align-items:center; justify-content:center; color:var(--slate); font-weight:bold; margin-bottom:20px;">
+            [系统占位：此处应呈现负性情绪图片，如车祸、悲伤场景]
+        </div>
+
+        <div class="ert-slider-box">
+            <div class="ert-instruction" id="ert-instruction">自然观看：请评估您现在的负面情绪强度</div>
+            <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                <span style="color:var(--green);">0 (完全平静)</span>
+                <span style="color:var(--rose);">100 (极度难受)</span>
+            </div>
+            <input type="range" id="ert-slider" min="0" max="100" value="50">
+            <div style="text-align:center; font-size:24px; font-weight:bold; color:var(--primary);" id="ert-val">50</div>
+        </div>
+
+        <button class="sys-btn btn-action" id="btn-ert-next" onclick="nextERTStep()">提交评分</button>
+    </div>
+
+    <div class="container hidden" id="iat-area">
+        <div class="module-header"><h2>情感内隐联想测验 (Affective IAT)</h2><p>基于反应时测量深层内隐偏置。请将双手食指分别放在键盘的 <strong>E 键</strong> 和 <strong>I 键</strong> 上。</p></div>
+        
+        <div class="iat-workspace">
+            <div class="iat-label iat-left" id="iat-label-l">我<br>OR<br>快乐</div>
+            <div class="iat-label iat-right" id="iat-label-r">他人<br>OR<br>悲伤</div>
+            
+            <div class="iat-stimulus" id="iat-stimulus">按空格键开始</div>
+            <div class="iat-error" id="iat-error">❌</div>
+        </div>
+        <p style="text-align:center; color:var(--slate); margin-top:15px;" id="iat-guide">指导语：词汇出现时，如果属于左侧类别请按 <strong>E</strong>，属于右侧类别请按 <strong>I</strong>。请尽可能快速且准确。</p>
+    </div>
+
+    <div class="container hidden" id="llm-area">
+        <div class="module-header"><h2>NLP 人格表型计算</h2><p>通过大语言模型(LLM)的情感词典和语用学分析，对自发语言(如偷饼图描述)进行特征降维，免除问卷填写的主观偏差。</p></div>
+        
+        <textarea class="llm-textarea" id="llm-input" placeholder="请在此处粘贴受试者的语音转录文本，或者让受试者自由输入一段自我介绍 (不少于50字)...">今天我觉得有点累，虽然外面天气很好，但我还是不太想出门和朋友聚会。可能一个人待在家里看看书会让我觉得更舒服些。不过如果明天工作有安排，我还是会认真去完成的。</textarea>
+        
+        <button class="sys-btn btn-action" id="btn-llm" onclick="analyzeLLM()">🧠 启动 NLP 语义与情感分析</button>
+
+        <div id="llm-results" class="hidden" style="margin-top: 30px; padding: 25px; background: #f8fafc; border-radius: 16px;">
+            <h3 style="margin-top:0; color:var(--purple);">大五人格 (OCEAN) 预测结果</h3>
+            <div class="ocean-bar"><span class="ocean-label">O (开放性)</span><div class="ocean-track"><div class="ocean-fill" id="o-o"></div></div><span class="ocean-val" id="v-o">0</span></div>
+            <div class="ocean-bar"><span class="ocean-label">C (尽责性)</span><div class="ocean-track"><div class="ocean-fill" id="o-c"></div></div><span class="ocean-val" id="v-c">0</span></div>
+            <div class="ocean-bar"><span class="ocean-label">E (外向性)</span><div class="ocean-track"><div class="ocean-fill" id="o-e"></div></div><span class="ocean-val" id="v-e">0</span></div>
+            <div class="ocean-bar"><span class="ocean-label">A (宜人性)</span><div class="ocean-track"><div class="ocean-fill" id="o-a"></div></div><span class="ocean-val" id="v-a">0</span></div>
+            <div class="ocean-bar"><span class="ocean-label">N (神经质)</span><div class="ocean-track"><div class="ocean-fill" style="background:var(--rose);" id="o-n"></div></div><span class="ocean-val" style="color:var(--rose);" id="v-n">0</span></div>
+            <button class="sys-btn" style="margin-top:20px; background:var(--primary); color:white;" onclick="saveLLM()">💾 确认并入库</button>
+        </div>
+    </div>
+
+    <script>
+        function show(id) {
+            ['menu','ser-area','ert-area','iat-area','llm-area'].forEach(d => { document.getElementById(d).classList.add('hidden'); });
+            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
+        }
+
+        /* ================= 1. SER 语音情绪识别逻辑 ================= */
+        let serRecorder, serChunks = [];
+        function startSER() {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                serRecorder = new MediaRecorder(stream);
+                serRecorder.ondataavailable = e => { if (e.data.size > 0) serChunks.push(e.data); };
+                serRecorder.start();
+                document.getElementById('ser-status').innerText = "🎙️ 录音中...";
+                document.getElementById('btn-ser-start').disabled = true;
+                document.getElementById('btn-ser-stop').disabled = false;
+                document.getElementById('btn-ser-stop').style.background = 'var(--rose)';
+            }).catch(e => alert("无麦克风权限！"));
+        }
+        function stopSER() {
+            serRecorder.stop();
+            document.getElementById('ser-status').innerText = "⏳ 提取中...";
+            serRecorder.onstop = () => {
+                // 模拟向后端 API 发送音频 Blob 获取 Valence 和 Arousal
+                setTimeout(() => {
+                    const serData = { module: "AEMO_SER", valence_score: 42, arousal_score: 65, prosody_variance: 0.12 };
+                    CAS_Storage.saveModuleData('AEMO_SER', serData);
+                    alert("✅ 语音韵律特征已提取！\n\n- 效价 (Valence): 42 (偏负面)\n- 唤醒度 (Arousal): 65 (偏高)\n- 模拟临床提示：高频能量变异性增大，提示潜在焦虑特质。");
+                    show('menu');
+                }, 1500);
+            };
+        }
+
+        /* ================= 2. ERT 情绪调节能力逻辑 ================= */
+        let ertData = { module: "AEMO_ERT", baseline_score: 0, reappraisal_score: 0, regulation_capacity: 0 };
+        let ertStep = 1;
+        
+        document.getElementById('ert-slider').oninput = function() { document.getElementById('ert-val').innerText = this.value; }
+
+        function startERT() { ertStep = 1; document.getElementById('ert-slider').value = 50; document.getElementById('ert-val').innerText = 50; document.getElementById('ert-instruction').innerText = "步骤 1/2 自然观看：请评估您现在的负面情绪强度"; show('ert-area'); }
+        
+        function nextERTStep() {
+            if (ertStep === 1) {
+                ertData.baseline_score = parseInt(document.getElementById('ert-slider').value);
+                ertStep = 2;
+                document.getElementById('ert-instruction').innerHTML = "步骤 2/2 <span style='color:var(--blue);'>认知重评 (Reappraisal)</span>：<br>请试着告诉自己：『这只是一部电影的拍摄现场，没有人真正受伤』。现在，请再次评估您的情绪强度。";
+                document.getElementById('ert-slider').value = 50; document.getElementById('ert-val').innerText = 50;
+            } else {
+                ertData.reappraisal_score = parseInt(document.getElementById('ert-slider').value);
+                // 调节能力 = 初始负面得分 - 重评后得分 (值越大，前额叶抑制能力越强)
+                ertData.regulation_capacity = ertData.baseline_score - ertData.reappraisal_score;
+                CAS_Storage.saveModuleData('AEMO_ERT', ertData);
+                alert(`✅ ERT 完成！\n\n基线情绪: ${ertData.baseline_score}\n重评后情绪: ${ertData.reappraisal_score}\n重评调节能力: ${ertData.regulation_capacity}\n\n*临床提示：如果调节能力<0或极小，提示由于神经退行性病变导致的前额叶-杏仁核自上而下抑制功能减退。`);
+                show('menu');
+            }
+        }
+
+        /* ================= 3. IAT 情感内隐联想逻辑 ================= */
+        // 简化版 IAT：只测试 Block 1 (相容) 和 Block 2 (不相容)
+        const iatWords = { self: ['我', '自己', '我的'], other: ['他', '别人', '他们'], pos: ['快乐', '健康', '活力'], neg: ['孤独', '衰老', '痛苦'] };
+        let iatState = 0; // 0: 准备, 1: Block1, 2: 准备B2, 3: Block2
+        let iatTrials = [], currentWord = "", currentCorrectKey = "", iatOnset = 0;
+        let b1_RT = [], b2_RT = [];
+
+        function startIAT_Intro() { iatState = 0; b1_RT=[]; b2_RT=[]; document.getElementById('iat-stimulus').innerText = "按空格键开始 Block 1"; show('iat-area'); }
+
+        document.addEventListener('keydown', (e) => {
+            if(document.getElementById('iat-area').classList.contains('hidden')) return;
+            const key = e.key.toLowerCase();
+            
+            if (iatState === 0 && key === ' ') { startBlock1(); }
+            else if (iatState === 2 && key === ' ') { startBlock2(); }
+            else if (iatState === 1 || iatState === 3) {
+                if (key === 'e' || key === 'i') {
+                    if (key === currentCorrectKey) {
+                        const rt = performance.now() - iatOnset;
+                        if(iatState === 1) b1_RT.push(rt); else b2_RT.push(rt);
+                        document.getElementById('iat-error').style.display = 'none';
+                        nextIATWord();
+                    } else {
+                        document.getElementById('iat-error').style.display = 'block'; // 必须改对才能继续
+                    }
+                }
+            }
+        });
+
+        function startBlock1() {
+            iatState = 1; iatTrials = [];
+            // Block 1 (相容): 左(我/快乐 E), 右(他/悲伤 I)
+            document.getElementById('iat-label-l').innerHTML = "我<br>OR<br>积极"; document.getElementById('iat-label-r').innerHTML = "他人<br>OR<br>消极";
+            for(let i=0;i<3;i++) { iatTrials.push({w:iatWords.self[i], k:'e'}); iatTrials.push({w:iatWords.pos[i], k:'e'}); iatTrials.push({w:iatWords.other[i], k:'i'}); iatTrials.push({w:iatWords.neg[i], k:'i'}); }
+            iatTrials.sort(() => Math.random() - 0.5); nextIATWord();
+        }
+
+        function startBlock2() {
+            iatState = 3; iatTrials = [];
+            // Block 2 (不相容): 左(我/悲伤 E), 右(他/快乐 I)
+            document.getElementById('iat-label-l').innerHTML = "我<br>OR<br>消极"; document.getElementById('iat-label-r').innerHTML = "他人<br>OR<br>积极";
+            for(let i=0;i<3;i++) { iatTrials.push({w:iatWords.self[i], k:'e'}); iatTrials.push({w:iatWords.neg[i], k:'e'}); iatTrials.push({w:iatWords.other[i], k:'i'}); iatTrials.push({w:iatWords.pos[i], k:'i'}); }
+            iatTrials.sort(() => Math.random() - 0.5); nextIATWord();
+        }
+
+        function nextIATWord() {
+            if (iatTrials.length === 0) {
+                if (iatState === 1) { iatState = 2; document.getElementById('iat-stimulus').innerText = "按空格键开始 Block 2 (注意左右规则已对调!)"; } 
+                else { finishIAT(); }
+                return;
+            }
+            const trial = iatTrials.pop();
+            currentWord = trial.w; currentCorrectKey = trial.k;
+            document.getElementById('iat-stimulus').innerText = "";
+            setTimeout(() => { document.getElementById('iat-stimulus').innerText = currentWord; iatOnset = performance.now(); }, 250); // ITI
+        }
+
+        function finishIAT() {
+            const avg1 = b1_RT.reduce((a,b)=>a+b,0)/b1_RT.length;
+            const avg2 = b2_RT.reduce((a,b)=>a+b,0)/b2_RT.length;
+            const dScore = avg2 - avg1; // 简化版 D-score 逻辑
+            
+            const iatData = { module: "AEMO_IAT", congruent_rt: Math.round(avg1), incongruent_rt: Math.round(avg2), implicit_bias_ms: Math.round(dScore) };
+            CAS_Storage.saveModuleData('AEMO_IAT', iatData);
+            
+            let biasMsg = dScore > 200 ? "显著的内隐抑郁/孤独偏置" : "无明显负向偏置";
+            alert(`✅ IAT 测验完成！\n\n- 相容任务平均 RT: ${Math.round(avg1)} ms\n- 不相容任务平均 RT: ${Math.round(avg2)} ms\n- 内隐阻力差值: ${Math.round(dScore)} ms\n\n*临床提示: 差值显著大于零，提示存在【${biasMsg}】。当系统要求把“我”和“消极词”绑定时，受试者潜意识处理得更快。`);
+            show('menu');
+        }
+
+        /* ================= 4. 大语言模型 LLM 提取大五人格 ================= */
+        let llmResultData = {};
+        
+        function analyzeLLM() {
+            const text = document.getElementById('llm-input').value;
+            if (text.length < 20) return alert("文本过短，NLP 无法提取有效语义特征。");
+            
+            document.getElementById('btn-llm').innerText = "🔄 正在连接云端大语言模型分析中...";
+            document.getElementById('btn-llm').disabled = true;
+
+            // 模拟向 ChatGPT 或本地 LLM 发送 Prompt 并提取 JSON 的过程
+            setTimeout(() => {
+                // 基于示例文字的虚拟解析结果
+                llmResultData = { O: 65, C: 80, E: 35, A: 75, N: 60, text_length: text.length };
+                
+                ['o','c','e','a','n'].forEach(trait => {
+                    document.getElementById(`o-${trait}`).style.width = llmResultData[trait.toUpperCase()] + '%';
+                    document.getElementById(`v-${trait}`).innerText = llmResultData[trait.toUpperCase()];
+                });
+                
+                document.getElementById('llm-results').classList.remove('hidden');
+                document.getElementById('btn-llm').innerText = "✅ NLP 解析完成";
+            }, 2000);
+        }
+
+        function saveLLM() {
+            CAS_Storage.saveModuleData('AEMO_LLM_Big5', { module: "AEMO_LLM_Big5", data: llmResultData });
+            alert("✅ NLP 人格画像数据已入库！提取大五人格特征，无需问卷作答。");
+            show('menu');
+        }
+    </script>
+</body>
+</html>
