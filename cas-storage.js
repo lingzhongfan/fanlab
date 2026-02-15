@@ -4,7 +4,6 @@ const CAS_Storage = {
     hasSession: () => localStorage.getItem('CAS_Current_Session') !== null,
     
     initSession: function(subjectInfo) {
-        // 强制保障利手和教育水平等所有字段入库
         const sessionData = {
             session_id: subjectInfo.subject_id,
             demographics: {
@@ -12,8 +11,8 @@ const CAS_Storage = {
                 name: subjectInfo.name,
                 dob: subjectInfo.dob,
                 gender: subjectInfo.gender,
-                handedness: subjectInfo.handedness,     // 已修复
-                education_level: subjectInfo.education_level // 已修复
+                handedness: subjectInfo.handedness,     // 确保利手输出
+                education_level: subjectInfo.education_level // 确保教育水平输出
             },
             start_time: new Date().toISOString(),
             modules: {} 
@@ -28,10 +27,7 @@ const CAS_Storage = {
 
     saveModuleData: function(moduleName, data) {
         let session = this.getSession();
-        session.modules[moduleName] = { 
-            completed_at: new Date().toISOString(), 
-            data: data 
-        };
+        session.modules[moduleName] = { completed_at: new Date().toISOString(), data: data };
         localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
     },
 
@@ -46,7 +42,7 @@ const CAS_Storage = {
     },
 
     clearSession: function() {
-        if(confirm("确定清除当前受试者的所有测试缓存吗？")) {
+        if(confirm("确定清除当前受试者的所有测试缓存吗？(请确保已导出)")) {
             localStorage.removeItem(this.SESSION_KEY);
             location.href = 'index.html';
         }
