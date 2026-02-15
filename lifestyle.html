@@ -3,267 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAS-LIF | 主观认知与节律状态</title>
+    <title>CAS-LIF | 生活方式与临床评估</title>
     <style>
-        /* 全局样式配置 */
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: #f8fafc; 
-            margin: 0; 
-            padding: 20px; 
-        }
-        .container { 
-            max-width: 650px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 35px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        }
-        .module-header { 
-            color: #0f172a; 
-            margin-top: 0; 
-            font-size: 24px; 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-        }
-        
-        /* 导航与按钮 */
-        .sys-btn { 
-            background: #0f172a; 
-            color: white; 
-            border: none; 
-            padding: 18px 30px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            margin: 10px 0; 
-            width: 100%; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-        .sys-btn:active { transform: scale(0.98); } 
+        /* 科技温情风 UI */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --teal: #0d9488; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        #nav-back { 
-            display: inline-flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: #3b82f6; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            padding: 10px 18px; 
-            background: #eff6ff; 
-            border-radius: 10px; 
-            transition: 0.2s; 
-        } 
-        #nav-back:active { background: #dbeafe; }
+        .module-header { border-left: 6px solid var(--teal); padding-left: 15px; margin-bottom: 30px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .btn-menu { background: #f0fdfa; color: #0f766e; border: 1px solid #ccfbf1; }
+        .btn-menu:hover { background: var(--teal); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(13, 148, 136, 0.2); }
+        .btn-action { background: var(--teal); color: white; justify-content: center; margin-top: 30px; }
+
+        /* 问卷系统精美 UI */
+        .q-group { margin-bottom: 35px; background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px dashed #e2e8f0; }
+        .q-group label { display: block; font-weight: 600; margin-bottom: 20px; font-size: 16px; color: var(--primary); line-height: 1.5; }
         
-        /* 问卷组合样式 (增强触控体验) */
-        .q-group { 
-            margin-bottom: 25px; 
-            padding-bottom: 20px; 
-            border-bottom: 1px dashed #e2e8f0; 
-        } 
-        .q-group:last-child { border-bottom: none; }
-        .q-group label { 
-            display: block; 
-            font-weight: bold; 
-            color: #1e293b; 
-            margin-bottom: 12px; 
-            font-size: 16px; 
-            line-height: 1.4; 
-        }
-        
-        /* 表单输入元素样式 */
-        select, input[type="time"] { 
-            width: 100%; 
-            padding: 16px; 
-            border-radius: 10px; 
-            border: 2px solid #cbd5e1; 
-            font-size: 16px; 
-            background: #f8fafc; 
-            outline: none; 
-            transition: 0.2s; 
-            box-sizing: border-box; 
-        }
-        select:focus, input[type="time"]:focus { 
-            border-color: #3b82f6; 
-            background: white; 
-        }
+        /* 优化单选按钮的触控体验 (适老化) */
+        .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .radio-option { display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .radio-option:active { transform: scale(0.98); }
+        .radio-option input[type="radio"] { width: 20px; height: 20px; margin-right: 15px; accent-color: var(--teal); cursor: pointer; }
+        .radio-option:has(input[type="radio"]:checked) { border-color: var(--teal); background: #f0fdfa; }
+
+        /* 滑块 */
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; background: white; border: 4px solid var(--teal); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .labels { display: flex; justify-content: space-between; font-size: 13px; color: var(--slate); margin-top: 12px; font-weight: bold; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="text-align: left; max-width: 650px; margin: 0 auto;">
-        <a href="index.html" id="nav-back">← 返回控制台</a>
-    </div>
-    
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--teal); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+
     <div class="container" id="menu">
-        <h2 class="module-header">🌙 衰退预警与生活质控</h2>
-        <button class="sys-btn" onclick="show('scd-area');">1. SCD-Q 主观认知下降问卷</button>
-        <button class="sys-btn" onclick="show('sleep-area');">2. 睡眠结构与节律特征</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('iadl-area');">3. IADL 工具性日常生活能力</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('phq-area');">4. PHQ-2 抑郁情绪鉴别筛查</button>
+        <div class="module-header">
+            <h2>🌙 生活方式与日常功能 (CAS-LIF)</h2>
+            <p>包含主观认知衰退(SCD)、日常工具性功能(IADL)、睡眠节律与抑郁筛查。</p>
+        </div>
+        <button class="sys-btn btn-menu" onclick="show('scd-area')">🧠 1. SCD-Q 主观认知下降问卷</button>
+        <button class="sys-btn btn-menu" onclick="show('iadl-area')">🛠️ 2. IADL 日常生活能力量表</button>
+        <button class="sys-btn btn-menu" onclick="show('sleep-area')">💤 3. 睡眠与生物节律特征评估</button>
+        <button class="sys-btn btn-menu" onclick="show('phq-area')">🌧️ 4. PHQ-2 抑郁情绪筛查量表</button>
     </div>
 
     <div class="container hidden" id="scd-area">
-        <h2 class="module-header">主观认知下降 (SCD-Q)</h2>
+        <div class="module-header"><h2>主观认知下降 (SCD-Q)</h2>
+        <p>临床意义: SCD 是阿尔茨海默病 (AD) 临床前期的重要预测指标。</p></div>
+        
         <div class="q-group">
-            <label>1. 您觉得自己的记忆力是否正在下降？</label>
-            <select id="scd-1">
-                <option value="0">没有明显变化</option>
-                <option value="1">偶尔感觉下降</option>
-                <option value="2">明显感觉下降</option>
-            </select>
+            <label>1. 与一年前相比，您是否觉得自己的记忆力正在下降？</label>
+            <div class="radio-grid">
+                <label class="radio-option"><input type="radio" name="scd1" value="1"> 是 (Yes)</label>
+                <label class="radio-option"><input type="radio" name="scd1" value="0"> 否 (No)</label>
+            </div>
         </div>
+        
         <div class="q-group">
-            <label>2. 这种记忆下降是否引起了您的担忧？</label>
-            <select id="scd-2">
-                <option value="0">完全不担忧</option>
-                <option value="1">有一点担忧</option>
-                <option value="2">非常担忧</option>
-            </select>
+            <label>2. 这种记忆力下降的情况是否让您感到担心或焦虑？</label>
+            <div class="radio-grid">
+                <label class="radio-option"><input type="radio" name="scd2" value="1"> 是 (Yes)</label>
+                <label class="radio-option"><input type="radio" name="scd2" value="0"> 否 (No)</label>
+            </div>
         </div>
-        <button class="sys-btn" style="background:#10b981;" onclick="saveSCD()">✓ 保存问卷</button>
-    </div>
 
-    <div class="container hidden" id="sleep-area">
-        <h2 class="module-header">生物节律与睡眠</h2>
-        <div class="q-group">
-            <label>1. 过去一个月，您通常晚上几点入睡？</label>
-            <input type="time" id="slp-1" value="23:00">
-        </div>
-        <div class="q-group">
-            <label>2. 睡眠碎片化程度 (夜间通常醒来几次？)</label>
-            <select id="slp-2">
-                <option value="0">0次 (一觉到天亮)</option>
-                <option value="1">1-2次</option>
-                <option value="2">3次及以上</option>
-            </select>
-        </div>
-        <button class="sys-btn" style="background:#10b981;" onclick="saveSleep()">✓ 保存特征</button>
+        <button class="sys-btn btn-action" onclick="saveSCD()">保存 SCD 数据</button>
     </div>
 
     <div class="container hidden" id="iadl-area">
-        <h2 class="module-header">日常生活能力 (IADL)</h2>
-        <p style="color:#64748b; font-size: 14px; margin-top:-10px;">用于鉴别轻度认知障碍(MCI)与痴呆。</p>
+        <div class="module-header"><h2>工具性日常生活能力 (IADL)</h2>
+        <p>临床诊断鉴别: IADL 受损是区分 MCI (轻度认知障碍) 与痴呆 (Dementia) 的核心分水岭。</p></div>
         
         <div class="q-group">
-            <label>1. 财务管理 (如：去银行取钱、计算找零、支付账单)</label>
-            <select id="iadl-1">
-                <option value="0">完全独立完成</option>
-                <option value="1">需要部分协助或提醒</option>
-                <option value="2">完全无法自己处理</option>
-            </select>
+            <label>1. 【管理财务】: 您能独立处理账单、去银行办理业务吗？</label>
+            <div class="radio-grid">
+                <label class="radio-option"><input type="radio" name="iadl1" value="0"> 完全独立</label>
+                <label class="radio-option"><input type="radio" name="iadl1" value="1"> 需要部分协助</label>
+                <label class="radio-option" style="grid-column: 1 / -1;"><input type="radio" name="iadl1" value="2"> 完全无法独立完成</label>
+            </div>
         </div>
+        
         <div class="q-group">
-            <label>2. 按时服药 (能否自己记住按时、按量吃药)</label>
-            <select id="iadl-2">
-                <option value="0">完全独立完成</option>
-                <option value="1">需要家人事先分装或提醒</option>
-                <option value="2">完全无法自己服药，必须他人喂食</option>
-            </select>
+            <label>2. 【服药管理】: 您能按时按量、正确地服用自己的日常药物吗？</label>
+            <div class="radio-grid">
+                <label class="radio-option"><input type="radio" name="iadl2" value="0"> 完全独立</label>
+                <label class="radio-option"><input type="radio" name="iadl2" value="1"> 需人提醒或准备</label>
+            </div>
         </div>
+
+        <button class="sys-btn btn-action" onclick="saveIADL()">保存 IADL 评估</button>
+    </div>
+
+    <div class="container hidden" id="sleep-area">
+        <div class="module-header"><h2>睡眠结构与生物节律</h2>
+        <p>临床意义: 昼夜节律紊乱 (Circadian Disruption) 和睡眠碎片化往往早于认知衰退出现。</p></div>
+        
         <div class="q-group">
-            <label>3. 交通出行 (能否自己乘车或打车去不熟悉的地方)</label>
-            <select id="iadl-3">
-                <option value="0">完全独立规划路线并出行</option>
-                <option value="1">仅限周围非常熟悉的地方，或只能叫车</option>
-                <option value="2">必须有家属陪同</option>
-            </select>
+            <label>1. 过去一个月内，您平均每晚的【实际睡眠时间】大约是？</label>
+            <div style="font-weight:bold; color:var(--teal); text-align:center; font-size:24px; margin-bottom:15px;" id="sleep-hr-val">7 小时</div>
+            <input type="range" id="sleep-hr" min="2" max="14" step="0.5" value="7" oninput="document.getElementById('sleep-hr-val').innerText = this.value + ' 小时'">
         </div>
-        <button class="sys-btn" style="background:#10b981;" onclick="saveIADL()">✓ 保存 IADL 评估</button>
+        
+        <div class="q-group">
+            <label>2. 您在睡眠过程中，是否经常出现大声做梦、挥动手臂或踢腿的情况？(RBD 快速眼动期睡眠行为障碍筛查)</label>
+            <div class="radio-grid">
+                <label class="radio-option"><input type="radio" name="sleep-rbd" value="1"> 经常发生</label>
+                <label class="radio-option"><input type="radio" name="sleep-rbd" value="0"> 从未发生</label>
+            </div>
+        </div>
+
+        <button class="sys-btn btn-action" onclick="saveSleep()">保存睡眠特征</button>
     </div>
 
     <div class="container hidden" id="phq-area">
-        <h2 class="module-header">情绪筛查 (PHQ-2)</h2>
-        <p style="color:#64748b; font-size: 14px; margin-top:-10px;">用于排除“假性痴呆”干扰。请回顾过去两周的状况。</p>
+        <div class="module-header"><h2>抑郁情绪筛查 (PHQ-2)</h2>
+        <p>临床意义: 极高比例的早期认知减退患者伴随抑郁，必须排除“抑郁性假性痴呆”。</p></div>
+        
+        <p style="color:var(--slate); font-weight:bold;">在过去的 2 周内，您多长频率受到以下问题的困扰？</p>
+
+        <div class="q-group">
+            <label>1. 做事缺乏兴趣或乐趣？</label>
+            <select id="phq1" style="width:100%; padding:15px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px;">
+                <option value="-1">请选择...</option>
+                <option value="0">完全没有 (0分)</option>
+                <option value="1">有几天 (1分)</option>
+                <option value="2">一半以上的天数 (2分)</option>
+                <option value="3">几乎每天 (3分)</option>
+            </select>
+        </div>
         
         <div class="q-group">
-            <label>1. 做事情时，是否感到缺乏兴趣或乐趣？</label>
-            <select id="phq-1">
-                <option value="0">完全没有</option>
-                <option value="1">有几天</option>
-                <option value="2">一半以上的天数</option>
-                <option value="3">几乎每天</option>
+            <label>2. 感到情绪低落、沮丧或绝望？</label>
+            <select id="phq2" style="width:100%; padding:15px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px;">
+                <option value="-1">请选择...</option>
+                <option value="0">完全没有 (0分)</option>
+                <option value="1">有几天 (1分)</option>
+                <option value="2">一半以上的天数 (2分)</option>
+                <option value="3">几乎每天 (3分)</option>
             </select>
         </div>
-        <div class="q-group">
-            <label>2. 是否感到情绪低落、抑郁或绝望？</label>
-            <select id="phq-2">
-                <option value="0">完全没有</option>
-                <option value="1">有几天</option>
-                <option value="2">一半以上的天数</option>
-                <option value="3">几乎每天</option>
-            </select>
-        </div>
-        <button class="sys-btn" style="background:#10b981;" onclick="savePHQ()">✓ 保存情绪筛查</button>
+
+        <button class="sys-btn btn-action" onclick="savePHQ()">计算 PHQ 得分并保存</button>
     </div>
 
     <script>
-        // 视图路由切换
-        function show(id) { 
-            ['menu', 'scd-area', 'sleep-area', 'iadl-area', 'phq-area'].forEach(d => {
-                document.getElementById(d).classList.add('hidden');
-            }); 
-            document.getElementById(id).classList.remove('hidden'); 
-            // 每次切换视图时滚动到页面顶部
-            window.scrollTo(0,0);
+        function show(id) {
+            ['menu', 'scd-area', 'iadl-area', 'sleep-area', 'phq-area'].forEach(d => {
+                const el = document.getElementById(d); if(el) el.classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
         }
 
-        /* ==================== 1. 保存 SCD 问卷数据 ==================== */
-        function saveSCD() { 
-            CAS_Storage.saveModuleData('Lifestyle_SCD', { 
-                memory_decline: parseInt(document.getElementById('scd-1').value), 
-                worry: parseInt(document.getElementById('scd-2').value) 
-            }); 
-            alert("主观认知预警已同步"); 
-            show('menu'); 
+        // 辅助函数：获取 Radio 选中的值
+        function getRadioVal(name) {
+            const ele = document.getElementsByName(name);
+            for(let i=0; i<ele.length; i++) { if(ele[i].checked) return parseInt(ele[i].value); }
+            return null;
         }
 
-        /* ==================== 2. 保存 睡眠与节律数据 ==================== */
-        function saveSleep() { 
-            CAS_Storage.saveModuleData('Lifestyle_Sleep', { 
-                bedtime: document.getElementById('slp-1').value, 
-                awakenings: parseInt(document.getElementById('slp-2').value) 
-            }); 
-            alert("生物节律数据已同步"); 
-            show('menu'); 
+        function saveSCD() {
+            const q1 = getRadioVal('scd1'); const q2 = getRadioVal('scd2');
+            if (q1 === null || q2 === null) return alert("请回答所有问题！");
+            CAS_Storage.saveModuleData('Lifestyle_SCD', { memory_decline: q1, worry_about_decline: q2, scd_score: q1 + q2 });
+            alert("SCD 数据已保存！"); show('menu');
         }
 
-        /* ==================== 3. 保存 IADL (工具性日常生活能力) ==================== */
-        // 得分越高代表能力受损越严重 (0为正常，总分最大为6)
         function saveIADL() {
-            let f_score = parseInt(document.getElementById('iadl-1').value);
-            let m_score = parseInt(document.getElementById('iadl-2').value);
-            let t_score = parseInt(document.getElementById('iadl-3').value);
-            
-            CAS_Storage.saveModuleData('Lifestyle_IADL', {
-                finance: f_score,
-                medication: m_score,
-                transport: t_score,
-                total_score: f_score + m_score + t_score
-            });
-            alert("IADL 能力鉴别数据已入库。"); 
-            show('menu'); 
+            const q1 = getRadioVal('iadl1'); const q2 = getRadioVal('iadl2');
+            if (q1 === null || q2 === null) return alert("请回答所有问题！");
+            CAS_Storage.saveModuleData('Lifestyle_IADL', { finance_management: q1, medication_management: q2, iadl_impairment_score: q1 + q2 });
+            alert("IADL 数据已保存！"); show('menu');
         }
 
-        /* ==================== 4. 保存 PHQ-2 (抑郁筛查) ==================== */
-        // PHQ-2 总分为 0-6 分。临床上通常将总分 ≥ 3 视为抑郁高风险
+        function saveSleep() {
+            const rbd = getRadioVal('sleep-rbd');
+            if (rbd === null) return alert("请回答所有问题！");
+            CAS_Storage.saveModuleData('Lifestyle_Sleep', { sleep_duration_hrs: parseFloat(document.getElementById('sleep-hr').value), rbd_symptom: rbd });
+            alert("睡眠节律特征已保存！"); show('menu');
+        }
+
         function savePHQ() {
-            let anhedonia_score = parseInt(document.getElementById('phq-1').value);
-            let depressed_score = parseInt(document.getElementById('phq-2').value);
+            const p1 = parseInt(document.getElementById('phq1').value);
+            const p2 = parseInt(document.getElementById('phq2').value);
+            if (p1 === -1 || p2 === -1) return alert("请选择您的困扰频率！");
             
-            CAS_Storage.saveModuleData('Lifestyle_PHQ2', {
-                anhedonia: anhedonia_score,
-                depressed_mood: depressed_score,
-                total_score: anhedonia_score + depressed_score
-            });
-            alert("假性痴呆/情绪筛查数据已入库。"); 
-            show('menu'); 
+            const totalScore = p1 + p2;
+            CAS_Storage.saveModuleData('Lifestyle_PHQ2', { q1: p1, q2: p2, total_score: totalScore });
+            
+            // 临床提示：PHQ-2 得分 >= 3 提示存在重大抑郁风险，需进一步进行 PHQ-9 评估
+            let msg = `量表保存成功。PHQ-2 总分: ${totalScore} 分。`;
+            if (totalScore >= 3) msg += "\n\n⚠️ 临床提示：得分≥3，提示可能存在抑郁症状，建议排查抑郁性假性痴呆。";
+            alert(msg); show('menu');
         }
     </script>
 </body>
