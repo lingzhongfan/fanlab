@@ -2,383 +2,109 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAS-LAN | 语言功能与语义网络</title>
+    <title>CAS-LAN | 语言功能</title>
     <style>
-        /* 全局样式与防误触配置 */
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: #f8fafc; 
-            margin: 0; 
-            padding: 20px; 
-            text-align: center; 
-            touch-action: manipulation; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-        .container { 
-            max-width: 650px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 35px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        }
-        .module-header { 
-            color: #0f172a; 
-            margin-top: 0; 
-            font-size: 24px; 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-        }
-        
-        /* 按钮与导航 */
-        .sys-btn { 
-            background: #0f172a; 
-            color: white; 
-            border: none; 
-            padding: 18px 30px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            margin: 10px 0; 
-            width: 100%; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-        .sys-btn:active { transform: scale(0.98); } 
+        /* 继承统一 UI */
+        body { font-family: sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 650px; margin: 20px auto; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 16px; background: #eef2ff; color: #4f46e5; transition: 0.2s; }
+        .btn-action { background: #4f46e5; color: white; }
         
-        #nav-back { 
-            display: inline-flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: #3b82f6; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            padding: 10px 18px; 
-            background: #eff6ff; 
-            border-radius: 10px; 
-            transition: 0.2s; 
-        } 
-        #nav-back:active { background: #dbeafe; }
-        
-        /* 输入框样式 (VFT & Naming) */
-        #vft-input, #naming-input { 
-            width: 70%; 
-            padding: 18px; 
-            font-size: 18px; 
-            border: 2px solid #cbd5e1; 
-            border-radius: 12px; 
-            margin-right: 15px; 
-            outline: none; 
-            transition: 0.2s; 
-            box-sizing: border-box; 
-            background: #f8fafc; 
-        } 
-        #vft-input:focus, #naming-input:focus { 
-            border-color: #3b82f6; 
-            background: white; 
-        }
-        
-        /* VFT 词汇云标签 */
-        .vft-word-list { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            justify-content: center; 
-            margin-top: 30px; 
-        } 
-        .vft-tag { 
-            background: #e0f2fe; 
-            color: #0369a1; 
-            padding: 10px 18px; 
-            border-radius: 20px; 
-            font-weight: bold; 
-            font-size: 15px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-        }
-        
-        /* 命名图片样式 */
-        #naming-pic { 
-            font-size: 120px; 
-            margin: 40px 0; 
-        }
-
-        /* 语义关联模块样式 */
-        #sema-target { 
-            font-size: 40px; 
-            font-weight: bold; 
-            color: #0f172a; 
-            margin: 30px 0 40px 0; 
-            letter-spacing: 2px; 
-        }
-        .sema-options { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-        }
-        .sema-btn { 
-            padding: 20px; 
-            font-size: 20px; 
-            border: 2px solid #cbd5e1; 
-            border-radius: 12px; 
-            background: white; 
-            color: #334155; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.1s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-        }
-        .sema-btn:active { 
-            background: #3b82f6; 
-            color: white; 
-            border-color: #3b82f6; 
-            transform: scale(0.98); 
-        }
+        /* 语音输入框样式 */
+        .input-wrapper { display: flex; gap: 10px; margin: 20px 0; }
+        input[type="text"] { flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 18px; }
+        .btn-mic { background: #10b981; color: white; border: none; border-radius: 14px; padding: 0 25px; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .btn-mic:active { transform: scale(0.9); }
+        .recording { animation: pulse 1.5s infinite; background: #f43f5e; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="text-align: left; max-width: 650px; margin: 0 auto;">
-        <a href="index.html" id="nav-back">← 返回控制台</a>
-    </div>
-    
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:#4f46e5; font-weight:bold; cursor:pointer; font-size: 16px;">← 返回控制台</button>
+
     <div class="container" id="menu">
-        <h2 class="module-header">💬 语言与语义网络</h2>
-        <button class="sys-btn" onclick="show('vft-area'); startVFT();">1. 词汇流畅性提取 (VFT - 动物类)</button>
-        <button class="sys-btn" onclick="show('naming-area'); startNaming();">2. 数字化图片命名时延 (Naming)</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('sema-area'); startSema();">3. 语义关联与抽象判别 (Semantic)</button>
+        <h2 style="color: #1e293b; margin-top:0;">💬 语言提取与语义网络</h2>
+        <button class="sys-btn" onclick="show('vft-area'); startVFT();">1. 词汇流畅性提取 (VFT) - 支持语音</button>
+        <button class="sys-btn" onclick="show('sema-area');">2. 语义关联与抽象提取</button>
     </div>
 
     <div class="container hidden" id="vft-area">
-        <h2 class="module-header">词汇流畅性 (VFT)</h2>
-        <p style="color:#ef4444; font-weight:bold; font-size:24px; margin-bottom: 5px;" id="vft-timer">剩余: 60 s</p>
-        <p style="color:#64748b; margin-bottom: 25px;">请在 60 秒内，输入尽可能多的<strong>动物名称</strong>。输入后点击提交或按回车。</p>
+        <h2>词汇流畅性 (动物类)</h2>
+        <p style="color:red; font-size:24px; font-weight:bold; text-align:center;" id="vft-timer">60s</p>
+        <p style="color:#64748b; text-align:center;">请说出尽可能多的动物名称（点击麦克风说话）。</p>
         
-        <div style="display: flex; justify-content: center; align-items: center;">
-            <input type="text" id="vft-input" placeholder="例如：大象" autocomplete="off">
-            <button class="sys-btn" style="width:auto; margin:0; padding:18px 25px;" onclick="submitVFTWord()">输入</button>
+        <div class="input-wrapper">
+            <input type="text" id="vft-input" placeholder="输入或语音输入...">
+            <button class="btn-mic" id="mic-btn" onclick="startVoice('vft-input')">🎤</button>
         </div>
+        <button class="sys-btn btn-action" onclick="submitVFT()">录入该词 (+)</button>
         
-        <div class="vft-word-list" id="vft-list"></div>
-    </div>
-
-    <div class="container hidden" id="naming-area">
-        <h2 class="module-header">图片命名时延</h2>
-        <p style="color:#64748b;">请以最快速度在框内写出下方物品的名称。</p>
-        
-        <div id="naming-pic">🐫</div>
-        
-        <div style="display: flex; justify-content: center; margin-bottom: 25px;">
-            <input type="text" id="naming-input" placeholder="输入名称并回车...">
-            <button class="sys-btn" style="width:auto; margin:0; padding:18px 25px;" onclick="submitNaming()">确认</button>
-        </div>
-        
-        <p id="naming-progress" style="font-weight:bold; color:#0f172a;">进度: 1 / 3</p>
+        <div id="vft-list" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;"></div>
     </div>
 
     <div class="container hidden" id="sema-area">
-        <h2 class="module-header">语义关联判断</h2>
-        <p style="color:#64748b; font-size: 15px;">请以最快速度，点击下方与<strong>上方词汇</strong>在意义上最接近（或同类）的词。</p>
-        
-        <div id="sema-target">医生</div>
-        
-        <div class="sema-options" id="sema-opts-container">
-            </div>
+        <h2>高阶语义判别</h2>
+        <p style="text-align:center; color:#64748b;">请选择与下方词汇同属一类或关联最紧密的词汇：</p>
+        <h1 style="text-align:center; color:#1e293b; font-size: 40px; margin: 40px 0;">火车</h1>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <button class="sys-btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1;" onclick="alert('已记录'); show('menu');">A. 自行车</button>
+            <button class="sys-btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1;" onclick="alert('已记录'); show('menu');">B. 苹果</button>
+            <button class="sys-btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1;" onclick="alert('已记录'); show('menu');">C. 桌子</button>
+        </div>
     </div>
 
     <script>
-        // 视图路由切换
-        function show(id) { 
-            ['menu', 'vft-area', 'naming-area', 'sema-area'].forEach(d => {
-                document.getElementById(d).classList.add('hidden');
-            }); 
-            document.getElementById(id).classList.remove('hidden'); 
-            window.scrollTo(0,0); 
+        function show(id) {
+            ['menu', 'vft-area', 'sema-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        /* ==================== 1. VFT (词汇流畅性) 逻辑 ==================== */
-        let vftData = { module: "Language_VFT", category: "Animals", total_words: 0, words_array: [] };
-        let vftTime = 60, vftTimerId, vftStartTime = 0;
-
-        function startVFT() { 
-            vftData.words_array = []; 
-            document.getElementById('vft-list').innerHTML = ''; 
-            document.getElementById('vft-input').value = ''; 
-            vftTime = 60; 
-            vftStartTime = performance.now(); 
-            
-            // 自动聚焦输入框以便快速作答
-            document.getElementById('vft-input').focus(); 
-            
-            // 倒计时逻辑
-            vftTimerId = setInterval(() => { 
-                vftTime--; 
-                document.getElementById('vft-timer').innerText = `剩余: ${vftTime} s`; 
-                if(vftTime <= 0) finishVFT(); 
-            }, 1000); 
-            
-            // 绑定回车键事件 (使用 isComposing 防止中文输入法拼音阶段误触)
-            document.getElementById('vft-input').addEventListener('keyup', function(e) { 
-                if (e.key === 'Enter' && !e.isComposing) submitVFTWord(); 
-            }); 
+        // 语音识别初始化 (仅在浏览器支持时生效)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.interimResults = false;
         }
 
-        function submitVFTWord() { 
-            if(vftTime <= 0) return; 
+        function startVoice(targetId) {
+            if (!recognition) return alert("您的浏览器不支持语音输入，请手动输入或使用Chrome浏览器。");
+            const btn = document.getElementById('mic-btn');
+            btn.classList.add('recording');
+            recognition.start();
             
-            let input = document.getElementById('vft-input'); 
-            let word = input.value.trim(); 
-            
-            if(word) { 
-                // 记录相对时间戳，用于后期分析词汇提取的“簇状聚集”特征 (Clustering)
-                let rt = performance.now() - vftStartTime; 
-                vftData.words_array.push({ word: word, timestamp_ms: Math.round(rt) }); 
-                
-                // 动态生成 UI 标签
-                let tag = document.createElement('div'); 
-                tag.className = 'vft-tag'; 
-                tag.innerText = word; 
-                document.getElementById('vft-list').appendChild(tag); 
-                
-                // 清空输入框
-                input.value = ''; 
-            } 
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript.replace(/[。，！？]/g, ''); // 去除标点
+                document.getElementById(targetId).value = text;
+                btn.classList.remove('recording');
+            };
+            recognition.onerror = function() { btn.classList.remove('recording'); };
+            recognition.onend = function() { btn.classList.remove('recording'); };
         }
 
-        function finishVFT() { 
-            clearInterval(vftTimerId); 
-            vftData.total_words = vftData.words_array.length; 
-            CAS_Storage.saveModuleData('Language_VFT', vftData); 
-            alert(`VFT 测试结束。共记录 ${vftData.total_words} 个词汇。`); 
-            show('menu'); 
+        // VFT 逻辑
+        let vftData = { words: [] }, vftTimerId, time = 60;
+        function startVFT() {
+            time = 60; vftData.words = []; document.getElementById('vft-list').innerHTML = '';
+            vftTimerId = setInterval(() => {
+                time--; document.getElementById('vft-timer').innerText = time + 's';
+                if(time <= 0) { clearInterval(vftTimerId); CAS_Storage.saveModuleData('Language_VFT', vftData); alert("时间到！记录已保存"); show('menu'); }
+            }, 1000);
         }
-        
-        /* ==================== 2. Naming (图片命名) 逻辑 ==================== */
-        // 图库与正确答案映射表 (ans 数组支持容错匹配)
-        const namingStimuli = [ 
-            { pic: '🐫', ans: ['骆驼'] }, 
-            { pic: '🦏', ans: ['犀牛'] }, 
-            { pic: '🛶', ans: ['独木舟', '船', '小船'] } 
-        ]; 
-        let nData = { module: "Language_Naming", records: [] };
-        let nTr = 0, nOnset = 0;
-
-        function startNaming() { 
-            nTr = 0; 
-            nData.records = []; 
-            nextNaming(); 
-        }
-
-        function nextNaming() { 
-            if(nTr >= namingStimuli.length) { 
-                CAS_Storage.saveModuleData('Language_Naming', nData); 
-                alert("命名测试特征已入库"); 
-                show('menu'); 
-                return; 
-            } 
-            
-            document.getElementById('naming-pic').innerText = namingStimuli[nTr].pic; 
-            document.getElementById('naming-input').value = ''; 
-            document.getElementById('naming-progress').innerText = `进度: ${nTr+1} / ${namingStimuli.length}`; 
-            
-            // 延迟 100ms 聚焦，避免移动端键盘闪烁
-            setTimeout(() => document.getElementById('naming-input').focus(), 100); 
-            
-            nOnset = performance.now(); 
-            
-            document.getElementById('naming-input').onkeyup = function(e) { 
-                if(e.key === 'Enter' && !e.isComposing) submitNaming(); 
-            }; 
-        }
-
-        function submitNaming() { 
-            let val = document.getElementById('naming-input').value.trim(); 
-            if(!val) return; 
-            
-            let rt = performance.now() - nOnset; 
-            // 只要用户输入包含正确答案中的任意一个词即算正确
-            let isCorrect = namingStimuli[nTr].ans.some(a => val.includes(a)); 
-            
-            nData.records.push({ 
-                item: namingStimuli[nTr].pic, 
-                user_input: val, 
-                correct: isCorrect, 
-                rt_ms: Math.round(rt) 
-            }); 
-            
-            nTr++; 
-            nextNaming(); 
-        }
-
-        /* ==================== 3. Semantic (语义关联) 逻辑 ==================== */
-        // 刺激题库：包含目标词、选项和正确答案
-        const semaStimuli = [
-            { target: '火车', options: ['自行车', '苹果', '桌子'], answer: '自行车' }, // 同属交通工具
-            { target: '剪刀', options: ['纸张', '天空', '时间'], answer: '纸张' },     // 功能关联
-            { target: '狮子', options: ['河流', '老虎', '书本'], answer: '老虎' },     // 同属动物分类
-            { target: '医生', options: ['医院', '沙发', '香蕉'], answer: '医院' },     // 场景关联
-            { target: '冬装', options: ['寒冷', '快乐', '速度'], answer: '寒冷' }      // 抽象概念关联
-        ];
-        let semaData = { module: "Language_Semantic", records: [] };
-        let s_tr = 0, s_onset = 0;
-
-        function startSema() {
-            s_tr = 0;
-            semaData.records = [];
-            nextSema();
-        }
-
-        function nextSema() {
-            if(s_tr >= semaStimuli.length) {
-                CAS_Storage.saveModuleData('Language_Semantic', semaData);
-                alert("语义网络判别数据已成功入库。");
-                show('menu');
-                return;
+        function submitVFT() {
+            const input = document.getElementById('vft-input');
+            const word = input.value.trim();
+            if(word) {
+                vftData.words.push(word);
+                const tag = document.createElement('span');
+                tag.style.cssText = "background:#eef2ff; color:#4f46e5; padding:8px 15px; border-radius:20px; font-weight:bold;";
+                tag.innerText = word;
+                document.getElementById('vft-list').appendChild(tag);
+                input.value = '';
             }
-
-            const trialData = semaStimuli[s_tr];
-            document.getElementById('sema-target').innerText = trialData.target;
-            
-            // 随机打乱选项数组，防止答案位置固定导致学习效应
-            let shuffledOpts = [...trialData.options].sort(() => Math.random() - 0.5);
-            
-            const container = document.getElementById('sema-opts-container');
-            container.innerHTML = '';
-            
-            // 动态生成选项按钮
-            shuffledOpts.forEach(opt => {
-                let btn = document.createElement('button');
-                btn.className = 'sema-btn';
-                btn.innerText = opt;
-                
-                // 绑定触摸与点击事件，同时阻止默认行为避免延迟
-                btn.ontouchstart = btn.onmousedown = (e) => {
-                    e.preventDefault();
-                    recordSema(opt, trialData.answer);
-                };
-                container.appendChild(btn);
-            });
-
-            s_onset = performance.now();
-        }
-
-        function recordSema(selectedObj, correctObj) {
-            let rt = performance.now() - s_onset;
-            let isCorrect = (selectedObj === correctObj);
-            
-            semaData.records.push({
-                target: semaStimuli[s_tr].target,
-                selected: selectedObj,
-                correct: isCorrect,
-                rt_ms: Math.round(rt)
-            });
-
-            s_tr++;
-            nextSema();
         }
     </script>
 </body>
