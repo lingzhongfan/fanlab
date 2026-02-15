@@ -138,6 +138,49 @@
                 htmlMap.EMO += `<div class="result-item"><span>😃 FER 面孔情绪识别准确率:</span> <strong>${acc}%</strong></div>`;
                 chartScores.EMO = acc;
             }
+            // --------- 新增：高级情感计算 (AEMO) 解析与扣分逻辑 ---------
+            
+            // 1. 语音情绪识别 (SER)
+            if(mods['AEMO_SER']) {
+                const ser = mods['AEMO_SER'].data;
+                htmlMap.EMO += `<div class="result-item"><span>🎙️ SER 语音情绪韵律 (效价/唤醒度):</span> <strong>V:${ser.valence_score} / A:${ser.arousal_score}</strong></div>`;
+                // 异常唤醒度可轻微惩罚 EMO 分数
+                if(ser.arousal_score > 80 || ser.arousal_score < 20) chartScores.EMO -= 5;
+            }
+
+            // 2. 情绪调节任务 (ERT)
+            if(mods['AEMO_ERT']) {
+                const ert = mods['AEMO_ERT'].data;
+                // 临床预警：调节能力 < 10，提示前额叶(dlPFC)对杏仁核自上而下的抑制功能明显减退
+                let alert = ert.regulation_capacity < 10 ? `<span class="alert-badge">情绪抑制衰退</span>` : "";
+                htmlMap.EMO += `<div class="result-item"><span>🖼️ ERT 认知重评 (基线负面/调节力):</span> <strong>${ert.baseline_score} / ${ert.regulation_capacity} ${alert}</strong></div>`;
+                
+                // 【雷达图联动】调节力越差，扣除的 EMO 情绪社会分越多
+                if(ert.regulation_capacity < 10) chartScores.EMO -= (10 - Math.max(0, ert.regulation_capacity)) * 1.5;
+            }
+
+            // 3. 情感内隐联想测验 (IAT)
+            if(mods['AEMO_IAT']) {
+                const iat = mods['AEMO_IAT'].data;
+                // 临床预警：内隐阻力差值 D-score 大于 200ms，提示潜意识的抑郁/孤独偏置极重
+                let alert = iat.implicit_bias_ms > 200 ? `<span class="alert-badge">内隐抑郁偏置</span>` : "";
+                htmlMap.EMO += `<div class="result-item"><span>⚡ IAT 内隐联想 (相容反应时/阻力差值):</span> <strong>${iat.congruent_rt}ms / D:${iat.implicit_bias_ms}ms ${alert}</strong></div>`;
+                
+                // 【雷达图联动】内隐偏置大于安全阈值后，每超 20ms 扣 1 分
+                if(iat.implicit_bias_ms > 200) chartScores.EMO -= Math.min(20, (iat.implicit_bias_ms - 200) / 20);
+            }
+
+            // 4. NLP 大五人格 LLM 画像
+            if(mods['AEMO_LLM_Big5']) {
+                const big5 = mods['AEMO_LLM_Big5'].data.data; 
+                // 临床预警：神经质(Neuroticism)得分过高
+                let alert = big5.N > 70 ? `<span class="alert-badge" style="background:var(--rose);">高神经质高危</span>` : "";
+                htmlMap.EMO += `<div class="result-item"><span>🤖 NLP 大五人格 (O/C/E/A/N):</span> <strong>${big5.O} / ${big5.C} / ${big5.E} / ${big5.A} / ${big5.N} ${alert}</strong></div>`;
+                
+                // 【雷达图联动】神经质极高，或外向性极低，扣除 EMO 情绪健康基线分
+                if(big5.N > 70) chartScores.EMO -= (big5.N - 70) * 0.5;
+                if(big5.E < 30) chartScores.EMO -= (30 - big5.E) * 0.5;
+            }
 
             // 【运动与动力学 MOT】 (多模态融合计算)
             if(mods['MOT_Tapping']) {
