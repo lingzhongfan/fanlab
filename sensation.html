@@ -3,386 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAS-SEN | 感觉传导与知觉辨别</title>
+    <title>CAS-SEN | 感觉与知觉传导</title>
     <style>
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: #f8fafc; 
-            margin: 0; 
-            padding: 20px; 
-            text-align: center; 
-            touch-action: manipulation; 
-            user-select: none; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-        .container { 
-            max-width: 650px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 35px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        }
-        .module-header { 
-            color: #0f172a; 
-            margin-top: 0; 
-            font-size: 24px; 
-            border-bottom: 2px solid #e2e8f0; 
-            padding-bottom: 15px; 
-            margin-bottom: 25px; 
-        }
-        .sys-btn { 
-            background: #0f172a; 
-            color: white; 
-            border: none; 
-            padding: 18px 30px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            margin: 8px 0; 
-            width: 100%; 
-            transition: 0.2s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-        .sys-btn:active { transform: scale(0.98); } 
+        /* 科技温情风 UI */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --yellow: #eab308; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: manipulation; user-select: none; }
+        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        #nav-back { 
-            display: inline-flex; 
-            align-items: center; 
-            text-decoration: none; 
-            color: #3b82f6; 
-            font-weight: bold; 
-            margin-bottom: 15px; 
-            padding: 10px 18px; 
-            background: #eff6ff; 
-            border-radius: 10px; 
-            transition: 0.2s; 
-        } 
-        #nav-back:active { background: #dbeafe; }
+        .module-header { border-left: 6px solid var(--yellow); padding-left: 15px; margin-bottom: 30px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .btn-menu { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+        .btn-menu:hover { background: var(--yellow); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(234, 179, 8, 0.2); }
+
+        /* RT与反应测试通用全屏刺激区 */
+        .rt-workspace { width: 100%; height: 350px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; transition: background 0.1s; margin-bottom: 20px; color: var(--slate); }
         
-        /* RT (反应时) 盒子通用样式 */
-        .rt-box { 
-            width: 100%; 
-            height: 280px; 
-            background: #e2e8f0; 
-            border-radius: 16px; 
-            margin: 20px 0; 
-            border: 4px solid #cbd5e1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 35px; 
-            font-weight: bold; 
-            color: white; 
-            cursor: pointer; 
-            transition: background 0.05s; 
-        }
-        .rt-box:active { transform: scale(0.99); }
-        
-        /* 视觉搜索样式 */
-        #search-box { 
-            width: 100%; 
-            height: 400px; 
-            background: #fff; 
-            border: 2px solid #cbd5e1; 
-            position: relative; 
-            border-radius: 16px; 
-            margin-bottom: 20px; 
-            overflow: hidden; 
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-        }
-        .stim { 
-            position: absolute; 
-            font-size: 30px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            padding: 5px; 
-            user-select: none; 
-        }
+        /* Choice RT / Go-NoGo 控制台 */
+        .btn-large { padding: 30px; font-size: 24px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; color: var(--primary); cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s;}
+        .btn-large:active { background: var(--blue); color: white; border-color: var(--blue); transform: scale(0.96); }
+
+        /* Visual Search 特征扫描区 */
+        #search-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 30px 0; }
+        .search-item { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; border-radius: 12px; transition: 0.1s; border: 1px solid transparent; }
+        .search-item:active { background: var(--light-blue); border-color: var(--blue); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <div style="text-align: left; max-width: 650px; margin: 0 auto;">
-        <a href="index.html" id="nav-back">← 返回控制台</a>
-    </div>
-    
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--yellow); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+
     <div class="container" id="menu">
-        <h2 class="module-header">⚡ 感觉传导与知觉辨别</h2>
-        <button class="sys-btn" onclick="show('srt-area'); startSRT();">1. Simple RT 传导速度基线</button>
-        <button class="sys-btn" onclick="show('crt-area'); startCRT();">2. Choice RT 知觉决策提取</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('gonogo-area'); startGoNoGo();">3. Go/No-Go 抑制网络</button>
-        <button class="sys-btn" style="background:#3b82f6;" onclick="show('search-area'); startSearch();">4. Visual Search 注意力分布</button>
+        <div class="module-header">
+            <h2>⚡ 感觉与知觉传导 (CAS-SEN)</h2>
+            <p>提取纯粹的感觉传导时间、底层决策开销与自下而上的注意力扫描。</p>
+        </div>
+        <button class="sys-btn btn-menu" onclick="startSRT()">⏱️ 1. 简单反应时 (Simple RT - 传导基线)</button>
+        <button class="sys-btn btn-menu" onclick="startCRT()">⚖️ 2. 选择反应时 (Choice RT - 决策开销)</button>
+        <button class="sys-btn btn-menu" onclick="startGNG()">🛑 3. Go/No-Go 测试 (底层感觉抑制)</button>
+        <button class="sys-btn btn-menu" onclick="startSearch()">🔍 4. 视觉特征搜索 (Visual Search - 顶叶网络)</button>
     </div>
 
     <div class="container hidden" id="srt-area">
-        <h2 class="module-header">简单反应时 (SRT)</h2>
-        <p style="color:#64748b;">保持警惕。区域<strong>变绿时</strong>，以最快速度点击它。(防抢跑)</p>
-        <div id="srt-box" class="rt-box" onmousedown="hitSRT(event)" ontouchstart="hitSRT(event)">等待</div>
+        <div class="module-header"><h2>简单反应时 (SRT)</h2><p>临床意义: 获取纯粹的神经传导延迟。请在方块变黄时立刻点击。</p></div>
+        <div class="rt-workspace" id="srt-box" onmousedown="clickSRT()">等待变黄...</div>
+        <p style="text-align:center; color:var(--slate);" id="srt-msg">测试进行中 (0/10)</p>
     </div>
 
     <div class="container hidden" id="crt-area">
-        <h2 class="module-header">选择反应时 (CRT)</h2>
-        <p style="color:#64748b;">出现红色按左侧按钮，出现蓝色按右侧按钮。</p>
-        <div id="crt-box" class="rt-box"></div>
-        <div style="display:flex; gap:15px;">
-            <button class="sys-btn" style="background:#ef4444; font-size:20px;" onclick="recCRT('red')">红色 (左)</button>
-            <button class="sys-btn" style="background:#3b82f6; font-size:20px;" onclick="recCRT('blue')">蓝色 (右)</button>
+        <div class="module-header"><h2>选择反应时 (CRT)</h2><p>临床计算: CRT耗时减去SRT耗时，即为纯粹的认知决策加工时间。</p></div>
+        <div class="rt-workspace" id="crt-stim" style="font-size: 80px; background:white;">+</div>
+        <div style="display:flex; gap:15px;" id="crt-controls" class="hidden">
+            <button class="btn-large" onclick="recordCRT('L')">左边 (L)</button>
+            <button class="btn-large" onclick="recordCRT('R')">右边 (R)</button>
         </div>
     </div>
 
-    <div class="container hidden" id="gonogo-area">
-        <h2 class="module-header">Go / No-Go 抑制</h2>
-        <p style="color:#64748b;">出现 <strong style="color:#10b981;">绿色 GO</strong> 请立即点击；出现 <strong style="color:#ef4444;">红色 NO-GO</strong> 绝对不要点击！</p>
-        <div id="gonogo-box" class="rt-box" onmousedown="hitGoNoGo(event)" ontouchstart="hitGoNoGo(event)">准备...</div>
+    <div class="container hidden" id="gng-area">
+        <div class="module-header"><h2>Go / No-Go (感觉抑制控制)</h2><p>规则: 看到绿色圆圈请点击，看到红色交叉【绝对不要】点击。</p></div>
+        <div class="rt-workspace" id="gng-stim" onclick="clickGNG()" style="font-size:100px; background:white;">+</div>
     </div>
 
     <div class="container hidden" id="search-area">
-        <h2 class="module-header">特征视觉搜索</h2>
-        <p style="color:#64748b;">在字母海中找出唯一的 <strong style="color:#ef4444; font-size:18px;">红色 T</strong> 并精准点击。</p>
-        <div id="search-box"></div>
+        <div class="module-header"><h2>视觉特征搜索 (Visual Search)</h2><p>临床意义: 评估顶叶控制的视觉扫描范围。请在众多 'O' 中找出唯一的 'Q'。</p></div>
+        <div id="search-board"></div>
     </div>
 
     <script>
-        function show(id) { 
-            ['menu', 'srt-area', 'crt-area', 'gonogo-area', 'search-area'].forEach(d => {
-                document.getElementById(d).classList.add('hidden');
-            }); 
-            document.getElementById(id).classList.remove('hidden'); 
+        function show(id) {
+            ['menu', 'srt-area', 'crt-area', 'gng-area', 'search-area'].forEach(d => {
+                const el = document.getElementById(d); if(el) el.classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
         }
 
-        /* ==================== 1. SRT (简单反应时) 逻辑 ==================== */
-        let srtData = { module: "Sensation_SimpleRT", records: [], false_starts: 0 };
-        let srtTr = 0, srtState = 'wait', srtOnset = 0, srtTo; 
+        /* ==================== 1. SRT 逻辑 ==================== */
+        let srtData = { module: "SEN_SRT", records: [] };
+        let srt_trial = 0, srt_onset = 0, srt_timeout = null, srt_active = false;
 
-        function startSRT() { 
-            srtTr = 0; 
-            srtData.records = []; 
-            srtData.false_starts = 0; 
-            nextSRT(); 
-        } 
-
-        function nextSRT() { 
-            if(srtTr >= 6) { 
-                CAS_Storage.saveModuleData('Sensation_SimpleRT', srtData); 
-                alert("SRT 基线录取完毕。"); 
-                show('menu'); 
-                return; 
-            } 
+        function startSRT() { srt_trial = 0; srtData.records = []; show('srt-area'); nextSRT(); }
+        
+        function nextSRT() {
+            if (srt_trial >= 10) { CAS_Storage.saveModuleData('SEN_SRT', srtData); alert("SRT 测试完成"); show('menu'); return; }
+            document.getElementById('srt-msg').innerText = `测试进行中 (${srt_trial}/10)`;
+            const box = document.getElementById('srt-box');
+            box.style.background = '#f8fafc'; box.innerText = "等待变黄..."; srt_active = false;
             
-            let box = document.getElementById('srt-box'); 
-            box.style.background = '#ef4444'; 
-            box.innerText = "准备..."; 
-            srtState = 'ready'; 
-            
-            // 随机等待 1~3.5 秒后变绿
-            srtTo = setTimeout(() => { 
-                box.style.background = '#10b981'; 
-                box.innerText = "点击！"; 
-                srtOnset = performance.now(); 
-                srtState = 'go'; 
-            }, Math.random() * 2500 + 1000); 
-        } 
-
-        function hitSRT(e) { 
-            e.preventDefault(); 
-            // 防抢跑机制
-            if (srtState === 'ready') { 
-                clearTimeout(srtTo); 
-                srtData.false_starts++; 
-                document.getElementById('srt-box').innerText = "抢跑！无效"; 
-                srtState = 'wait'; 
-                setTimeout(nextSRT, 1000); 
-            } else if (srtState === 'go') { 
-                // 正常响应
-                let rt = performance.now() - srtOnset; 
-                srtData.records.push(Math.round(rt)); 
-                srtTr++; 
-                srtState = 'wait'; 
-                
-                document.getElementById('srt-box').style.background = '#e2e8f0'; 
-                document.getElementById('srt-box').style.color = '#1e293b'; 
-                document.getElementById('srt-box').innerText = `${Math.round(rt)} ms`; 
-                
-                setTimeout(() => { 
-                    document.getElementById('srt-box').style.color = 'white'; 
-                    nextSRT(); 
-                }, 1000); 
-            } 
+            // 随机前冲时间 (Fore-period) 1000 - 3000ms，防止受试者预判节奏
+            const delay = Math.random() * 2000 + 1000;
+            srt_timeout = setTimeout(() => {
+                box.style.background = 'var(--yellow)'; box.style.color = 'white'; box.innerText = "点击！";
+                srt_onset = performance.now(); srt_active = true;
+            }, delay);
         }
 
-        /* ==================== 2. CRT (选择反应时) 逻辑 ==================== */
-        let crtData = { module: "Sensation_ChoiceRT", records: [] };
-        let crtTr = 0, crtOnset = 0, crtTar = '', crtTo; 
-
-        function startCRT() { 
-            crtTr = 0; 
-            crtData.records = []; 
-            nextCRT(); 
-        } 
-
-        function nextCRT() { 
-            if(crtTr >= 8) { 
-                CAS_Storage.saveModuleData('Sensation_ChoiceRT', crtData); 
-                alert("CRT 决策特征入库。"); 
-                show('menu'); 
-                return; 
-            } 
-            
-            document.getElementById('crt-box').style.background = '#e2e8f0'; 
-            document.getElementById('crt-box').style.color = '#1e293b'; 
-            document.getElementById('crt-box').innerText = "+"; 
-            
-            // 随机等待后显示红或蓝
-            crtTo = setTimeout(() => { 
-                crtTar = Math.random() > 0.5 ? 'red' : 'blue'; 
-                document.getElementById('crt-box').style.background = crtTar === 'red' ? '#ef4444' : '#3b82f6'; 
-                document.getElementById('crt-box').innerText = ""; 
-                crtOnset = performance.now(); 
-            }, Math.random() * 1500 + 800); 
-        } 
-
-        function recCRT(res) { 
-            if(document.getElementById('crt-box').innerText === "+") return; 
-            
-            let rt = performance.now() - crtOnset; 
-            crtData.records.push({
-                tar: crtTar, 
-                res: res, 
-                correct: crtTar === res, 
-                rt: Math.round(rt)
-            }); 
-            
-            crtTr++; 
-            clearTimeout(crtTo); 
-            nextCRT(); 
+        function clickSRT() {
+            if (!srt_active) {
+                // 提前抢答记为过失 (Anticipation Error)
+                clearTimeout(srt_timeout); alert("请不要提前点击！"); nextSRT(); return;
+            }
+            const rt = Math.round(performance.now() - srt_onset);
+            srtData.records.push({ trial: srt_trial+1, rt_ms: rt });
+            srt_trial++; nextSRT();
         }
 
-        /* ==================== 3. Go/No-Go (抑制) 逻辑 ==================== */
-        let gngData = { module: "Sensation_GoNoGo", records: [] };
-        let gngTr = 0, gngOnset = 0, gngTar = '', gngTo, gngMaxTimeTo; 
+        /* ==================== 2. CRT 逻辑 ==================== */
+        let crtData = { module: "SEN_CRT", records: [] };
+        let crt_trial = 0, crt_onset = 0, crt_target = '';
 
-        function startGoNoGo() { 
-            gngTr = 0; 
-            gngData.records = []; 
-            nextGoNoGo(); 
-        } 
-
-        function nextGoNoGo() { 
-            if(gngTr >= 12) { 
-                CAS_Storage.saveModuleData('Sensation_GoNoGo', gngData); 
-                alert("抑制网络测验完成。"); 
-                show('menu'); 
-                return; 
-            } 
+        function startCRT() { crt_trial = 0; crtData.records = []; show('crt-area'); nextCRT(); }
+        
+        function nextCRT() {
+            if (crt_trial >= 10) { CAS_Storage.saveModuleData('SEN_CRT', crtData); alert("CRT 测试完成"); show('menu'); return; }
+            document.getElementById('crt-controls').classList.add('hidden');
+            document.getElementById('crt-stim').innerText = "+";
             
-            let box = document.getElementById('gonogo-box'); 
-            box.style.background = '#e2e8f0'; 
-            box.style.color = '#1e293b'; 
-            box.innerText = "+"; 
-            
-            gngTo = setTimeout(() => { 
-                // 70% 概率出现 GO, 30% 概率出现 NO-GO
-                gngTar = Math.random() > 0.3 ? 'go' : 'nogo'; 
-                box.style.background = gngTar === 'go' ? '#10b981' : '#ef4444'; 
-                box.style.color = 'white'; 
-                box.innerText = gngTar.toUpperCase(); 
-                
-                gngOnset = performance.now(); 
-                
-                // 1.2秒限制：如果超时不点击
-                gngMaxTimeTo = setTimeout(() => { 
-                    if (gngTar === 'nogo') { 
-                        // 成功抑制 (Withheld)
-                        gngData.records.push({ type: 'nogo', action: 'withheld', correct: true }); 
-                        gngTr++; 
-                        nextGoNoGo(); 
-                    } else { 
-                        // 漏报错误 (Missed)
-                        gngData.records.push({ type: 'go', action: 'missed', correct: false }); 
-                        gngTr++; 
-                        nextGoNoGo(); 
-                    } 
-                }, 1200); 
-            }, Math.random() * 1200 + 800); 
-        } 
-
-        function hitGoNoGo(e) { 
-            e.preventDefault(); 
-            if(document.getElementById('gonogo-box').innerText === "+") return; 
-            
-            let rt = performance.now() - gngOnset; 
-            clearTimeout(gngMaxTimeTo); 
-            
-            if (gngTar === 'go') { 
-                // 击中 (Hit)
-                gngData.records.push({ type: 'go', action: 'hit', correct: true, rt: Math.round(rt) }); 
-            } else { 
-                // 虚报/冲动错误 (False Alarm)
-                gngData.records.push({ type: 'nogo', action: 'false_alarm', correct: false, rt: Math.round(rt) }); 
-            } 
-            
-            document.getElementById('gonogo-box').innerText = gngTar === 'go' ? "✓" : "✗"; 
-            gngTr++; 
-            setTimeout(nextGoNoGo, 800); 
+            setTimeout(() => {
+                crt_target = Math.random() > 0.5 ? 'L' : 'R';
+                document.getElementById('crt-stim').innerText = crt_target === 'L' ? '⬅️' : '➡️';
+                document.getElementById('crt-controls').classList.remove('hidden');
+                crt_onset = performance.now();
+            }, Math.random() * 1000 + 500);
         }
 
-        /* ==================== 4. Visual Search (视觉搜索) 逻辑 ==================== */
-        let sData = { module: "Sensation_VisualSearch", records: [] };
-        let sTr = 0, sOnset = 0; 
+        function recordCRT(choice) {
+            crtData.records.push({ trial: crt_trial+1, correct: choice === crt_target, rt_ms: Math.round(performance.now() - crt_onset) });
+            crt_trial++; nextCRT();
+        }
 
-        function startSearch() { 
-            sTr = 0; 
-            sData.records = []; 
-            nextSearch(); 
-        } 
+        /* ==================== 3. Go/No-Go 逻辑 ==================== */
+        let gngData = { module: "SEN_GoNoGo", records: [] };
+        let gng_trial = 0, gng_onset = 0, gng_isGo = true, gng_stimTimeout = null;
 
-        function nextSearch() { 
-            if(sTr >= 5) { 
-                CAS_Storage.saveModuleData('Sensation_VisualSearch', sData); 
-                alert("搜索特征完成提取。"); 
-                show('menu'); 
-                return; 
-            } 
+        function startGNG() { gng_trial = 0; gngData.records = []; show('gng-area'); nextGNG(); }
+        
+        function nextGNG() {
+            if (gng_trial >= 15) { CAS_Storage.saveModuleData('SEN_GoNoGo', gngData); alert("Go/No-Go 测试完成"); show('menu'); return; }
+            const box = document.getElementById('gng-stim'); box.innerText = "+";
             
-            let box = document.getElementById('search-box'); 
-            box.innerHTML = ''; 
+            setTimeout(() => {
+                // 70% Go (刺激建立优势反应), 30% No-Go (考察突然的抑制能力)
+                gng_isGo = Math.random() < 0.7; 
+                box.innerText = gng_isGo ? '🟢' : '❌';
+                gng_onset = performance.now();
+                
+                // 刺激仅呈现 800ms，超时未点击进入下一次判定
+                gng_stimTimeout = setTimeout(() => {
+                    // 如果超时未点击，对于 Go 是漏报 (Miss)，对于 No-Go 是正确拒绝 (Correct Rejection)
+                    gngData.records.push({ trial: gng_trial+1, type: gng_isGo?'Go':'NoGo', action: 'none', correct: !gng_isGo });
+                    gng_trial++; nextGNG();
+                }, 800);
+            }, Math.random() * 1000 + 500);
+        }
+
+        function clickGNG() {
+            if (document.getElementById('gng-stim').innerText === "+") return; // 忽略在注视点阶段的点击
+            clearTimeout(gng_stimTimeout);
+            const rt = Math.round(performance.now() - gng_onset);
+            // 对于 Go 是命中 (Hit)，对于 No-Go 是虚报/抑制失败 (False Alarm)
+            gngData.records.push({ trial: gng_trial+1, type: gng_isGo?'Go':'NoGo', action: 'clicked', correct: gng_isGo, rt_ms: rt });
             
-            // 干扰项随轮次增加
-            let distractors = 20 + sTr * 15; 
-            for(let i = 0; i < distractors; i++) { 
-                let el = document.createElement('div'); 
-                el.className = 'stim'; 
-                // 干扰项为 蓝T, 蓝L, 红L
-                let isBlueT = Math.random() > 0.5; 
-                el.innerText = isBlueT ? 'T' : 'L'; 
-                el.style.color = isBlueT ? '#3b82f6' : '#94a3b8'; 
-                el.style.left = (Math.random() * 88) + '%'; 
-                el.style.top = (Math.random() * 88) + '%'; 
-                box.appendChild(el); 
-            } 
+            // 错误反馈
+            if (!gng_isGo) { document.getElementById('gng-stim').innerText = "⚠️"; }
             
-            // 唯一目标：红T
-            let tar = document.createElement('div'); 
-            tar.className = 'stim'; 
-            tar.innerText = 'T'; 
-            tar.style.color = '#ef4444'; 
-            tar.style.left = (Math.random() * 85) + '%'; 
-            tar.style.top = (Math.random() * 85) + '%'; 
-            tar.style.zIndex = 10; 
+            setTimeout(() => { gng_trial++; nextGNG(); }, 300);
+        }
+
+        /* ==================== 4. Visual Search 逻辑 ==================== */
+        let vsData = { module: "SEN_VisualSearch", records: [] };
+        let vs_trial = 0, vs_onset = 0;
+
+        function startSearch() { vs_trial = 0; vsData.records = []; show('search-area'); nextSearch(); }
+        
+        function nextSearch() {
+            if (vs_trial >= 5) { CAS_Storage.saveModuleData('SEN_VisualSearch', vsData); alert("视觉搜索测试完成"); show('menu'); return; }
+            const board = document.getElementById('search-board'); board.innerHTML = '';
             
-            tar.ontouchstart = tar.onmousedown = (e) => { 
-                e.preventDefault(); 
-                let rt = performance.now() - sOnset; 
-                sData.records.push({ distractors: distractors, rt: Math.round(rt) }); 
-                sTr++; 
-                nextSearch(); 
-            }; 
+            const totalItems = 24; // 6x4 网格
+            const targetIdx = Math.floor(Math.random() * totalItems); // 随机埋点 Q
             
-            box.appendChild(tar); 
-            sOnset = performance.now(); 
+            for (let i = 0; i < totalItems; i++) {
+                let node = document.createElement('div'); node.className = 'search-item';
+                let isTarget = i === targetIdx;
+                node.innerText = isTarget ? 'Q' : 'O';
+                node.style.color = isTarget ? 'var(--blue)' : 'var(--slate)'; // 微微改变颜色增加难度
+                
+                node.onclick = () => {
+                    const rt = Math.round(performance.now() - vs_onset);
+                    if (isTarget) {
+                        vsData.records.push({ trial: vs_trial+1, target_pos: i, rt_ms: rt });
+                        vs_trial++; nextSearch();
+                    } else {
+                        node.style.background = 'var(--red)'; node.style.color = 'white';
+                        setTimeout(() => { node.style.background = 'transparent'; node.style.color = 'var(--slate)'; }, 200);
+                    }
+                };
+                board.appendChild(node);
+            }
+            vs_onset = performance.now();
         }
     </script>
 </body>
