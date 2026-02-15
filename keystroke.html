@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAS-MOT | 按键动力学评估</title>
+    <style>
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --teal: #0d9488; --orange: #f97316; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        
+        .module-header { border-left: 6px solid var(--orange); padding-left: 15px; margin-bottom: 25px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
+        
+
+        /* 抄写参考文本区 */
+        .reference-box { background: #fff7ed; border: 2px dashed #fed7aa; padding: 25px; border-radius: 16px; margin-bottom: 25px; text-align: center; }
+        .reference-box p { margin: 0 0 10px 0; color: #9a3412; font-weight: bold; font-size: 15px; }
+        .ref-text { font-family: 'Courier New', Courier, monospace; font-size: 26px; color: var(--orange); font-weight: bold; letter-spacing: 2px; user-select: none; }
+
+        /* 输入区 */
+        .input-workspace { position: relative; margin-bottom: 30px; }
+        textarea { width: 100%; height: 120px; box-sizing: border-box; padding: 20px; border: 2px solid #cbd5e1; border-radius: 16px; font-size: 22px; font-family: 'Courier New', Courier, monospace; outline: none; transition: 0.3s; resize: none; color: var(--primary); font-weight: bold;}
+        textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 4px #ffedd5; }
+        textarea:disabled { background: #f1f5f9; cursor: not-allowed; }
+
+        /* 实时仪表盘 */
+        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
+        .metric-card strong { font-size: 24px; color: var(--primary); font-family: monospace; }
+        .highlight-val { color: var(--orange) !important; }
+
+        .btn-submit { width: 100%; padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; background: var(--orange); color: white; box-shadow: 0 8px 20px rgba(249, 115, 22, 0.2); }
+        .btn-submit:hover { background: #ea580c; transform: translateY(-2px); }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--orange); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+
+    <div class="container">
+        <div class="module-header">
+            <h2>⌨️ 按键动力学 (Keystroke Dynamics)</h2>
+            <p><strong>临床靶向：</strong>捕捉帕金森病 (PD) 早期的运动强直与动作迟缓。<br>
+            *为剔除输入法带来的认知延迟噪音，请使用实体键盘抄写以下纯英文字符串。</p>
+        </div>
+
+        <div class="reference-box">
+            <p>请在下方输入框中准确且快速地抄写这段文字：</p>
+            <div class="ref-text" id="target-text">the quick brown fox jumps over the lazy dog</div>
+        </div>
+
+        <div class="input-workspace">
+            <textarea id="typing-area" placeholder="点击此处开始打字..." autocomplete="off" spellcheck="false"></textarea>
+        </div>
+
+        <div class="metrics-board">
+            <div class="metric-card"><span>总按键次数</span><strong id="m-keys">0</strong></div>
+            <div class="metric-card"><span>平均滞留时间 (Dwell)</span><strong id="m-dwell" class="highlight-val">0 ms</strong></div>
+            <div class="metric-card"><span>平均飞行时间 (Flight)</span><strong id="m-flight">0 ms</strong></div>
+        </div>
+
+        <button class="btn-submit" onclick="submitKeystroke()">💾 提取微观按键特征并入库</button>
+    </div>
+
+    <script>
+        const inputArea = document.getElementById('typing-area');
+        
+        // 核心数据结构
+        let keystrokeData = {
+            module: "MOT_Keystroke",
+            raw_events: [],       // 记录每一次按下和抬起的时间戳
+            key_pairs: [],        // 记录完整的 Dwell 和 Flight 对
+            summary: {}
+        };
+
+        // 临时变量，用于追踪按键状态
+        let activeKeys = {}; 
+        let lastKeyupTime = null;
+        let totalDwellTime = 0;
+        let validDwellCount = 0;
+        let totalFlightTime = 0;
+        let validFlightCount = 0;
+
+        // 监听按下事件 (计算 Flight Time 和 Dwell 起点)
+        inputArea.addEventListener('keydown', (e) => {
+            // 屏蔽功能键干扰
+            if(e.key === "Shift" || e.key === "Backspace" || e.key === "CapsLock") return;
+            
+            const now = performance.now();
+            const keyChar = e.key;
+
+            // 避免长按触发的重复 keydown
+            if(!activeKeys[keyChar]) {
+                activeKeys[keyChar] = now; // 记录按下时间
+                
+                // 计算飞行时间 (Flight Time = 当前 keydown - 上一个 keyup)
+                if(lastKeyupTime !== null) {
+                    const flightTime = now - lastKeyupTime;
+                    if(flightTime > 0 && flightTime < 2000) { // 剔除异常长的停顿
+                        totalFlightTime += flightTime;
+                        validFlightCount++;
+                        updateUI();
+                    }
+                }
+                
+                keystrokeData.raw_events.push({ action: 'down', key: keyChar, t: Math.round(now) });
+            }
+        });
+
+        // 监听抬起事件 (计算 Dwell Time)
+        inputArea.addEventListener('keyup', (e) => {
+            if(e.key === "Shift" || e.key === "Backspace" || e.key === "CapsLock") return;
+
+            const now = performance.now();
+            const keyChar = e.key;
+            lastKeyupTime = now;
+
+            if(activeKeys[keyChar]) {
+                const dwellTime = now - activeKeys[keyChar]; // 滞留时间 = keyup - keydown
+                
+                totalDwellTime += dwellTime;
+                validDwellCount++;
+                
+                keystrokeData.key_pairs.push({
+                    key: keyChar,
+                    dwell_ms: Math.round(dwellTime)
+                });
+                
+                delete activeKeys[keyChar]; // 清除状态
+                keystrokeData.raw_events.push({ action: 'up', key: keyChar, t: Math.round(now) });
+                
+                updateUI();
+            }
+            
+            // 自动判断是否完成抄写
+            if(inputArea.value.trim().toLowerCase() === document.getElementById('target-text').innerText.trim()) {
+                inputArea.style.borderColor = "var(--green)";
+                inputArea.disabled = true;
+            }
+        });
+
+        function updateUI() {
+            document.getElementById('m-keys').innerText = validDwellCount;
+            
+            if(validDwellCount > 0) {
+                const avgDwell = totalDwellTime / validDwellCount;
+                document.getElementById('m-dwell').innerText = Math.round(avgDwell) + ' ms';
+                // 预警提示：健康年轻人一般在 80-120ms，若超过 200ms 提示严重运动迟缓
+                if(avgDwell > 200) document.getElementById('m-dwell').style.color = 'var(--red)';
+            }
+            
+            if(validFlightCount > 0) {
+                const avgFlight = totalFlightTime / validFlightCount;
+                document.getElementById('m-flight').innerText = Math.round(avgFlight) + ' ms';
+            }
+        }
+
+        function submitKeystroke() {
+            if(validDwellCount < 10) return alert("按键数据过少，请至少抄写一部分文本。");
+
+            keystrokeData.summary = {
+                avg_dwell_ms: Math.round(totalDwellTime / validDwellCount),
+                avg_flight_ms: validFlightCount > 0 ? Math.round(totalFlightTime / validFlightCount) : 0,
+                total_keys_pressed: validDwellCount
+            };
+
+            CAS_Storage.saveModuleData('MOT_Keystroke', keystrokeData);
+            
+            let msg = `✅ 按键动力学特征已入库！\n\n- 平均滞留时间 (Dwell): ${keystrokeData.summary.avg_dwell_ms} ms\n- 平均飞行时间 (Flight): ${keystrokeData.summary.avg_flight_ms} ms`;
+            
+            if(keystrokeData.summary.avg_dwell_ms > 200) {
+                msg += "\n\n⚠️ 临床提示：受试者的 Dwell Time 显著延长，提示可能存在锥体外系症状引起的肌肉强直或运动迟缓。";
+            }
+
+            alert(msg);
+            setTimeout(() => { location.href = 'index.html'; }, 800);
+        }
+    </script>
+</body>
+</html>
