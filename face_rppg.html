@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAS-PHY | 面部影像与微表情记录</title>
+    <style>
+        /* 科技温情风 UI */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --pink: #ec4899; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        
+        .module-header { border-left: 6px solid var(--pink); padding-left: 15px; margin-bottom: 25px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
+
+        .instruction-box { background: #fdf2f8; border: 2px dashed #fbcfe8; padding: 20px; border-radius: 16px; margin-bottom: 25px; font-size: 15px; color: #9d174d; }
+
+        /* 摄像头视窗区 */
+        .video-workspace { position: relative; width: 100%; height: 400px; background: #0f172a; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px solid #cbd5e1; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);}
+        
+        /* 镜像显示的视频流，符合人类照镜子的习惯 */
+        #cam-preview { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.8; }
+        
+        /* 录制时覆盖在画面上的静息注视点 */
+        .fixation-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; background: rgba(0,0,0,0.4); display: none; }
+        .crosshair { font-size: 80px; color: white; font-weight: bold; opacity: 0.8; margin-bottom: 20px;}
+        .timer-text { font-family: monospace; font-size: 30px; color: var(--green); font-weight: bold; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px;}
+
+        /* 控制按钮 */
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-start { background: var(--blue); color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2); }
+        .btn-start:hover { background: #4338ca; }
+        .btn-stop { background: var(--red); color: white; opacity: 0.5; cursor: not-allowed; }
+        .btn-stop.active { opacity: 1; cursor: pointer; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2); }
+        
+        /* 人脸框辅助对齐 UI */
+        .face-guide { position: absolute; width: 200px; height: 280px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; top: 50px; pointer-events: none; }
+    </style>
+    <script src="cas-storage.js"></script>
+</head>
+<body>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--pink); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+
+    <div class="container">
+        <div class="module-header">
+            <h2>🎥 影像表型与 rPPG 提取 (静息态)</h2>
+            <p><strong>临床靶向：</strong>捕捉微表情延迟 (情感淡漠) 与面部血流变异 (自主神经 HRV)。<br>
+            系统将录取一段 60 秒的高清静息态视频，供后端抽取生理指标。</p>
+        </div>
+        
+
+        <div class="instruction-box">
+            <strong>📋 主试指导语：</strong>“请您坐正，脸部对准屏幕中央的虚线框。点击开始后，请放松，自然呼吸，并全程盯着屏幕中央的十字光标，尽量不要说话或大幅晃动头部。”
+        </div>
+
+        <div class="video-workspace">
+            <video id="cam-preview" autoplay muted playsinline></video>
+            <div class="face-guide" id="face-guide"></div>
+            
+            <div class="fixation-overlay" id="fixation-overlay">
+                <div class="crosshair">+</div>
+                <div class="timer-text" id="record-timer">00:00</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="btn-start" onclick="startCameraAndRecord()">📷 开启相机并录制</button>
+            <button class="btn btn-stop" id="btn-stop" onclick="stopRecording()" disabled>⏹ 提前结束</button>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        let timerInterval;
+        let elapsedSeconds = 0;
+        const RECORD_LIMIT_SEC = 60; // 临床标准 60 秒静息态
+
+        async function startCameraAndRecord() {
+            try {
+                // 请求前置摄像头，限制帧率为 30fps 以保证 rPPG 频域分析的稳定性
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user", frameRate: { ideal: 30, max: 30 }, width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: false // 纯影像分析不需要音频，减小体积
+                });
+                
+                const videoElement = document.getElementById('cam-preview');
+                videoElement.srcObject = stream;
+                
+                // 给受试者 3 秒时间对齐人脸框
+                document.getElementById('btn-start').innerText = "请对齐人脸 (3s后自动录像)...";
+                document.getElementById('btn-start').disabled = true;
+
+                setTimeout(() => {
+                    startRecordingEngine();
+                }, 3000);
+
+            } catch (err) {
+                alert("无法访问摄像头，请检查浏览器权限。\n错误: " + err);
+            }
+        }
+
+        function startRecordingEngine() {
+            // UI 切换：隐藏人脸辅助框，显示黑屏十字注视点
+            document.getElementById('face-guide').style.display = 'none';
+            document.getElementById('fixation-overlay').style.display = 'flex';
+            
+            document.getElementById('btn-start').innerText = "🔴 录像中...";
+            const btnStop = document.getElementById('btn-stop');
+            btnStop.disabled = false; btnStop.classList.add('active');
+
+            recordedChunks = [];
+            // 使用极高兼容性的 webm 格式打包视频流
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.start();
+            
+            // 计时器
+            elapsedSeconds = 0;
+            timerInterval = setInterval(() => {
+                elapsedSeconds++;
+                const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+                const secs = String(elapsedSeconds % 60).padStart(2, '0');
+                document.getElementById('record-timer').innerText = `${mins}:${secs}`;
+                
+                // 达到 60 秒自动停止
+                if (elapsedSeconds >= RECORD_LIMIT_SEC) {
+                    stopRecording();
+                }
+            }, 1000);
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+            clearInterval(timerInterval);
+            
+            // 关闭摄像头硬件
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            document.getElementById('fixation-overlay').style.display = 'none';
+            document.getElementById('btn-start').innerText = "✅ 录制完成";
+            document.getElementById('btn-stop').disabled = true;
+            document.getElementById('btn-stop').classList.remove('active');
+
+            mediaRecorder.onstop = () => {
+                const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                
+                // 1. 保存元数据到 CAS 结构中
+                const physioData = {
+                    module: "PHY_Face_rPPG",
+                    duration_sec: elapsedSeconds,
+                    video_size_mb: (videoBlob.size / (1024 * 1024)).toFixed(2),
+                    backend_processed: false
+                };
+                CAS_Storage.saveModuleData('PHY_Face_rPPG', physioData);
+
+                // 2. 模拟后端发送机制
+                alert(`影像采集完成！\n\n- 时长: ${elapsedSeconds}s\n- 数据包体积: ${physioData.video_size_mb} MB\n\n*后台逻辑提示: 视频流 Blob 已在内存中就绪。您可通过 REST API 将其发送至装有 OpenFace 和 PyVHR 的 Python 服务器，以提取 FACS 动作单元（AUs）和 HRV 心率变异性。`);
+                
+                setTimeout(() => { location.href = 'index.html'; }, 1000);
+            };
+        }
+    </script>
+</body>
+</html>
