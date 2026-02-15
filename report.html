@@ -190,6 +190,15 @@
                 resHTML += `<div class="result-item"><span>⏱️ Tapping 10秒快速敲击总数:</span> <strong>${taps} 次</strong></div>`;
                 chartScores.MOT = Math.min(100, Math.round((taps / 60) * 100)); // 假设10秒60次为100分
             }
+            // 【双重任务步态 Dual-Task Gait】
+           if(mods['MOT_DualTaskGait']) {
+               const gait = mods['MOT_DualTaskGait'].data.summary;
+              // 变异系数过大提示步态极度不平稳
+              let alert = gait.variability_cv > 25.0 ? `<span class="alert-text">步态变异性异常(高跌倒风险)</span>` : "";
+              resHTML += `<div class="result-item"><span>🚶‍♂️ 双重任务步态 (步频 / 变异系数):</span> <strong>${gait.cadence_spm} 步/分 | ${gait.variability_cv}% ${alert}</strong></div>`;
+            // 若需计入图表得分，步频低且变异高则扣分
+              chartScores.MOT = (chartScores.MOT + Math.max(0, 100 - (gait.variability_cv * 2))) / 2;
+            }
             // 【书写动力学 dCDT】
            if(mods['MOT_dCDT']) {
                const dcdt = mods['MOT_dCDT'].data.summary;
