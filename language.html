@@ -2,109 +2,256 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>CAS-LAN | 语言功能</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CAS-LAN | 语言功能与语义网络</title>
     <style>
-        /* 继承统一 UI */
-        body { font-family: sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 650px; margin: 20px auto; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== 1. 科技温情风 UI (Warm-Tech UI) ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --purple: #8b5cf6; --green: #10b981; --slate: #64748b; }
+        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: manipulation; }
+        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 16px; background: #eef2ff; color: #4f46e5; transition: 0.2s; }
-        .btn-action { background: #4f46e5; color: white; }
         
-        /* 语音输入框样式 */
-        .input-wrapper { display: flex; gap: 10px; margin: 20px 0; }
-        input[type="text"] { flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 18px; }
-        .btn-mic { background: #10b981; color: white; border: none; border-radius: 14px; padding: 0 25px; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .module-header { border-left: 6px solid var(--purple); padding-left: 15px; margin-bottom: 30px; }
+        .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; justify-content: flex-start; gap: 12px; }
+        .btn-menu { background: #faf5ff; color: #7e22ce; border: 1px solid #f3e8ff; }
+        .btn-menu:hover { background: var(--purple); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(139, 92, 246, 0.2); }
+        .btn-action { background: var(--purple); color: white; justify-content: center; margin-top: 20px; }
+
+        /* ==================== 2. 专项实验 UI ==================== */
+        /* [范式1] VFT 语音输入框 */
+        .vft-timer { font-size: 40px; font-weight: bold; color: var(--red); text-align: center; margin: 20px 0; font-variant-numeric: tabular-nums; }
+        .input-wrapper { display: flex; gap: 15px; margin: 20px 0; }
+        input[type="text"] { flex: 1; padding: 18px; border: 2px solid #e2e8f0; border-radius: 16px; font-size: 18px; outline: none; transition: 0.2s; color: var(--primary); font-weight: bold;}
+        input[type="text"]:focus { border-color: var(--purple); box-shadow: 0 0 0 4px #f3e8ff; }
+        
+        /* 智能麦克风按钮 */
+        .btn-mic { background: var(--green); color: white; border: none; border-radius: 16px; padding: 0 25px; font-size: 24px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
         .btn-mic:active { transform: scale(0.9); }
-        .recording { animation: pulse 1.5s infinite; background: #f43f5e; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
+        .recording { animation: mic-pulse 1.5s infinite; background: var(--red) !important; }
+        @keyframes mic-pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
+        
+        .word-tag { background: #f3e8ff; color: #7e22ce; padding: 10px 18px; border-radius: 20px; font-weight: bold; display: inline-block; margin: 5px; animation: popIn 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* [范式2] Naming 图片命名区 */
+        .naming-stimulus { font-size: 120px; text-align: center; margin: 40px 0; background: #f8fafc; border-radius: 24px; padding: 40px 0; border: 2px dashed #e2e8f0; }
+        
+        /* [范式3] Semantic 关联区 */
+        .sema-target { font-size: 50px; font-weight: bold; text-align: center; margin: 30px 0; color: var(--primary); letter-spacing: 5px;}
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .btn-choice { background: white; color: var(--primary); border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px 0; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        .btn-choice:active { background: var(--purple); color: white; border-color: var(--purple); transform: scale(0.95); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:#4f46e5; font-weight:bold; cursor:pointer; font-size: 16px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--purple); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
     <div class="container" id="menu">
-        <h2 style="color: #1e293b; margin-top:0;">💬 语言提取与语义网络</h2>
-        <button class="sys-btn" onclick="show('vft-area'); startVFT();">1. 词汇流畅性提取 (VFT) - 支持语音</button>
-        <button class="sys-btn" onclick="show('sema-area');">2. 语义关联与抽象提取</button>
+        <div class="module-header">
+            <h2>💬 语言与语义 (CAS-LAN)</h2>
+            <p>评估词汇检索流畅度、图文命名时延及内部语义网络通达度。</p>
+        </div>
+        <button class="sys-btn btn-menu" onclick="startVFT()">🗣️ 1. 词汇流畅性提取 (VFT) - 支持语音</button>
+        <button class="sys-btn btn-menu" onclick="startNaming()">🖼️ 2. 图片数字化命名 (BNT 范式)</button>
+        <button class="sys-btn btn-menu" onclick="startSemantic()">🧠 3. 高阶语义关联与分类测试</button>
     </div>
 
     <div class="container hidden" id="vft-area">
-        <h2>词汇流畅性 (动物类)</h2>
-        <p style="color:red; font-size:24px; font-weight:bold; text-align:center;" id="vft-timer">60s</p>
-        <p style="color:#64748b; text-align:center;">请说出尽可能多的动物名称（点击麦克风说话）。</p>
+        <div class="module-header"><h2>词汇流畅性 (VFT - 动物类)</h2>
+        <p>临床意义: 评估额叶执行功能与颞叶语义库的检索效率。请在 60 秒内尽可能多地说出动物的名称。</p></div>
+        
+        <div class="vft-timer" id="vft-timer">60s</div>
         
         <div class="input-wrapper">
-            <input type="text" id="vft-input" placeholder="输入或语音输入...">
-            <button class="btn-mic" id="mic-btn" onclick="startVoice('vft-input')">🎤</button>
+            <input type="text" id="vft-input" placeholder="输入或点击右侧麦克风语音输入..." onkeypress="if(event.key === 'Enter') submitVFT()">
+            <button class="btn-mic" id="mic-btn" onclick="toggleVoice('vft-input')">🎤</button>
         </div>
-        <button class="sys-btn btn-action" onclick="submitVFT()">录入该词 (+)</button>
+        <button class="sys-btn btn-action" onclick="submitVFT()">录入该词汇 (+)</button>
         
-        <div id="vft-list" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;"></div>
+        <div id="vft-list" style="margin-top:20px; min-height: 100px; padding: 15px; background: #f8fafc; border-radius: 16px;"></div>
+    </div>
+
+    <div class="container hidden" id="naming-area">
+        <div class="module-header"><h2>图片命名 (Naming)</h2>
+        <p>临床意义: 靶向左侧颞中回，早期发现命名性失语 (Anomia) 及找词困难。</p></div>
+        
+        <div style="font-weight:bold; color:var(--purple); margin-bottom: 10px;">进度: <span id="naming-prog">1/5</span></div>
+        <div class="naming-stimulus" id="naming-stim">🐘</div>
+        
+        <div class="input-wrapper">
+            <input type="text" id="naming-input" placeholder="这是什么？" onkeypress="if(event.key === 'Enter') recordNaming()">
+            <button class="btn-mic" id="mic-btn-naming" onclick="toggleVoice('naming-input')">🎤</button>
+        </div>
+        <button class="sys-btn btn-action" onclick="recordNaming()">确认并进入下一题</button>
     </div>
 
     <div class="container hidden" id="sema-area">
-        <h2>高阶语义判别</h2>
-        <p style="text-align:center; color:#64748b;">请选择与下方词汇同属一类或关联最紧密的词汇：</p>
-        <h1 style="text-align:center; color:#1e293b; font-size: 40px; margin: 40px 0;">火车</h1>
-        <div style="display:flex; flex-direction:column; gap:15px;">
-            <button class="sys-btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1;" onclick="alert('已记录'); show('menu');">A. 自行车</button>
-            <button class="sys-btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1;" onclick="alert('已记录'); show('menu');">B. 苹果</button>
-            <button class="sys-btn" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1;" onclick="alert('已记录'); show('menu');">C. 桌子</button>
-        </div>
+        <div class="module-header"><h2>语义关联网络 (Semantic Network)</h2>
+        <p>临床意义: 评估概念之间的连接强度。请选择与上方词汇关联最紧密的选项。</p></div>
+        <div style="font-weight:bold; color:var(--purple); margin-bottom: 10px;">进度: <span id="sema-prog">1/5</span></div>
+        <div class="sema-target" id="sema-target">医院</div>
+        
+        <div class="grid-3" id="sema-controls">
+            </div>
     </div>
 
     <script>
         function show(id) {
-            ['menu', 'vft-area', 'sema-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+            ['menu', 'vft-area', 'naming-area', 'sema-area'].forEach(d => {
+                const el = document.getElementById(d); if(el) el.classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
         }
 
-        // 语音识别初始化 (仅在浏览器支持时生效)
+        /* ==================== 0. HTML5 语音识别引擎初始化 ==================== */
+        // 调用浏览器底层的 Web Speech API，适用于社区医生持 iPad 辅助老人测试
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition;
+        let recognition = null;
+        let isRecording = false;
+
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.lang = 'zh-CN';
-            recognition.interimResults = false;
+            // 设置为 false，确保只有在受试者说完一句话时才返回确定的词，防止识别闪烁
+            recognition.interimResults = false; 
+            recognition.continuous = false;
         }
 
-        function startVoice(targetId) {
-            if (!recognition) return alert("您的浏览器不支持语音输入，请手动输入或使用Chrome浏览器。");
-            const btn = document.getElementById('mic-btn');
-            btn.classList.add('recording');
-            recognition.start();
+        // 通用语音切换函数
+        function toggleVoice(targetInputId) {
+            if (!recognition) return alert("您的设备/浏览器不支持原生语音输入，请手动打字。推荐使用 Chrome 或 Safari。");
             
-            recognition.onresult = function(event) {
-                const text = event.results[0][0].transcript.replace(/[。，！？]/g, ''); // 去除标点
-                document.getElementById(targetId).value = text;
-                btn.classList.remove('recording');
-            };
-            recognition.onerror = function() { btn.classList.remove('recording'); };
-            recognition.onend = function() { btn.classList.remove('recording'); };
+            const btn = event.currentTarget; // 获取当前点击的麦克风按钮
+            const inputField = document.getElementById(targetInputId);
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                btn.classList.add('recording'); inputField.placeholder = "正在聆听...";
+                recognition.start();
+                
+                recognition.onresult = function(e) {
+                    // 正则去除句末标点符号
+                    const text = e.results[0][0].transcript.replace(/[。，！？]/g, '');
+                    inputField.value = text;
+                    // 若在 VFT 模块中，语音识别后自动提交
+                    if(targetInputId === 'vft-input') submitVFT(); 
+                };
+                
+                recognition.onend = function() { 
+                    btn.classList.remove('recording'); inputField.placeholder = "输入或点击右侧麦克风语音输入...";
+                    isRecording = false; 
+                };
+                
+                recognition.onerror = function() { 
+                    btn.classList.remove('recording'); inputField.placeholder = "识别失败，请重试或手动输入";
+                    isRecording = false; 
+                };
+                isRecording = true;
+            }
         }
 
-        // VFT 逻辑
-        let vftData = { words: [] }, vftTimerId, time = 60;
+        /* ==================== 1. VFT (词汇流畅性) 逻辑 ==================== */
+        let vftData = { module: "LAN_VFT", category: "Animal", words: [] };
+        let vftTimerId = null, vftTimeLeft = 60;
+        
         function startVFT() {
-            time = 60; vftData.words = []; document.getElementById('vft-list').innerHTML = '';
+            vftTimeLeft = 60; vftData.words = []; 
+            document.getElementById('vft-list').innerHTML = ''; document.getElementById('vft-input').value = '';
+            document.getElementById('vft-timer').innerText = "60s";
+            show('vft-area');
+            
             vftTimerId = setInterval(() => {
-                time--; document.getElementById('vft-timer').innerText = time + 's';
-                if(time <= 0) { clearInterval(vftTimerId); CAS_Storage.saveModuleData('Language_VFT', vftData); alert("时间到！记录已保存"); show('menu'); }
+                vftTimeLeft--; 
+                document.getElementById('vft-timer').innerText = vftTimeLeft + 's';
+                if(vftTimeLeft <= 0) { 
+                    clearInterval(vftTimerId); 
+                    CAS_Storage.saveModuleData('LAN_VFT', vftData); 
+                    alert(`时间到！共提取有效词汇: ${vftData.words.length} 个。\n\n*临床提示: 后期可对输出的词表进行语义聚类(Clustering)和转换(Switching)的深度 NLP 分析。`); 
+                    show('menu'); 
+                }
             }, 1000);
         }
+
         function submitVFT() {
+            if(vftTimeLeft <= 0) return;
             const input = document.getElementById('vft-input');
             const word = input.value.trim();
-            if(word) {
+            if(word && !vftData.words.includes(word)) { // 防御重复输入
                 vftData.words.push(word);
                 const tag = document.createElement('span');
-                tag.style.cssText = "background:#eef2ff; color:#4f46e5; padding:8px 15px; border-radius:20px; font-weight:bold;";
-                tag.innerText = word;
+                tag.className = 'word-tag'; tag.innerText = word;
                 document.getElementById('vft-list').appendChild(tag);
                 input.value = '';
+            } else if (vftData.words.includes(word)) {
+                // 临床上，重复词汇(Perseveration)也是额叶受损的重要标志，正式版可开辟新数组记录
+                alert("已经说过这个词啦！"); input.value = '';
             }
+        }
+
+        /* ==================== 2. Naming (图片命名) 逻辑 ==================== */
+        // 刺激库：日常物体。此处使用高对比度 Emoji 代替实际线稿图 (Line Drawings)
+        const namingStims = [ { img: '🐘', ans: '大象' }, { img: '✂️', ans: '剪刀' }, { img: '🚁', ans: '直升机' }, { img: '🦏', ans: '犀牛' }, { img: '🪚', ans: '锯子' } ];
+        let namData = { module: "LAN_Naming", records: [] };
+        let n_trial = 0, n_onset = 0;
+
+        function startNaming() { n_trial = 0; namData.records = []; show('naming-area'); nextNaming(); }
+        
+        function nextNaming() {
+            if (n_trial >= namingStims.length) { CAS_Storage.saveModuleData('LAN_Naming', namData); alert("命名测试完成！数据已保存。"); show('menu'); return; }
+            document.getElementById('naming-prog').innerText = `${n_trial + 1}/${namingStims.length}`;
+            document.getElementById('naming-stim').innerText = namingStims[n_trial].img;
+            document.getElementById('naming-input').value = '';
+            n_onset = performance.now();
+        }
+
+        function recordNaming() {
+            const input = document.getElementById('naming-input').value.trim();
+            if (!input) return alert("请告诉我这是什么？");
+            const rt = Math.round(performance.now() - n_onset);
+            // 记录原始输入文本，后续可通过 NLP 计算与标准答案的词向量相似度 (Cosine Similarity)
+            namData.records.push({ trial: n_trial+1, stimulus: namingStims[n_trial].img, response: input, rt_ms: rt });
+            n_trial++; nextNaming();
+        }
+
+        /* ==================== 3. Semantic (语义关联) 逻辑 ==================== */
+        const semaStims = [
+            { t: '医生', opts: ['医院', '苹果', '桌子'], a: '医院' },
+            { t: '轮胎', opts: ['汽车', '天空', '衣服'], a: '汽车' },
+            { t: '冬天', opts: ['雪花', '沙漠', '火焰'], a: '雪花' },
+            { t: '键盘', opts: ['鼠标', '水杯', '树木'], a: '鼠标' },
+            { t: '锁', opts: ['钥匙', '鞋子', '玻璃'], a: '钥匙' }
+        ];
+        let semaData = { module: "LAN_Semantic", records: [] };
+        let sm_trial = 0, sm_onset = 0, sm_curr = null;
+
+        function startSemantic() { sm_trial = 0; semaData.records = []; show('sema-area'); nextSemantic(); }
+        
+        function nextSemantic() {
+            if (sm_trial >= semaStims.length) { CAS_Storage.saveModuleData('LAN_Semantic', semaData); alert("语义关联测试完成！"); show('menu'); return; }
+            document.getElementById('sema-prog').innerText = `${sm_trial + 1}/${semaStims.length}`;
+            sm_curr = semaStims[sm_trial];
+            document.getElementById('sema-target').innerText = sm_curr.t;
+            
+            const controls = document.getElementById('sema-controls'); controls.innerHTML = '';
+            
+            // 打乱选项呈现顺序
+            let options = [...sm_curr.opts].sort(() => Math.random() - 0.5);
+            options.forEach(opt => {
+                let btn = document.createElement('button'); btn.className = 'btn-choice'; btn.innerText = opt;
+                btn.onclick = () => recordSemantic(opt); controls.appendChild(btn);
+            });
+            sm_onset = performance.now();
+        }
+
+        function recordSemantic(choice) {
+            const rt = Math.round(performance.now() - sm_onset);
+            semaData.records.push({ target: sm_curr.t, response: choice, correct: choice === sm_curr.a, rt_ms: rt });
+            sm_trial++; nextSemantic();
         }
     </script>
 </body>
