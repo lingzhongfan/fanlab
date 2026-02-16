@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroMap - 神经行为多模态评估图谱系统</title>
+    <title>NeuroMap - 主试标准化操作手册</title>
     <style>
         /* 科技温情风 UI 规范 */
         :root { 
             --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; 
-            --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --purple: #8b5cf6; --teal: #0d9488; --slate: #64748b; 
+            --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --purple: #8b5cf6; --teal: #0d9488; --pink: #ec4899; --orange: #f97316; --slate: #64748b; 
         }
         body { font-family: -apple-system, "PingFang SC", sans-serif; background: #f8fafc; margin: 0; padding: 0; color: #334155; line-height: 1.6; }
-        .wrapper { max-width: 1100px; margin: 40px auto; background: white; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); overflow: hidden; }
+        .wrapper { max-width: 1200px; margin: 40px auto; background: white; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); overflow: hidden; }
         
-        /* 头部 */
         header { background: var(--primary); color: white; padding: 50px 40px; text-align: center; border-bottom: 8px solid var(--blue); }
         header h1 { margin: 0; font-size: 34px; letter-spacing: 2px; }
         header p { opacity: 0.85; margin: 15px 0 0 0; font-size: 16px; }
@@ -22,15 +21,14 @@
         .domain-title { display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin: 50px 0 30px 0; font-size: 24px; color: var(--primary); font-weight: bold;}
         .domain-title span { background: var(--light-blue); color: var(--blue); padding: 10px 15px; border-radius: 16px; font-size: 28px; }
         
-        /* 卡片网格布局 */
-        .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
-        .guide-card { background: #fcfcfd; border: 1px solid #e2e8f0; border-radius: 20px; padding: 30px; transition: 0.3s; }
+        .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 30px; }
+        .guide-card { background: #fcfcfd; border: 1px solid #e2e8f0; border-radius: 20px; padding: 30px; transition: 0.3s; display: flex; flex-direction: column;}
         .guide-card:hover { border-color: var(--blue); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.08); transform: translateY(-3px); }
         .guide-card h3 { margin-top: 0; color: var(--blue); font-size: 20px; border-left: 4px solid var(--blue); padding-left: 10px; }
+        .guide-text { font-size: 14px; flex-grow: 1;}
         .guide-text strong { color: var(--primary); }
-        .alert-text { display: inline-block; background: #fff1f2; color: var(--red); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-top: 10px; line-height: 1.4;}
+        .alert-text { display: inline-block; background: #fff1f2; color: var(--red); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-top: 15px; line-height: 1.4;}
 
-        /* 动画预览通用视窗 */
         .anim-box { height: 180px; background: white; border-radius: 16px; margin-top: 25px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; }
 
         /* ================= 纯 CSS 核心机制动画 ================= */
@@ -41,47 +39,59 @@
         .c-flash-1 { animation: flash 4s infinite 0.5s; } .c-flash-2 { animation: flash 4s infinite 1.5s; } .c-flash-3 { animation: flash 4s infinite 2.5s; }
         @keyframes flash { 0%, 10% { background: var(--blue); transform: scale(0.9); box-shadow: 0 0 10px rgba(79,70,229,0.5); } 15%, 100% { background: #e2e8f0; transform: scale(1); } }
 
-        /* 2. Flanker */
-        .flanker-anim { font-family: monospace; font-size: 35px; font-weight: bold; letter-spacing: 8px; animation: flanker-switch 4s infinite; }
-        @keyframes flanker-switch { 0%, 45% { content: '>>>>>'; color: var(--slate); } 50%, 95% { content: '<<><<'; color: var(--red); } }
-
-        /* 3. DCCS */
+        /* 2. DCCS */
         .dccs-rule { position: absolute; top: 15px; font-size: 14px; font-weight: bold; padding: 6px 15px; border-radius: 10px; border: 2px dashed #cbd5e1; animation: dccs-rule-switch 4s infinite; }
         .dccs-target { font-size: 50px; animation: dccs-target-switch 4s infinite; }
         @keyframes dccs-rule-switch { 0%, 45% { content: '按【颜色】匹配'; background: #fee2e2; color: var(--red); border-color: var(--red); } 50%, 95% { content: '按【形状】匹配'; background: #e0e7ff; color: var(--blue); border-color: var(--blue); } }
         @keyframes dccs-target-switch { 0%, 45% { content: '🔴🐰'; } 50%, 95% { content: '🔵⛵'; } }
 
-        /* 4. FER */
-        .fer-anim { font-size: 60px; animation: fer-switch 4s infinite; }
-        @keyframes fer-switch { 0%, 20% { content: '😐'; } 25%, 45% { content: '😠'; transform: scale(1.1); } 50%, 70% { content: '😨'; } 75%, 95% { content: '😊'; } }
-
-        /* 🌟 NEW: 5. dCDT (画钟动力学) */
+        /* 3. dCDT */
         .dcdt-anim-wrapper { position: relative; width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; }
         .dcdt-dial { position: absolute; width: 80px; height: 80px; border: 3px dashed var(--slate); border-radius: 50%; opacity: 0.3; }
         .dcdt-center { position: absolute; width: 6px; height: 6px; background: var(--teal); border-radius: 50%; }
-        .dcdt-hand { position: absolute; background: var(--teal); transform-origin: bottom center; border-radius: 3px; }
-        .dcdt-hand.hour { width: 4px; height: 25px; top: 25px; transform: rotate(330deg); }
-        .dcdt-hand.min { width: 3px; height: 35px; top: 15px; transform: rotate(60deg); }
         .dcdt-pen { position: absolute; font-size: 24px; top: 0; left: 50%; transform-origin: 0 50px; animation: draw-circle 3s infinite linear; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
         @keyframes draw-circle { 0% { transform: rotate(0deg) translate(-10px, -20px); } 100% { transform: rotate(360deg) translate(-10px, -20px); } }
 
-        /* 🌟 NEW: 6. IMU Gait (手机双重任务步态) */
+        /* 4. IMU Gait */
         .gait-phone { width: 45px; height: 85px; border: 4px solid var(--amber); border-radius: 12px; background: #fffbeb; display: flex; align-items: center; justify-content: center; position: relative; animation: walk-bounce 1s infinite alternate ease-in-out; }
         .gait-phone::before { content: 'X Y Z'; font-family: monospace; font-size: 10px; font-weight: bold; color: var(--amber); transform: rotate(-90deg); }
         .gait-shadow { position: absolute; bottom: 30px; width: 60px; height: 10px; background: rgba(0,0,0,0.1); border-radius: 50%; animation: shadow-pulse 1s infinite alternate ease-in-out; }
         @keyframes walk-bounce { 0% { transform: translateY(15px) rotate(-8deg); } 100% { transform: translateY(-15px) rotate(8deg); } }
         @keyframes shadow-pulse { 0% { transform: scale(1.2); opacity: 0.2; } 100% { transform: scale(0.8); opacity: 0.05; } }
 
-        /* 🌟 NEW: 7. VBM (语音生物标志物) */
+        /* 5. VBM & SER */
         .vbm-anim { display: flex; align-items: center; gap: 6px; }
         .vbm-bar { width: 10px; background: var(--purple); border-radius: 5px; animation: sound-wave 0.8s infinite alternate ease-in-out; }
-        .vbm-bar:nth-child(1) { height: 20px; animation-delay: 0.1s; }
-        .vbm-bar:nth-child(2) { height: 55px; animation-delay: 0.3s; }
-        .vbm-bar:nth-child(3) { height: 35px; animation-delay: 0.0s; }
-        .vbm-bar:nth-child(4) { height: 70px; animation-delay: 0.4s; }
-        .vbm-bar:nth-child(5) { height: 45px; animation-delay: 0.2s; }
-        .vbm-bar:nth-child(6) { height: 25px; animation-delay: 0.5s; }
+        .vbm-bar:nth-child(1) { height: 20px; animation-delay: 0.1s; } .vbm-bar:nth-child(2) { height: 55px; animation-delay: 0.3s; }
+        .vbm-bar:nth-child(3) { height: 35px; animation-delay: 0.0s; } .vbm-bar:nth-child(4) { height: 70px; animation-delay: 0.4s; }
         @keyframes sound-wave { 0% { transform: scaleY(0.3); background: #c4b5fd; } 100% { transform: scaleY(1.1); background: var(--purple); } }
+
+        /* 🌟 NEW: 6. ERT (认知重评) */
+        .ert-anim { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .ert-face { font-size: 50px; animation: ert-face-change 4s infinite; }
+        .ert-text { font-size: 14px; font-weight: bold; padding: 5px 15px; border-radius: 12px; animation: ert-text-change 4s infinite; }
+        @keyframes ert-face-change { 0%, 45% { content: '😨'; transform: scale(1.1); } 50%, 95% { content: '😐'; transform: scale(1); } }
+        @keyframes ert-text-change { 0%, 45% { content: '本能反应'; background: #ffe4e6; color: var(--red); } 50%, 95% { content: '前额叶重评介入'; background: #e0e7ff; color: var(--blue); } }
+
+        /* 🌟 NEW: 7. IAT (内隐联想) */
+        .iat-anim { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .iat-word { font-size: 24px; font-weight: bold; color: var(--primary); position: absolute; animation: iat-sort 2s infinite; }
+        .iat-key { position: absolute; bottom: 20px; font-size: 16px; font-weight: bold; color: var(--slate); border: 2px solid #cbd5e1; padding: 5px 10px; border-radius: 8px;}
+        @keyframes iat-sort { 0% { transform: translateY(-40px) scale(0.5); opacity: 0; content: '孤独'; } 20% { transform: translateY(0) scale(1.2); opacity: 1; content: '孤独'; } 80% { transform: translate(60px, 0) scale(1); opacity: 0; } 100% { opacity: 0; } }
+
+        /* 🌟 NEW: 8. Keystroke (按键动力学) */
+        .key-anim { display: flex; gap: 20px; align-items: flex-end; height: 80px; }
+        .key-btn { width: 50px; height: 50px; background: #f1f5f9; border: 4px solid var(--orange); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: var(--orange); box-shadow: 0 8px 0 #fdba74; transition: 0.1s; animation: key-press 2s infinite; }
+        .key-btn:nth-child(2) { animation-delay: 0.5s; border-color: var(--teal); color: var(--teal); box-shadow: 0 8px 0 #5eead4;}
+        @keyframes key-press { 0%, 70%, 100% { transform: translateY(0); box-shadow: 0 8px 0 currentColor; } 10%, 60% { transform: translateY(8px); box-shadow: 0 0 0 currentColor; background: #fff7ed;} }
+        .key-label { position: absolute; top: 20px; font-size: 12px; font-weight: bold; color: var(--slate); font-family: monospace; animation: key-text 2s infinite; }
+        @keyframes key-text { 0%, 9% { content: 'Flight Time (飞行)'; color: var(--slate); } 10%, 60% { content: 'Dwell Time (滞留测算中)'; color: var(--orange); } }
+
+        /* 🌟 NEW: 9. rPPG (影像血流) */
+        .rppg-anim { position: relative; width: 100px; height: 120px; border: 3px solid var(--pink); border-radius: 16px; display: flex; align-items: center; justify-content: center; background: #fdf2f8; overflow: hidden; }
+        .rppg-face { font-size: 50px; z-index: 1; }
+        .rppg-scan { position: absolute; top: 0; left: 0; width: 100%; height: 20px; background: linear-gradient(to bottom, rgba(236,72,153,0), rgba(236,72,153,0.5)); border-bottom: 2px solid var(--pink); animation: scan-line 2s infinite linear; z-index: 2; }
+        @keyframes scan-line { 0% { transform: translateY(-20px); } 100% { transform: translateY(120px); } }
 
         .back-btn { display: block; width: fit-content; margin: 50px auto 20px; padding: 20px 50px; background: var(--primary); color: white; border-radius: 16px; text-decoration: none; font-size: 18px; font-weight: bold; box-shadow: 0 8px 20px rgba(30, 41, 59, 0.3); transition: 0.2s; }
         .back-btn:hover { background: black; transform: translateY(-3px); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
@@ -90,8 +100,8 @@
 <body>
 <div class="wrapper">
     <header>
-        <h1>NeuroMap 主试标准化操作手册</h1>
-        <p>包含数字表型全集：NIH 认知范式 · 动力学 · 声学提取 · IMU 步态</p>
+        <h1>CAS 3.0 主试标准化操作手册</h1>
+        <p>数字表型全景：认知范式 · 动力学 · 声学提取 · 影像血流 · 情感计算</p>
     </header>
 
     <div class="content">
@@ -99,92 +109,85 @@
         <div class="guide-grid">
             <div class="guide-card">
                 <h3>1. Corsi 空间记忆跨度</h3>
-                <p class="guide-text"><strong>指导语:</strong> “请仔细观察方块亮起的顺序，等提示出现后，请按原顺序点击方块。”</p>
-                <div class="alert-text">💡 临床注意: 系统自适应难度。若连续答错 2 次将自动终止。请提醒受试者切勿抢答。</div>
-                <div class="anim-box">
-                    <div class="c-grid">
-                        <div class="c-box c-flash-1"></div><div class="c-box"></div><div class="c-box c-flash-3"></div>
-                        <div class="c-box"></div><div class="c-box c-flash-2"></div><div class="c-box"></div>
-                    </div>
-                </div>
+                <p class="guide-text"><strong>指导语:</strong> “请观察方块亮起的顺序，结束后按原顺序点击。”</p>
+                <div class="anim-box"><div class="c-grid"><div class="c-box c-flash-1"></div><div class="c-box"></div><div class="c-box c-flash-3"></div><div class="c-box"></div><div class="c-box c-flash-2"></div><div class="c-box"></div></div></div>
             </div>
-
             <div class="guide-card">
-                <h3>2. Flanker 侧抑制与冲突解决</h3>
-                <p class="guide-text"><strong>指导语:</strong> “忽略两边箭头的干扰，只根据【最中间箭头】的方向，点击对应的左右按钮。”</p>
-                <div class="alert-text">💡 临床注意: 考察前扣带回(ACC)。若反应极慢或错误频发，提示执行抑制能力衰退。</div>
-                <div class="anim-box"><div class="flanker-anim"><span style="color:#cbd5e1">&lt;&lt;</span><span style="color:var(--blue);">&gt;</span><span style="color:#cbd5e1">&lt;&lt;</span></div></div>
-            </div>
-
-            <div class="guide-card">
-                <h3>3. DCCS 维度变化卡片</h3>
-                <p class="guide-text"><strong>指导语:</strong> “请紧盯上方提示框。提示【按颜色】，就选颜色一样的；提示【按形状】，就选形状一样的。”</p>
-                <div class="alert-text">💡 临床注意: 重点观察“规则切换”瞬间受试者产生的反应延迟 (Switch Cost)。</div>
-                <div class="anim-box">
-                    <div class="dccs-rule">按颜色匹配</div>
-                    <div class="dccs-target">🔴🐰</div>
-                </div>
+                <h3>2. DCCS 维度变化卡片</h3>
+                <p class="guide-text"><strong>指导语:</strong> “紧盯提示框。提示【按颜色】，就选颜色一样的；提示【按形状】，就选形状一样的。”</p>
+                <div class="alert-text">💡 临床注意: 观察“规则切换”瞬间的反应延迟 (Switch Cost)。</div>
+                <div class="anim-box"><div class="dccs-rule">按颜色匹配</div><div class="dccs-target">🔴🐰</div></div>
             </div>
         </div>
 
-        <div class="domain-title"><span style="color:var(--teal); background:#ccfbf1;">🎯</span> 运动与动力学 (Motor & Kinematics)</div>
+        <div class="domain-title"><span style="color:var(--teal); background:#ccfbf1;">🎯</span> 运动共济与精细动力学 (Motor)</div>
         <div class="guide-grid">
-            
             <div class="guide-card" style="border-color: var(--teal);">
-                <h3 style="color: var(--teal); border-left-color: var(--teal);">4. 数字化画钟测试 (dCDT)</h3>
-                <p class="guide-text"><strong>准备工作:</strong> 必须为受试者提供支持压感的触控笔 (如 Apple Pencil)。</p>
-                <p class="guide-text"><strong>指导语:</strong> “请在画板上画一个圆形的钟表。把所有的数字写上，并将指针指在【11点10分】的位置。”</p>
-                <div class="alert-text" style="background:#f0fdfa; color:var(--teal);">💡 临床靶向: 系统提取的关键并非最终图案，而是笔尖离开屏幕思考的“空中停顿时间 (In-air time)”，用于极早期预警执行功能受损。</div>
-                <div class="anim-box">
-                    <div class="dcdt-anim-wrapper">
-                        <div class="dcdt-dial"></div>
-                        <div class="dcdt-center"></div>
-                        <div class="dcdt-hand hour"></div>
-                        <div class="dcdt-hand min"></div>
-                        <div class="dcdt-pen">✏️</div>
-                    </div>
-                </div>
+                <h3 style="color: var(--teal); border-left-color: var(--teal);">3. dCDT 数字化画钟测试</h3>
+                <p class="guide-text"><strong>指导语:</strong> “画一个圆形钟表，标上数字，指针指在 11点10分。”</p>
+                <div class="alert-text" style="background:#f0fdfa; color:var(--teal);">💡 核心特征: 笔尖离开屏幕思考的“空中停顿时间”。</div>
+                <div class="anim-box"><div class="dcdt-anim-wrapper"><div class="dcdt-dial"></div><div class="dcdt-center"></div><div class="dcdt-pen">✏️</div></div></div>
             </div>
-
             <div class="guide-card" style="border-color: var(--amber);">
-                <h3 style="color: var(--amber); border-left-color: var(--amber);">5. IMU 认知-运动双重任务步态</h3>
-                <p class="guide-text"><strong>准备工作:</strong> 必须使用智能手机浏览器（iOS 设备需点击允许传感器权限），并将手机放入口袋或系于腰间。</p>
-                <p class="guide-text"><strong>指导语:</strong> “请您用平时习惯的速度向前走 10 米。在走路的同时，大声地从 100 开始每次减 7 (100, 93, 86...)。”</p>
-                <div class="alert-text" style="background:#fffbeb; color:#b45309;">💡 临床靶向: 通过加速度计捕捉额叶资源耗竭导致的步速坠降与“步态变异性 (Variability)”增大。</div>
-                <div class="anim-box" style="flex-direction: column;">
-                    <div class="gait-phone"></div>
-                    <div class="gait-shadow"></div>
+                <h3 style="color: var(--amber); border-left-color: var(--amber);">4. IMU 双重任务步态</h3>
+                <p class="guide-text"><strong>指导语:</strong> “把手机放入口袋。用平时的速度走10米，同时大声从100连续减7。”</p>
+                <div class="alert-text" style="background:#fffbeb; color:#b45309;">💡 核心特征: 额叶资源耗竭导致的步态变异性 (Variability)。</div>
+                <div class="anim-box"><div class="gait-phone"></div></div>
+            </div>
+            <div class="guide-card" style="border-color: var(--orange);">
+                <h3 style="color: var(--orange); border-left-color: var(--orange);">5. KEY 按键动力学</h3>
+                <p class="guide-text"><strong>准备工作:</strong> 必须使用实体键盘，关闭中文输入法。</p>
+                <p class="guide-text"><strong>指导语:</strong> “请尽可能快速、准确地抄写屏幕上的英文字符串。”</p>
+                <div class="alert-text" style="background:#fff7ed; color:#c2410c;">💡 核心特征: 捕捉帕金森或强直导致的滞留时间 (Dwell Time) 延长。</div>
+                <div class="anim-box">
+                    <div class="key-label"></div>
+                    <div class="key-anim"><div class="key-btn">T</div><div class="key-btn">H</div></div>
                 </div>
             </div>
-            
         </div>
 
-        <div class="domain-title"><span style="color:var(--purple); background:#f3e8ff;">🎙️</span> 语言网络与计算声学 (Language & VBM)</div>
+        <div class="domain-title"><span style="color:var(--rose); background:#ffe4e6;">🎭</span> 高级情感计算与潜意识 (Advanced Emotion)</div>
         <div class="guide-grid">
-            
-            <div class="guide-card" style="border-color: var(--purple);">
-                <h3 style="color: var(--purple); border-left-color: var(--purple);">6. VBM 语音生物标志物提取</h3>
-                <p class="guide-text"><strong>准备工作:</strong> 确保环境相对安静。向受试者展示屏幕上的《偷饼图》(Cookie Theft Picture)。</p>
-                <p class="guide-text"><strong>指导语:</strong> “请您仔细观察这张图片，然后尽可能详细地描述图片里正在发生什么。”</p>
-                <div class="alert-text" style="background:#faf5ff; color:var(--purple);">💡 临床靶向: 并非进行语义识别，而是提取发音的声学特征。AD 早期词汇检索困难会导致“停顿比 (Pause Ratio)”异常增高；PD 会产生发声微颤 ($F_0$ 扰动)。</div>
+            <div class="guide-card" style="border-color: var(--rose);">
+                <h3 style="color: var(--rose); border-left-color: var(--rose);">6. ERT 认知重评任务</h3>
+                <p class="guide-text"><strong>第一步:</strong> 记录自然观看负性图片时的情绪得分。<br><strong>第二步:</strong> 指导受试者换个角度思考（如“这只是电影”），再次记录得分。</p>
+                <div class="alert-text" style="background:#fff1f2; color:var(--rose);">💡 核心特征: 两次差值为“调节力”，反映前额叶对边缘系统的抑制功能。</div>
+                <div class="anim-box"><div class="ert-anim"><div class="ert-face"></div><div class="ert-text"></div></div></div>
+            </div>
+            <div class="guide-card" style="border-color: var(--blue);">
+                <h3 style="color: var(--blue); border-left-color: var(--blue);">7. IAT 内隐联想测验</h3>
+                <p class="guide-text"><strong>指导语:</strong> “请将双手食指放在 E 键和 I 键上。看到词汇后，凭直觉用最快速度进行左右分类。”</p>
+                <div class="alert-text" style="background:#eff6ff; color:#1d4ed8;">💡 核心特征: 通过“我+积极”与“我+消极”的毫秒级反应时差值，暴露隐藏的抑郁偏置。</div>
                 <div class="anim-box">
-                    <div class="vbm-anim">
-                        <div class="vbm-bar"></div><div class="vbm-bar"></div><div class="vbm-bar"></div>
-                        <div class="vbm-bar"></div><div class="vbm-bar"></div><div class="vbm-bar"></div>
+                    <div class="iat-anim">
+                        <div class="iat-key" style="left:10px;">E: 我/快乐</div>
+                        <div class="iat-word">孤独</div>
+                        <div class="iat-key" style="right:10px;">I: 他/悲伤</div>
                     </div>
                 </div>
             </div>
-
-            <div class="guide-card" style="border-color: var(--red);">
-                <h3 style="color: var(--red); border-left-color: var(--red);">7. FER 面孔情绪识别</h3>
-                <p class="guide-text"><strong>指导语:</strong> “屏幕上会出现不同的人物面孔，请以最快速度点选该面孔代表的情绪。”</p>
-                <div class="alert-text" style="background:#fff1f2; color:var(--red);">💡 临床靶向: 杏仁核与社会认知网络。额颞叶痴呆(FTD)患者极易丧失对“恐惧”和“愤怒”的识别敏锐度。</div>
-                <div class="anim-box"><div class="fer-anim">😐</div></div>
+            <div class="guide-card" style="border-color: var(--purple);">
+                <h3 style="color: var(--purple); border-left-color: var(--purple);">8. VBM/SER 语音特征与韵律</h3>
+                <p class="guide-text"><strong>指导语:</strong> “请尽可能详细地描述屏幕上的《偷饼图》，或者讲述一件让您有压力的事情。”</p>
+                <div class="alert-text" style="background:#faf5ff; color:var(--purple);">💡 核心特征: 提取停顿比(找词困难)与声学梅尔频谱(焦虑爆发/抑郁平淡)。后台同步执行 LLM 大五人格测算。</div>
+                <div class="anim-box"><div class="vbm-anim"><div class="vbm-bar"></div><div class="vbm-bar"></div><div class="vbm-bar"></div><div class="vbm-bar"></div></div></div>
             </div>
-
         </div>
 
-        <a href="index.html" class="back-btn">已了解全部施测规范，返回主控制台 ➔</a>
+        <div class="domain-title"><span style="color:var(--pink); background:#fdf2f8;">🎥</span> 生理影像与血流动力学 (Physiology)</div>
+        <div class="guide-grid">
+            <div class="guide-card" style="border-color: var(--pink);">
+                <h3 style="color: var(--pink); border-left-color: var(--pink);">9. rPPG 面部血流动力学</h3>
+                <p class="guide-text"><strong>准备工作:</strong> 确保测试环境光线均匀（避免强烈的单侧阴影）。</p>
+                <p class="guide-text"><strong>指导语:</strong> “请您脸部对准屏幕中央的框。开始后，自然呼吸，全程盯着十字光标，尽量不要说话或晃动头部 60 秒。”</p>
+                <div class="alert-text" style="background:#fdf2f8; color:#be185d;">💡 核心特征: 通过视频提取面部毛细血管微小变色，进而解算自主神经心率变异性 (HRV)。</div>
+                <div class="anim-box">
+                    <div class="rppg-anim"><div class="rppg-face">👤</div><div class="rppg-scan"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-btn">已了解全部新版规范，返回主控制台 ➔</a>
     </div>
 </div>
 </body>
