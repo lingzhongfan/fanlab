@@ -1,6 +1,6 @@
 // 文件名: cas-storage.js
 /**
- * CAS (Computational Assessment Suite) 核心存储引擎
+ * NeuroMap (The Neuro-Behavioral Multimodal Assessment Platform) 核心存储引擎
  * 临床意义: 负责在无网络(Offline)环境下，将22+项高频行为学时序数据(Time-Series)
  * 与横截面量表数据(Cross-Sectional)持久化在本地浏览器，保障社区筛查的数据安全。
  */
