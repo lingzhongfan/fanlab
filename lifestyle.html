@@ -3,202 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-LIF | 生活方式与临床评估</title>
+    <title>NeuroMap-LIF | 日常功能与生物节律评估 (科研临床版 v4.0)</title>
     <style>
-        /* 科技温情风 UI */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --teal: #0d9488; --slate: #64748b; }
-        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --green: #10b981; --light-green: #d1fae5; --emerald: #059669; --red: #f43f5e; --slate: #64748b; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); user-select: none; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; position: relative; overflow: hidden; min-height: 500px;}
         .hidden { display: none !important; }
         
-        .module-header { border-left: 6px solid var(--teal); padding-left: 15px; margin-bottom: 30px; }
+        .module-header { border-left: 6px solid var(--green); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
-        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
-        .btn-menu { background: #f0fdfa; color: #0f766e; border: 1px solid #ccfbf1; }
-        .btn-menu:hover { background: var(--teal); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(13, 148, 136, 0.2); }
-        .btn-action { background: var(--teal); color: white; justify-content: center; margin-top: 30px; }
+        .sys-btn { width: 100%; padding: 20px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.2s; background: var(--green); color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);}
+        .sys-btn:hover { background: var(--emerald); transform: translateY(-2px); }
 
-        /* 问卷系统精美 UI */
-        .q-group { margin-bottom: 35px; background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px dashed #e2e8f0; }
-        .q-group label { display: block; font-weight: 600; margin-bottom: 20px; font-size: 16px; color: var(--primary); line-height: 1.5; }
+        /* 进度条 */
+        .progress-bar-container { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.4s ease; }
+        .progress-text { text-align: right; font-size: 13px; color: var(--slate); font-weight: bold; margin-top: -20px; margin-bottom: 20px;}
+
+        /* 单题呈现区 (Single-item UI) */
+        .question-card { animation: fadeInRight 0.4s ease-out; }
+        @keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
         
-        /* 优化单选按钮的触控体验 (适老化) */
-        .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .radio-option { display: flex; align-items: center; padding: 15px; background: white; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.2s; }
-        .radio-option:active { transform: scale(0.98); }
-        .radio-option input[type="radio"] { width: 20px; height: 20px; margin-right: 15px; accent-color: var(--teal); cursor: pointer; }
-        .radio-option:has(input[type="radio"]:checked) { border-color: var(--teal); background: #f0fdfa; }
+        .q-title { font-size: 26px; font-weight: bold; color: var(--primary); margin-bottom: 10px; line-height: 1.4; }
+        .q-desc { font-size: 16px; color: var(--slate); margin-bottom: 30px; line-height: 1.5; }
 
-        /* 滑块 */
-        input[type=range] { -webkit-appearance: none; width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; background: white; border: 4px solid var(--teal); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .labels { display: flex; justify-content: space-between; font-size: 13px; color: var(--slate); margin-top: 12px; font-weight: bold; }
+        /* 选项按钮 (大号防抖设计) */
+        .options-grid { display: grid; gap: 15px; }
+        .btn-option { padding: 25px 20px; text-align: left; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; font-size: 20px; font-weight: bold; color: var(--primary); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
+        .btn-option:hover { border-color: var(--green); background: var(--light-green); }
+        .btn-option:active { transform: scale(0.98); }
+
+        /* 连续变量滑动条 (VAS) */
+        .vas-container { background: #f8fafc; padding: 30px; border-radius: 16px; border: 2px dashed #cbd5e1; margin-bottom: 20px; }
+        .vas-labels { display: flex; justify-content: space-between; font-weight: bold; color: var(--slate); font-size: 14px; margin-bottom: 15px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 35px; height: 35px; background: white; border: 5px solid var(--green); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .vas-value-display { text-align: center; font-size: 32px; font-weight: bold; color: var(--emerald); margin-top: 20px; font-family: monospace; }
+
+        /* 节律曲线图版 */
+        .circadian-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .circadian-col { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .circadian-label { font-size: 16px; font-weight: bold; color: var(--slate); }
+        .circadian-col input[type=range] { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 20px; height: 200px; padding: 0; }
+
+        /* 导航控制 */
+        .nav-controls { display: flex; justify-content: space-between; margin-top: 40px; border-top: 2px solid #f1f5f9; padding-top: 20px;}
+        .btn-nav { padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-prev { background: #f1f5f9; color: var(--slate); }
+        .btn-prev:hover { background: #e2e8f0; color: var(--primary); }
+        .btn-next { background: var(--green); color: white; }
+        .btn-next:hover { background: var(--emerald); }
+        .btn-next:disabled { background: #cbd5e1; cursor: not-allowed; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--teal); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--green); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
-    <div class="container" id="menu">
+    <div class="container" id="menu-area">
         <div class="module-header">
-            <h2>🌙 生活方式与日常功能 (CAS-LIF)</h2>
-            <p>包含主观认知衰退(SCD)、日常工具性功能(IADL)、睡眠节律与抑郁筛查。</p>
+            <h2>🥗 日常功能与生物节律 (LIF)</h2>
+            <p><strong>临床靶向：</strong>评估工具性日常生活能力 (IADL) 的独立性、睡眠质量以及 24 小时生物能量节律。<br>
+            *系统将自动追踪受试者回答每一道题目的“决策潜伏期(Hesitation RT)”，识别隐性失认症或认知负荷。</p>
         </div>
-        <button class="sys-btn btn-menu" onclick="show('scd-area')">🧠 1. SCD-Q 主观认知下降问卷</button>
-        <button class="sys-btn btn-menu" onclick="show('iadl-area')">🛠️ 2. IADL 日常生活能力量表</button>
-        <button class="sys-btn btn-menu" onclick="show('sleep-area')">💤 3. 睡眠与生物节律特征评估</button>
-        <button class="sys-btn btn-menu" onclick="show('phq-area')">🌧️ 4. PHQ-2 抑郁情绪筛查量表</button>
+        <div style="background: var(--light-green); padding: 20px; border-radius: 16px; color: var(--emerald); font-weight: bold; margin-bottom: 30px;">
+            ⚠️ 主试注意：请将平板交由受试者本人操作。如果受试者存在严重运动障碍，可由主试代为点击，但需确保是受试者做出的决定。
+        </div>
+        <button class="sys-btn" onclick="startAssessment()">▶ 开始全景生活评估</button>
     </div>
 
-    <div class="container hidden" id="scd-area">
-        <div class="module-header"><h2>主观认知下降 (SCD-Q)</h2>
-        <p>临床意义: SCD 是阿尔茨海默病 (AD) 临床前期的重要预测指标。</p></div>
-        
-        <div class="q-group">
-            <label>1. 与一年前相比，您是否觉得自己的记忆力正在下降？</label>
-            <div class="radio-grid">
-                <label class="radio-option"><input type="radio" name="scd1" value="1"> 是 (Yes)</label>
-                <label class="radio-option"><input type="radio" name="scd1" value="0"> 否 (No)</label>
+    <div class="container hidden" id="task-area">
+        <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        <div class="progress-text" id="progress-text">1 / 5</div>
+
+        <div id="question-container" class="question-card">
             </div>
-        </div>
-        
-        <div class="q-group">
-            <label>2. 这种记忆力下降的情况是否让您感到担心或焦虑？</label>
-            <div class="radio-grid">
-                <label class="radio-option"><input type="radio" name="scd2" value="1"> 是 (Yes)</label>
-                <label class="radio-option"><input type="radio" name="scd2" value="0"> 否 (No)</label>
-            </div>
-        </div>
 
-        <button class="sys-btn btn-action" onclick="saveSCD()">保存 SCD 数据</button>
-    </div>
-
-    <div class="container hidden" id="iadl-area">
-        <div class="module-header"><h2>工具性日常生活能力 (IADL)</h2>
-        <p>临床诊断鉴别: IADL 受损是区分 MCI (轻度认知障碍) 与痴呆 (Dementia) 的核心分水岭。</p></div>
-        
-        <div class="q-group">
-            <label>1. 【管理财务】: 您能独立处理账单、去银行办理业务吗？</label>
-            <div class="radio-grid">
-                <label class="radio-option"><input type="radio" name="iadl1" value="0"> 完全独立</label>
-                <label class="radio-option"><input type="radio" name="iadl1" value="1"> 需要部分协助</label>
-                <label class="radio-option" style="grid-column: 1 / -1;"><input type="radio" name="iadl1" value="2"> 完全无法独立完成</label>
-            </div>
+        <div class="nav-controls">
+            <button class="btn-nav btn-prev" id="btn-prev" onclick="navigate(-1)">返回上题</button>
+            <button class="btn-nav btn-next" id="btn-next" onclick="navigate(1)">下一题 ➔</button>
         </div>
-        
-        <div class="q-group">
-            <label>2. 【服药管理】: 您能按时按量、正确地服用自己的日常药物吗？</label>
-            <div class="radio-grid">
-                <label class="radio-option"><input type="radio" name="iadl2" value="0"> 完全独立</label>
-                <label class="radio-option"><input type="radio" name="iadl2" value="1"> 需人提醒或准备</label>
-            </div>
-        </div>
-
-        <button class="sys-btn btn-action" onclick="saveIADL()">保存 IADL 评估</button>
-    </div>
-
-    <div class="container hidden" id="sleep-area">
-        <div class="module-header"><h2>睡眠结构与生物节律</h2>
-        <p>临床意义: 昼夜节律紊乱 (Circadian Disruption) 和睡眠碎片化往往早于认知衰退出现。</p></div>
-        
-        <div class="q-group">
-            <label>1. 过去一个月内，您平均每晚的【实际睡眠时间】大约是？</label>
-            <div style="font-weight:bold; color:var(--teal); text-align:center; font-size:24px; margin-bottom:15px;" id="sleep-hr-val">7 小时</div>
-            <input type="range" id="sleep-hr" min="2" max="14" step="0.5" value="7" oninput="document.getElementById('sleep-hr-val').innerText = this.value + ' 小时'">
-        </div>
-        
-        <div class="q-group">
-            <label>2. 您在睡眠过程中，是否经常出现大声做梦、挥动手臂或踢腿的情况？(RBD 快速眼动期睡眠行为障碍筛查)</label>
-            <div class="radio-grid">
-                <label class="radio-option"><input type="radio" name="sleep-rbd" value="1"> 经常发生</label>
-                <label class="radio-option"><input type="radio" name="sleep-rbd" value="0"> 从未发生</label>
-            </div>
-        </div>
-
-        <button class="sys-btn btn-action" onclick="saveSleep()">保存睡眠特征</button>
-    </div>
-
-    <div class="container hidden" id="phq-area">
-        <div class="module-header"><h2>抑郁情绪筛查 (PHQ-2)</h2>
-        <p>临床意义: 极高比例的早期认知减退患者伴随抑郁，必须排除“抑郁性假性痴呆”。</p></div>
-        
-        <p style="color:var(--slate); font-weight:bold;">在过去的 2 周内，您多长频率受到以下问题的困扰？</p>
-
-        <div class="q-group">
-            <label>1. 做事缺乏兴趣或乐趣？</label>
-            <select id="phq1" style="width:100%; padding:15px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px;">
-                <option value="-1">请选择...</option>
-                <option value="0">完全没有 (0分)</option>
-                <option value="1">有几天 (1分)</option>
-                <option value="2">一半以上的天数 (2分)</option>
-                <option value="3">几乎每天 (3分)</option>
-            </select>
-        </div>
-        
-        <div class="q-group">
-            <label>2. 感到情绪低落、沮丧或绝望？</label>
-            <select id="phq2" style="width:100%; padding:15px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px;">
-                <option value="-1">请选择...</option>
-                <option value="0">完全没有 (0分)</option>
-                <option value="1">有几天 (1分)</option>
-                <option value="2">一半以上的天数 (2分)</option>
-                <option value="3">几乎每天 (3分)</option>
-            </select>
-        </div>
-
-        <button class="sys-btn btn-action" onclick="savePHQ()">计算 PHQ 得分并保存</button>
     </div>
 
     <script>
-        function show(id) {
-            ['menu', 'scd-area', 'iadl-area', 'sleep-area', 'phq-area'].forEach(d => {
-                const el = document.getElementById(d); if(el) el.classList.add('hidden');
+        // ================= 1. 临床问题库设计 =================
+        // 涵盖 IADL(工具性日常生活能力)、睡眠质量、节律曲线与社会参与
+        const questions = [
+            {
+                id: "iadl_medication",
+                type: "choice",
+                title: "💊 服药管理能力",
+                desc: "您目前能否完全依靠自己，在正确的时间服用正确剂量的药物？",
+                options: [
+                    { value: 3, label: "完全能独立按时按量服药", score: 0 }, // score: 扣分项，0为正常
+                    { value: 2, label: "需要别人提醒或帮忙分装好", score: 1 },
+                    { value: 1, label: "完全不能，必须由他人喂服", score: 2 }
+                ]
+            },
+            {
+                id: "iadl_finance",
+                type: "choice",
+                title: "💰 财务与购物管理",
+                desc: "您目前能否独立处理日常开销、去超市购物并算清账目？",
+                options: [
+                    { value: 3, label: "能独立完成购物和财务管理", score: 0 },
+                    { value: 2, label: "能买些日用品，但大额财务处理困难", score: 1 },
+                    { value: 1, label: "完全无法独立购物或管钱", score: 2 }
+                ]
+            },
+            {
+                id: "sleep_quality",
+                type: "vas",
+                title: "🛏️ 主观睡眠质量",
+                desc: "请拖动滑块，评估您过去一个月内的总体睡眠质量。",
+                labels: ["极差 (严重失眠)", "极好 (一觉到天亮)"],
+                unit: "分"
+            },
+            {
+                id: "circadian_rhythm",
+                type: "curve",
+                title: "📈 24小时能量节律",
+                desc: "请调节以下四个滑块，描绘您一天中【精力最充沛】和【最疲惫】的时间段分布。",
+                labels: ["早晨 (8:00)", "中午 (13:00)", "傍晚 (18:00)", "夜间 (22:00)"]
+            },
+            {
+                id: "social_engagement",
+                type: "choice",
+                title: "🤝 社会与情感互动",
+                desc: "您最近一周内，主动与亲戚、朋友或邻居进行交流（包括电话/微信）的频率是？",
+                options: [
+                    { value: 3, label: "几乎每天都有交流", score: 0 },
+                    { value: 2, label: "每周只有 1-2 次", score: 1 },
+                    { value: 1, label: "几乎没有与人主动交流", score: 2 }
+                ]
+            }
+        ];
+
+        // ================= 2. 核心状态与引擎 =================
+        let lifData = { module: "LIF_Lifestyle", responses: [], summary: {} };
+        let currentIndex = 0;
+        let questionOnset = 0; // 用于计算反应潜伏期 (Hesitation RT)
+        let currentAnswers = {}; // 存储所有回答
+
+        function startAssessment() {
+            lifData.responses = [];
+            currentAnswers = {};
+            currentIndex = 0;
+            document.getElementById('menu-area').classList.add('hidden');
+            document.getElementById('task-area').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentIndex];
+            const container = document.getElementById('question-container');
+            
+            // 重置动画
+            container.style.animation = 'none';
+            container.offsetHeight; // 触发重绘
+            container.style.animation = null;
+
+            // 更新进度条
+            const progress = ((currentIndex + 1) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${questions.length}`;
+
+            // 控制按钮状态
+            document.getElementById('btn-prev').style.visibility = currentIndex === 0 ? 'hidden' : 'visible';
+            const nextBtn = document.getElementById('btn-next');
+            nextBtn.innerText = currentIndex === questions.length - 1 ? "完成并入库 💾" : "下一题 ➔";
+            
+            // 默认禁用下一题，除非已经作答
+            nextBtn.disabled = currentAnswers[q.id] === undefined && q.type !== 'curve' && q.type !== 'vas';
+
+            let html = `<div class="q-title">${q.title}</div><div class="q-desc">${q.desc}</div>`;
+
+            // 根据题目类型渲染不同 UI
+            if (q.type === 'choice') {
+                html += `<div class="options-grid">`;
+                q.options.forEach(opt => {
+                    const isSelected = currentAnswers[q.id] && currentAnswers[q.id].value === opt.value;
+                    const style = isSelected ? `border-color: var(--green); background: var(--light-green);` : ``;
+                    html += `<button class="btn-option" style="${style}" onclick="selectChoice('${q.id}', ${opt.value}, ${opt.score})">
+                                <span>${opt.label}</span>
+                                ${isSelected ? '✅' : ''}
+                             </button>`;
+                });
+                html += `</div>`;
+            } 
+            else if (q.type === 'vas') {
+                const val = currentAnswers[q.id] ? currentAnswers[q.id].value : 50;
+                html += `
+                    <div class="vas-container">
+                        <div class="vas-labels"><span>${q.labels[0]}</span><span>${q.labels[1]}</span></div>
+                        <input type="range" id="vas-slider" min="0" max="100" value="${val}" oninput="updateVAS('${q.id}', this.value)">
+                        <div class="vas-value-display" id="vas-val-text">${val} ${q.unit}</div>
+                    </div>
+                `;
+                // VAS 默认有值，允许直接点击下一题
+                nextBtn.disabled = false;
+                if(!currentAnswers[q.id]) currentAnswers[q.id] = { value: 50, rt: 0 }; 
+            }
+            else if (q.type === 'curve') {
+                const vals = currentAnswers[q.id] ? currentAnswers[q.id].value : [50, 50, 50, 50];
+                html += `<div class="vas-container" style="display:flex; justify-content:center;"><div class="circadian-grid">`;
+                q.labels.forEach((label, i) => {
+                    html += `
+                        <div class="circadian-col">
+                            <input type="range" min="0" max="100" value="${vals[i]}" onchange="updateCurve('${q.id}')" class="curve-slider" orient="vertical">
+                            <span class="circadian-label">${label}</span>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                nextBtn.disabled = false;
+                if(!currentAnswers[q.id]) currentAnswers[q.id] = { value: [50,50,50,50], rt: 0 }; 
+            }
+
+            container.innerHTML = html;
+            
+            // 记录题目呈现的精确时间戳 (计算迟疑潜伏期)
+            questionOnset = performance.now();
+        }
+
+        // ================= 3. 数据绑定与交互 =================
+        function selectChoice(qId, val, score) {
+            const rt = Math.round(performance.now() - questionOnset);
+            currentAnswers[qId] = { value: val, score: score, rt_ms: rt };
+            renderQuestion(); // 重新渲染以更新选中状态
+            
+            // 为了流畅体验，选择单选题后延迟 400ms 自动进入下一题
+            setTimeout(() => { if(currentIndex < questions.length - 1) navigate(1); }, 400);
+        }
+
+        function updateVAS(qId, val) {
+            document.getElementById('vas-val-text').innerText = `${val} ${questions[currentIndex].unit}`;
+            const rt = Math.round(performance.now() - questionOnset);
+            currentAnswers[qId] = { value: parseInt(val), rt_ms: rt };
+        }
+
+        function updateCurve(qId) {
+            const sliders = document.querySelectorAll('.curve-slider');
+            let vals = [];
+            sliders.forEach(s => vals.push(parseInt(s.value)));
+            const rt = Math.round(performance.now() - questionOnset);
+            currentAnswers[qId] = { value: vals, rt_ms: rt };
+        }
+
+        function navigate(step) {
+            // 如果是下一题，将当前答案推入正式数组
+            if (step === 1) {
+                const q = questions[currentIndex];
+                const ans = currentAnswers[q.id];
+                
+                // 查找是否已存在记录并更新，否则推入
+                const existingIdx = lifData.responses.findIndex(r => r.q_id === q.id);
+                const record = { q_id: q.id, type: q.type, answer: ans.value, score: ans.score, hesitation_rt_ms: ans.rt_ms };
+                if (existingIdx >= 0) lifData.responses[existingIdx] = record;
+                else lifData.responses.push(record);
+            }
+
+            currentIndex += step;
+
+            if (currentIndex >= questions.length) {
+                submitAssessment();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        // ================= 4. 特征提取与入库 =================
+        function submitAssessment() {
+            // 提取关键临床指标
+            let totalIadlImpairment = 0;
+            let rtArray = [];
+
+            lifData.responses.forEach(r => {
+                if(r.score !== undefined) totalIadlImpairment += r.score;
+                rtArray.push(r.hesitation_rt_ms);
             });
-            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
-        }
 
-        // 辅助函数：获取 Radio 选中的值
-        function getRadioVal(name) {
-            const ele = document.getElementsByName(name);
-            for(let i=0; i<ele.length; i++) { if(ele[i].checked) return parseInt(ele[i].value); }
-            return null;
-        }
-
-        function saveSCD() {
-            const q1 = getRadioVal('scd1'); const q2 = getRadioVal('scd2');
-            if (q1 === null || q2 === null) return alert("请回答所有问题！");
-            CAS_Storage.saveModuleData('Lifestyle_SCD', { memory_decline: q1, worry_about_decline: q2, scd_score: q1 + q2 });
-            alert("SCD 数据已保存！"); show('menu');
-        }
-
-        function saveIADL() {
-            const q1 = getRadioVal('iadl1'); const q2 = getRadioVal('iadl2');
-            if (q1 === null || q2 === null) return alert("请回答所有问题！");
-            CAS_Storage.saveModuleData('Lifestyle_IADL', { finance_management: q1, medication_management: q2, iadl_impairment_score: q1 + q2 });
-            alert("IADL 数据已保存！"); show('menu');
-        }
-
-        function saveSleep() {
-            const rbd = getRadioVal('sleep-rbd');
-            if (rbd === null) return alert("请回答所有问题！");
-            CAS_Storage.saveModuleData('Lifestyle_Sleep', { sleep_duration_hrs: parseFloat(document.getElementById('sleep-hr').value), rbd_symptom: rbd });
-            alert("睡眠节律特征已保存！"); show('menu');
-        }
-
-        function savePHQ() {
-            const p1 = parseInt(document.getElementById('phq1').value);
-            const p2 = parseInt(document.getElementById('phq2').value);
-            if (p1 === -1 || p2 === -1) return alert("请选择您的困扰频率！");
+            // 计算平均决策迟疑时间
+            const avgRt = rtArray.length > 0 ? Math.round(rtArray.reduce((a,b)=>a+b,0) / rtArray.length) : 0;
             
-            const totalScore = p1 + p2;
-            CAS_Storage.saveModuleData('Lifestyle_PHQ2', { q1: p1, q2: p2, total_score: totalScore });
+            // 提取睡眠和节律
+            const sleepQ = lifData.responses.find(r => r.q_id === 'sleep_quality');
+            const curve = lifData.responses.find(r => r.q_id === 'circadian_rhythm');
+
+            lifData.summary = {
+                iadl_impairment_score: totalIadlImpairment, // 分数越高，生活自理能力越差
+                avg_decision_hesitation_ms: avgRt,
+                sleep_quality_index: sleepQ ? sleepQ.answer : 50,
+                circadian_curve: curve ? curve.answer : [50,50,50,50]
+            };
+
+            CAS_Storage.saveModuleData('LIF_Lifestyle', lifData);
+
+            let msg = `✅ 日常功能与节律评估 (LIF) 已入库！\n\n- IADL 受损分: ${totalIadlImpairment} (越低越好)\n- 平均决策迟疑: ${avgRt} ms\n- 睡眠质量: ${lifData.summary.sleep_quality_index} / 100\n\n`;
             
-            // 临床提示：PHQ-2 得分 >= 3 提示存在重大抑郁风险，需进一步进行 PHQ-9 评估
-            let msg = `量表保存成功。PHQ-2 总分: ${totalScore} 分。`;
-            if (totalScore >= 3) msg += "\n\n⚠️ 临床提示：得分≥3，提示可能存在抑郁症状，建议排查抑郁性假性痴呆。";
-            alert(msg); show('menu');
+            if(totalIadlImpairment >= 2) {
+                msg += "⚠️ 临床提示：检测到工具性日常生活能力 (IADL) 出现下降。\n";
+            }
+            if(avgRt > 6000) {
+                msg += "⚠️ 预警提示：受试者在回答日常生活问题时，决策潜伏期(>6秒)显著延长，提示可能存在隐性认知负荷或执行功能下降带来的犹豫。";
+            }
+
+            alert(msg);
+            setTimeout(() => { location.href = 'index.html'; }, 800);
         }
     </script>
 </body>
