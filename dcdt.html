@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-MOT | 数字书写动力学 (dCDT)</title>
+    <title>NeuroMap-dCDT | 数字化画钟与书写动力学 (科研完全体)</title>
     <style>
-        /* 科技温情风 UI */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --amber: #f59e0b; --slate: #64748b; --teal: #0d9488; }
-        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: none; /* 禁用全局滚动，确保画笔流畅 */ }
-        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --teal: #0d9488; --red: #f43f5e; --slate: #64748b; --bg: #fcfcfd; }
+        /* 绝对禁止浏览器的默认橡皮筋回弹、双击放大和长按选词，保证画布的纯净度 */
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); overscroll-behavior: none; user-select: none; -webkit-user-select: none; }
+        .container { max-width: 900px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         
         .module-header { border-left: 6px solid var(--teal); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
         .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        .instruction-box { background: #f0fdfa; border: 2px dashed #99f6e4; padding: 20px; border-radius: 16px; margin-bottom: 25px; text-align: center; font-size: 18px; color: #0f766e; font-weight: bold; }
-        .instruction-box span { color: #e11d48; font-size: 22px; }
+        .instruction-box { background: #f0fdfa; border: 2px dashed #99f6e4; padding: 20px; border-radius: 16px; margin-bottom: 25px; text-align: center; }
+        .instruction-box p { margin: 0; color: #0f766e; font-size: 18px; font-weight: bold; }
 
-        /* 画板区域 */
-        .canvas-container { position: relative; width: 100%; height: 500px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 20px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.02); }
-        canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+        /* 画布容器：利用 CSS 硬件加速并彻底阻断触控默认行为 */
+        .canvas-container { position: relative; width: 100%; height: 500px; background: #fff; border: 2px solid #cbd5e1; border-radius: 16px; box-shadow: inset 0 0 20px rgba(0,0,0,0.02); overflow: hidden; margin-bottom: 20px;}
+        canvas { display: block; width: 100%; height: 100%; touch-action: none; /* 关键：禁用手势平移和缩放 */ cursor: crosshair; }
 
-        /* 动力学实时反馈面板 */
-        .metrics-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 25px; }
+        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
         .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; }
         .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
-        .metric-card strong { font-size: 20px; color: var(--teal); font-family: monospace; }
+        .metric-card strong { font-size: 22px; color: var(--primary); font-family: monospace; }
+        .highlight-val { color: var(--teal) !important; }
 
-        .controls { display: flex; gap: 20px; margin-top: 30px; }
-        .btn { flex: 1; padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-clear { background: #f1f5f9; color: var(--slate); border: 2px solid #e2e8f0; }
+        .btn-group { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
+        .btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-clear { background: #f1f5f9; color: var(--slate); border: 2px solid #e2e8f0;}
         .btn-clear:hover { background: #e2e8f0; }
         .btn-submit { background: var(--teal); color: white; box-shadow: 0 8px 20px rgba(13, 148, 136, 0.2); }
         .btn-submit:hover { background: #0f766e; transform: translateY(-2px); }
@@ -41,188 +42,188 @@
 
     <div class="container">
         <div class="module-header">
-            <h2>✍️ 数字化画钟测试 (dCDT)</h2>
-            <p><strong>临床靶向：</strong>执行功能、视空间能力与语义记忆。系统将在后台提取微观动力学（Kinematics）与空中停顿时间（In-air Time）。<br>
-            *建议使用 Apple Pencil 或支持压感的触控笔，以获取高精度压力特征。</p>
+            <h2>✍️ 数字化画钟动力学 (dCDT)</h2>
+            <p><strong>临床靶向：</strong>评估执行功能、视空间结构能力与运动计划。系统将以高频采样率记录笔尖坐标(X/Y)、时间戳(t)及压力(p)。<br>
+            *捕捉空中思考时间 (In-air Time)，预警早期额顶网络执行衰退。</p>
         </div>
 
         <div class="instruction-box">
-            请在下方空白处画一个圆形的钟表。<br>
-            把所有的数字都写上，并把指针指在 <span>11点10分</span> 的位置。
+            <p>“请在下方画一个圆形的钟表，标上所有数字，并将指针画在【11点10分】。”</p>
         </div>
 
-        <div class="canvas-container">
+        <div class="canvas-container" id="canvas-container">
             <canvas id="dcdt-canvas"></canvas>
         </div>
 
         <div class="metrics-board">
-            <div class="metric-card"><span>总耗时</span><strong id="m-total">0.0s</strong></div>
-            <div class="metric-card"><span>落笔时间</span><strong id="m-surface">0.0s</strong></div>
-            <div class="metric-card"><span>空中思考时间</span><strong id="m-air">0.0s</strong></div>
-            <div class="metric-card"><span>总笔画数</span><strong id="m-strokes">0</strong></div>
+            <div class="metric-card"><span>总笔画数 (Strokes)</span><strong id="m-strokes">0</strong></div>
+            <div class="metric-card"><span>落笔书写时间 (On-surface)</span><strong id="m-on">0.00 s</strong></div>
+            <div class="metric-card"><span>空中思考时间 (In-air)</span><strong id="m-off" class="highlight-val">0.00 s</strong></div>
         </div>
 
-        <div class="controls">
-            <button class="btn btn-clear" onclick="clearCanvas()">🗑️ 清空重画</button>
-            <button class="btn btn-submit" onclick="submitDCDT()">💾 提取动力学特征并保存</button>
+        <div class="btn-group">
+            <button class="btn btn-clear" onclick="clearCanvas()">🗑️ 重画</button>
+            <button class="btn btn-submit" onclick="submitDCDT()">💾 提取时空特征并入库</button>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('dcdt-canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d', { willReadFrequently: true }); // 优化高频绘制性能
         
-        // 适配高分屏 (Retina Display) 的绘图精度
+        // 数据结构：严格遵循国际书写动力学规范
+        let dcdtData = { module: "MOT_dCDT", raw_strokes: [], summary: {} };
+        let currentStroke = [];
+        let isDrawing = false;
+        
+        let sessionStartTime = null;
+        let totalOnSurfaceTime = 0; // 累计落笔时间 (ms)
+        let totalInAirTime = 0;     // 累计悬空思考时间 (ms)
+        let lastPointerUpTime = null; // 上一笔结束的时间
+
+        // 解决高分屏模糊和坐标偏移问题 (Retina Ready)
         function resizeCanvas() {
             const rect = canvas.parentElement.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
+            // 初始化画笔样式
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 3;
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        /* ==================== 核心动力学数据结构 ==================== */
-        let dcdtData = {
-            module: "MOT_dCDT",
-            strokes: [],          // 记录每一笔的详细点位与压感
-            start_time_ms: null,  // 第一次落笔时间
-            end_time_ms: null,    // 最后一次抬笔时间
-            total_surface_ms: 0,  // 笔尖接触屏幕的总时间
-            total_air_ms: 0       // 笔尖悬空思考时间 (In-air time)
-        };
-
-        let currentStroke = [];
-        let isDrawing = false;
-        let lastPointerUpTime = null; 
-        let strokeStartTime = null;
-
-        /* ==================== 渲染与特征捕获引擎 ==================== */
-        // 使用 Pointer Events，它可以完美兼容鼠标、手指和带压感的触控笔
-        canvas.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            isDrawing = true;
-            
-            const now = performance.now();
-            if(!dcdtData.start_time_ms) dcdtData.start_time_ms = now;
-            
-            // 计算空中停顿时间 (In-air time)
-            if(lastPointerUpTime) {
-                dcdtData.total_air_ms += (now - lastPointerUpTime);
-            }
-
-            strokeStartTime = now;
+        function clearCanvas() {
+            if(!confirm("确定要清空画布重新开始吗？")) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dcdtData.raw_strokes = [];
             currentStroke = [];
-            
-            // 记录起点
+            isDrawing = false;
+            sessionStartTime = null;
+            totalOnSurfaceTime = 0;
+            totalInAirTime = 0;
+            lastPointerUpTime = null;
+            updateUI();
+        }
+
+        // ================= 核心书写引擎 (基于 PointerEvent) =================
+        
+        function getPos(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const pressure = e.pressure || 0.5; // 若设备不支持压感，默认0.5
+            return {
+                x: Math.round(e.clientX - rect.left),
+                y: Math.round(e.clientY - rect.top),
+                t: Math.round(e.timeStamp),
+                p: e.pressure ? parseFloat(e.pressure.toFixed(3)) : 1.0 // 记录压感，如果不支持则默认1.0
+            };
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); // 阻断默认滚动
+            if (e.pointerType === 'mouse' && e.button !== 0) return; // 忽略鼠标右键
             
-            currentStroke.push({ x: x, y: y, t: Math.round(now), p: pressure });
+            isDrawing = true;
+            const pos = getPos(e);
+            currentStroke = [pos];
             
             ctx.beginPath();
-            ctx.moveTo(x, y);
-            updateMetricsUI();
+            ctx.moveTo(pos.x, pos.y);
+
+            // 如果是第一笔，记录总体起始时间
+            if (!sessionStartTime) {
+                sessionStartTime = pos.t;
+            } else if (lastPointerUpTime) {
+                // 如果不是第一笔，本次落笔时间 - 上次抬笔时间 = 这一段的悬空思考时间
+                totalInAirTime += (pos.t - lastPointerUpTime);
+            }
+            updateUI();
         });
 
         canvas.addEventListener('pointermove', (e) => {
-            if (!isDrawing) return;
             e.preventDefault();
+            if (!isDrawing) return;
             
-            const now = performance.now();
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const pressure = e.pressure || 0.5;
-
-            // 动态调整笔画粗细 (基于压感，增加触觉反馈的真实度)
-            ctx.lineWidth = 2 + pressure * 4; 
-            ctx.strokeStyle = '#1e293b';
+            const pos = getPos(e);
+            currentStroke.push(pos);
             
-            ctx.lineTo(x, y);
+            // 实时绘制反馈 (使用线段连接保证圆滑，如果硬件支持压感可根据 p 改变线宽)
+            ctx.lineWidth = 2 + (pos.p * 3); // 压感联动视觉效果
+            ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
-
-            // 高频采样特征点
-            currentStroke.push({ x: x, y: y, t: Math.round(now), p: pressure });
+            
+            // 为了平滑过渡，重置起点
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
         });
 
-        function endPointer(e) {
+        // 将 pointerup, pointerout, pointercancel 统一处理为断笔
+        const endStroke = (e) => {
+            e.preventDefault();
             if (!isDrawing) return;
             isDrawing = false;
             
-            const now = performance.now();
-            lastPointerUpTime = now;
-            dcdtData.end_time_ms = now;
-            
-            // 累加本次落笔持续时间
-            dcdtData.total_surface_ms += (now - strokeStartTime);
-            
-            // 将这一笔压入总序列
-            if(currentStroke.length > 0) {
-                dcdtData.strokes.push({
-                    stroke_index: dcdtData.strokes.length + 1,
-                    duration_ms: Math.round(now - strokeStartTime),
-                    points: currentStroke
-                });
+            const pos = getPos(e);
+            // 计算这一笔画花费的落笔时间
+            if (currentStroke.length > 0) {
+                const strokeStartTime = currentStroke[0].t;
+                totalOnSurfaceTime += (pos.t - strokeStartTime);
             }
-            updateMetricsUI();
-        }
-
-        canvas.addEventListener('pointerup', endPointer);
-        canvas.addEventListener('pointerout', endPointer); // 防止笔尖划出边界丢失事件
-        canvas.addEventListener('pointercancel', endPointer);
-
-        /* ==================== 界面更新与数据入库 ==================== */
-        function updateMetricsUI() {
-            if(!dcdtData.start_time_ms) return;
             
-            const totalSec = ((lastPointerUpTime || performance.now()) - dcdtData.start_time_ms) / 1000;
-            const surfaceSec = dcdtData.total_surface_ms / 1000;
-            const airSec = dcdtData.total_air_ms / 1000;
-
-            document.getElementById('m-total').innerText = totalSec.toFixed(1) + 's';
-            document.getElementById('m-surface').innerText = surfaceSec.toFixed(1) + 's';
-            // 当空中思考时间异常长时，给予标红提示 (执行功能衰退的极早期指标)
-            const airEl = document.getElementById('m-air');
-            airEl.innerText = airSec.toFixed(1) + 's';
-            if(airSec > 5.0) { airEl.style.color = 'var(--red)'; } else { airEl.style.color = 'var(--teal)'; }
+            lastPointerUpTime = pos.t;
+            dcdtData.raw_strokes.push([...currentStroke]);
+            currentStroke = [];
             
-            document.getElementById('m-strokes').innerText = dcdtData.strokes.length;
-        }
+            updateUI();
+        };
 
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            dcdtData.strokes = [];
-            dcdtData.start_time_ms = null; dcdtData.end_time_ms = null;
-            dcdtData.total_surface_ms = 0; dcdtData.total_air_ms = 0;
-            lastPointerUpTime = null;
-            updateMetricsUI();
+        canvas.addEventListener('pointerup', endStroke);
+        canvas.addEventListener('pointerout', endStroke);
+        canvas.addEventListener('pointercancel', endStroke);
+
+        // ================= 数据统计算法 =================
+
+        function updateUI() {
+            document.getElementById('m-strokes').innerText = dcdtData.raw_strokes.length;
+            document.getElementById('m-on').innerText = (totalOnSurfaceTime / 1000).toFixed(2) + ' s';
             
-            document.getElementById('m-total').innerText = '0.0s';
-            document.getElementById('m-surface').innerText = '0.0s';
-            document.getElementById('m-air').innerText = '0.0s';
-            document.getElementById('m-air').style.color = 'var(--teal)';
-            document.getElementById('m-strokes').innerText = '0';
+            // 悬空时间 UI 实时变色预警
+            const inAirSec = (totalInAirTime / 1000).toFixed(2);
+            const inAirEl = document.getElementById('m-off');
+            inAirEl.innerText = inAirSec + ' s';
+            
+            if(inAirSec > 8.0) {
+                inAirEl.style.color = 'var(--red)';
+            } else {
+                inAirEl.style.color = 'var(--teal)';
+            }
         }
 
         function submitDCDT() {
-            if(dcdtData.strokes.length === 0) return alert("请先在画板上完成画钟测试。");
-            
-            // 简单的数据清洗与汇总
+            if (dcdtData.raw_strokes.length === 0) return alert("画布为空，请让受试者画钟。");
+
+            // 计算全局总耗时
+            const finalTime = performance.now(); // 相对起点
+            const totalSessionTime = lastPointerUpTime ? (lastPointerUpTime - sessionStartTime) : 0;
+
             dcdtData.summary = {
-                total_duration_sec: parseFloat(document.getElementById('m-total').innerText),
-                on_surface_sec: parseFloat(document.getElementById('m-surface').innerText),
-                in_air_sec: parseFloat(document.getElementById('m-air').innerText),
-                total_strokes: dcdtData.strokes.length
+                num_strokes: dcdtData.raw_strokes.length,
+                on_surface_sec: parseFloat((totalOnSurfaceTime / 1000).toFixed(2)),
+                in_air_sec: parseFloat((totalInAirTime / 1000).toFixed(2)),
+                total_duration_sec: parseFloat((totalSessionTime / 1000).toFixed(2))
             };
 
             CAS_Storage.saveModuleData('MOT_dCDT', dcdtData);
             
-            alert(`✅ 动力学特征提取成功！\n\n- 总笔画数: ${dcdtData.summary.total_strokes}\n- 落笔时间: ${dcdtData.summary.on_surface_sec} s\n- 空中思考时间: ${dcdtData.summary.in_air_sec} s\n\n*后台已记录数百个微观时空点位与压感坐标，可供后续机器学习建模。`);
-            
+            let msg = `✅ dCDT 时空特征已入库！\n\n- 总笔画数: ${dcdtData.summary.num_strokes}\n- 书写总耗时: ${dcdtData.summary.on_surface_sec} 秒\n- 空中思考时间: ${dcdtData.summary.in_air_sec} 秒\n\n`;
+            if(dcdtData.summary.in_air_sec > 8.0) {
+                msg += "⚠️ 临床提示：受试者的悬空思考时间显著延长，提示可能存在视空间规划困难或执行功能早衰。";
+            } else {
+                msg += "* 运动规划与空间结构执行流畅。";
+            }
+
+            alert(msg);
             setTimeout(() => { location.href = 'index.html'; }, 800);
         }
     </script>
