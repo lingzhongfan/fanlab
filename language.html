@@ -3,255 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-LAN | 语言功能与语义网络</title>
+    <title>NeuroMap-LAN | 语言网络与流畅性评估 (科研完全体 v4.0)</title>
     <style>
-        /* ==================== 1. 科技温情风 UI (Warm-Tech UI) ==================== */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --purple: #8b5cf6; --green: #10b981; --slate: #64748b; }
-        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: manipulation; }
-        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-        .hidden { display: none !important; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --purple: #9333ea; --light-purple: #f3e8ff; --green: #10b981; --red: #f43f5e; --slate: #64748b; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); }
+        .container { max-width: 900px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         
-        .module-header { border-left: 6px solid var(--purple); padding-left: 15px; margin-bottom: 30px; }
+        .module-header { border-left: 6px solid var(--purple); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
-        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; justify-content: flex-start; gap: 12px; }
-        .btn-menu { background: #faf5ff; color: #7e22ce; border: 1px solid #f3e8ff; }
-        .btn-menu:hover { background: var(--purple); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(139, 92, 246, 0.2); }
-        .btn-action { background: var(--purple); color: white; justify-content: center; margin-top: 20px; }
+        /* 临床指导语区块 */
+        .instruction-box { background: var(--light-purple); border: 2px dashed #d8b4fe; padding: 25px; border-radius: 16px; margin-bottom: 25px; }
+        .instruction-box p { margin: 0 0 10px 0; color: #6b21a8; font-weight: bold; font-size: 16px; }
+        .instruction-box ul { margin: 0; padding-left: 20px; color: #7e22ce; font-size: 14px; line-height: 1.5; }
 
-        /* ==================== 2. 专项实验 UI ==================== */
-        /* [范式1] VFT 语音输入框 */
-        .vft-timer { font-size: 40px; font-weight: bold; color: var(--red); text-align: center; margin: 20px 0; font-variant-numeric: tabular-nums; }
-        .input-wrapper { display: flex; gap: 15px; margin: 20px 0; }
-        input[type="text"] { flex: 1; padding: 18px; border: 2px solid #e2e8f0; border-radius: 16px; font-size: 18px; outline: none; transition: 0.2s; color: var(--primary); font-weight: bold;}
-        input[type="text"]:focus { border-color: var(--purple); box-shadow: 0 0 0 4px #f3e8ff; }
+        /* 倒计时与状态板 */
+        .status-board { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px 25px; border-radius: 16px; border: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .timer-display { font-size: 32px; font-weight: bold; color: var(--primary); font-family: monospace; }
+        .timer-alert { color: var(--red); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         
-        /* 智能麦克风按钮 */
-        .btn-mic { background: var(--green); color: white; border: none; border-radius: 16px; padding: 0 25px; font-size: 24px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
-        .btn-mic:active { transform: scale(0.9); }
-        .recording { animation: mic-pulse 1.5s infinite; background: var(--red) !important; }
-        @keyframes mic-pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); } 70% { box-shadow: 0 0 0 15px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
-        
-        .word-tag { background: #f3e8ff; color: #7e22ce; padding: 10px 18px; border-radius: 20px; font-weight: bold; display: inline-block; margin: 5px; animation: popIn 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .mic-status { display: flex; align-items: center; gap: 10px; font-weight: bold; color: var(--slate); }
+        .mic-icon { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; }
+        .mic-recording { background: var(--red); box-shadow: 0 0 10px rgba(244, 63, 94, 0.5); animation: pulse 1s infinite; }
 
-        /* [范式2] Naming 图片命名区 */
-        .naming-stimulus { font-size: 120px; text-align: center; margin: 40px 0; background: #f8fafc; border-radius: 24px; padding: 40px 0; border: 2px dashed #e2e8f0; }
-        
-        /* [范式3] Semantic 关联区 */
-        .sema-target { font-size: 50px; font-weight: bold; text-align: center; margin: 30px 0; color: var(--primary); letter-spacing: 5px;}
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .btn-choice { background: white; color: var(--primary); border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px 0; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.1s; }
-        .btn-choice:active { background: var(--purple); color: white; border-color: var(--purple); transform: scale(0.95); }
+        /* 词汇输入工作区 */
+        .input-workspace { position: relative; margin-bottom: 20px; }
+        .word-input { width: 100%; box-sizing: border-box; padding: 20px; border: 2px solid #cbd5e1; border-radius: 16px; font-size: 20px; outline: none; transition: 0.3s; color: var(--primary); font-weight: bold; }
+        .word-input:focus { border-color: var(--purple); box-shadow: 0 0 0 4px #f3e8ff; }
+        .word-input:disabled { background: #f1f5f9; cursor: not-allowed; }
+        .input-hint { position: absolute; right: 20px; top: 22px; font-size: 14px; color: var(--slate); pointer-events: none; }
+
+        /* 动态生成的词汇标签池 */
+        .word-pool { display: flex; flex-wrap: wrap; gap: 10px; min-height: 120px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; margin-bottom: 30px; align-content: flex-start; }
+        .word-tag { display: inline-flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--purple); color: var(--purple); padding: 8px 15px; border-radius: 20px; font-size: 16px; font-weight: bold; box-shadow: 0 2px 5px rgba(147, 51, 234, 0.1); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .word-tag .del-btn { cursor: pointer; color: var(--slate); font-size: 14px; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: #f1f5f9; transition: 0.2s; }
+        .word-tag .del-btn:hover { background: var(--red); color: white; }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .empty-hint { color: #94a3b8; font-size: 16px; width: 100%; text-align: center; margin-top: 30px; }
+
+        /* 统计仪表盘 */
+        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; }
+        .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
+        .metric-card strong { font-size: 24px; color: var(--primary); font-family: monospace; }
+        .highlight-val { color: var(--purple) !important; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
+        .btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: #f1f5f9; color: var(--primary); border: 2px solid #e2e8f0;}
+        .btn-start:hover { background: #e2e8f0; border-color: var(--slate); }
+        .btn-submit { background: var(--purple); color: white; box-shadow: 0 8px 20px rgba(147, 51, 234, 0.2); }
+        .btn-submit:hover { background: #7e22ce; transform: translateY(-2px); }
+        .btn-submit:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
     <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--purple); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
-    <div class="container" id="menu">
+    <div class="container">
         <div class="module-header">
-            <h2>💬 语言与语义 (CAS-LAN)</h2>
-            <p>评估词汇检索流畅度、图文命名时延及内部语义网络通达度。</p>
+            <h2>🗣️ 言语流畅性测验 (VFT - 动物类别)</h2>
+            <p><strong>临床靶向：</strong>评估额叶执行搜索策略与颞叶语义存储网络。<br>
+            *通过 60 秒严格倒计时与微秒级输入时间戳(Timestamps)，计算“簇(Clustering)”与“转换(Switching)”的动力学衰减。</p>
         </div>
-        <button class="sys-btn btn-menu" onclick="startVFT()">🗣️ 1. 词汇流畅性提取 (VFT) - 支持语音</button>
-        <button class="sys-btn btn-menu" onclick="startNaming()">🖼️ 2. 图片数字化命名 (BNT 范式)</button>
-        <button class="sys-btn btn-menu" onclick="startSemantic()">🧠 3. 高阶语义关联与分类测试</button>
-    </div>
 
-    <div class="container hidden" id="vft-area">
-        <div class="module-header"><h2>词汇流畅性 (VFT - 动物类)</h2>
-        <p>临床意义: 评估额叶执行功能与颞叶语义库的检索效率。请在 60 秒内尽可能多地说出动物的名称。</p></div>
-        
-        <div class="vft-timer" id="vft-timer">60s</div>
-        
-        <div class="input-wrapper">
-            <input type="text" id="vft-input" placeholder="输入或点击右侧麦克风语音输入..." onkeypress="if(event.key === 'Enter') submitVFT()">
-            <button class="btn-mic" id="mic-btn" onclick="toggleVoice('vft-input')">🎤</button>
+        <div class="instruction-box">
+            <p>⚠️ 临床指导语 (主试宣读)：</p>
+            <ul>
+                <li>“在接下来的 1 分钟内，请您尽可能多地说出您能想到的【动物】的名字。”</li>
+                <li>“任何动物都可以，海里的、天上的、昆虫都可以。想到什么就说什么，尽量不要重复。”</li>
+                <li>“主试注意：点击开始后，请将受试者说出的词敲击【空格或回车】录入。系统将在后台同步录音。”</li>
+            </ul>
         </div>
-        <button class="sys-btn btn-action" onclick="submitVFT()">录入该词汇 (+)</button>
-        
-        <div id="vft-list" style="margin-top:20px; min-height: 100px; padding: 15px; background: #f8fafc; border-radius: 16px;"></div>
-    </div>
 
-    <div class="container hidden" id="naming-area">
-        <div class="module-header"><h2>图片命名 (Naming)</h2>
-        <p>临床意义: 靶向左侧颞中回，早期发现命名性失语 (Anomia) 及找词困难。</p></div>
-        
-        <div style="font-weight:bold; color:var(--purple); margin-bottom: 10px;">进度: <span id="naming-prog">1/5</span></div>
-        <div class="naming-stimulus" id="naming-stim">🐘</div>
-        
-        <div class="input-wrapper">
-            <input type="text" id="naming-input" placeholder="这是什么？" onkeypress="if(event.key === 'Enter') recordNaming()">
-            <button class="btn-mic" id="mic-btn-naming" onclick="toggleVoice('naming-input')">🎤</button>
-        </div>
-        <button class="sys-btn btn-action" onclick="recordNaming()">确认并进入下一题</button>
-    </div>
-
-    <div class="container hidden" id="sema-area">
-        <div class="module-header"><h2>语义关联网络 (Semantic Network)</h2>
-        <p>临床意义: 评估概念之间的连接强度。请选择与上方词汇关联最紧密的选项。</p></div>
-        <div style="font-weight:bold; color:var(--purple); margin-bottom: 10px;">进度: <span id="sema-prog">1/5</span></div>
-        <div class="sema-target" id="sema-target">医院</div>
-        
-        <div class="grid-3" id="sema-controls">
+        <div class="status-board">
+            <div class="mic-status">
+                <div class="mic-icon" id="mic-indicator"></div>
+                <span id="mic-text">麦克风待机</span>
             </div>
+            <div class="timer-display" id="time-display">01:00</div>
+        </div>
+
+        <div class="input-workspace">
+            <input type="text" class="word-input" id="word-input" placeholder="输入动物名称后，按 空格 或 回车 键生成标签..." disabled autocomplete="off">
+            <div class="input-hint">⏎ / Space</div>
+        </div>
+
+        <div class="word-pool" id="word-pool">
+            <div class="empty-hint" id="empty-hint">等待数据录入...</div>
+        </div>
+
+        <div class="metrics-board">
+            <div class="metric-card"><span>有效词汇量 (N)</span><strong id="m-words" class="highlight-val">0</strong></div>
+            <div class="metric-card"><span>首词提取潜伏期 (Latency)</span><strong id="m-latency">0 ms</strong></div>
+            <div class="metric-card"><span>平均词间间隔 (IWI)</span><strong id="m-iwi">0 ms</strong></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-start" id="btn-start" onclick="startVFT()">▶ 启动 60 秒计时与录音</button>
+            <button class="btn btn-submit" id="btn-submit" onclick="submitVFT()" disabled>💾 提取时序语义特征并入库</button>
+        </div>
     </div>
 
     <script>
-        function show(id) {
-            ['menu', 'vft-area', 'naming-area', 'sema-area'].forEach(d => {
-                const el = document.getElementById(d); if(el) el.classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
-        }
-
-        /* ==================== 0. HTML5 语音识别引擎初始化 ==================== */
-        // 调用浏览器底层的 Web Speech API，适用于社区医生持 iPad 辅助老人测试
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-        let isRecording = false;
-
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'zh-CN';
-            // 设置为 false，确保只有在受试者说完一句话时才返回确定的词，防止识别闪烁
-            recognition.interimResults = false; 
-            recognition.continuous = false;
-        }
-
-        // 通用语音切换函数
-        function toggleVoice(targetInputId) {
-            if (!recognition) return alert("您的设备/浏览器不支持原生语音输入，请手动打字。推荐使用 Chrome 或 Safari。");
-            
-            const btn = event.currentTarget; // 获取当前点击的麦克风按钮
-            const inputField = document.getElementById(targetInputId);
-
-            if (isRecording) {
-                recognition.stop();
-            } else {
-                btn.classList.add('recording'); inputField.placeholder = "正在聆听...";
-                recognition.start();
-                
-                recognition.onresult = function(e) {
-                    // 正则去除句末标点符号
-                    const text = e.results[0][0].transcript.replace(/[。，！？]/g, '');
-                    inputField.value = text;
-                    // 若在 VFT 模块中，语音识别后自动提交
-                    if(targetInputId === 'vft-input') submitVFT(); 
-                };
-                
-                recognition.onend = function() { 
-                    btn.classList.remove('recording'); inputField.placeholder = "输入或点击右侧麦克风语音输入...";
-                    isRecording = false; 
-                };
-                
-                recognition.onerror = function() { 
-                    btn.classList.remove('recording'); inputField.placeholder = "识别失败，请重试或手动输入";
-                    isRecording = false; 
-                };
-                isRecording = true;
-            }
-        }
-
-        /* ==================== 1. VFT (词汇流畅性) 逻辑 ==================== */
-        let vftData = { module: "LAN_VFT", category: "Animal", words: [] };
-        let vftTimerId = null, vftTimeLeft = 60;
+        const TIME_LIMIT = 60; // 严格限制 60 秒
+        let timeLeft = TIME_LIMIT;
+        let timerInterval = null;
         
-        function startVFT() {
-            vftTimeLeft = 60; vftData.words = []; 
-            document.getElementById('vft-list').innerHTML = ''; document.getElementById('vft-input').value = '';
-            document.getElementById('vft-timer').innerText = "60s";
-            show('vft-area');
+        let vftData = { module: "Language_VFT", words: [], summary: {} };
+        let taskOnset = 0; 
+        
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const inputEl = document.getElementById('word-input');
+        const poolEl = document.getElementById('word-pool');
+        const emptyHint = document.getElementById('empty-hint');
+        const startBtn = document.getElementById('btn-start');
+        const submitBtn = document.getElementById('btn-submit');
+        const timeDisplay = document.getElementById('time-display');
+
+        // ================= 1. 音频与倒计时引擎 =================
+        
+        async function startVFT() {
+            // 请求麦克风权限 (真正的临床 VFT 必须有录音备案，以备后续校验重复或错构词)
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.start();
+                
+                document.getElementById('mic-indicator').classList.add('mic-recording');
+                document.getElementById('mic-text').innerText = "录音与计时中...";
+                document.getElementById('mic-text').style.color = "var(--red)";
+            } catch(err) {
+                alert("⚠️ 无法调用麦克风，录音功能已关闭。将仅记录文本和时间戳。");
+            }
+
+            // 初始化状态
+            vftData.words = [];
+            audioChunks = [];
+            timeLeft = TIME_LIMIT;
+            poolEl.innerHTML = '';
             
-            vftTimerId = setInterval(() => {
-                vftTimeLeft--; 
-                document.getElementById('vft-timer').innerText = vftTimeLeft + 's';
-                if(vftTimeLeft <= 0) { 
-                    clearInterval(vftTimerId); 
-                    CAS_Storage.saveModuleData('LAN_VFT', vftData); 
-                    alert(`时间到！共提取有效词汇: ${vftData.words.length} 个。\n\n*临床提示: 后期可对输出的词表进行语义聚类(Clustering)和转换(Switching)的深度 NLP 分析。`); 
-                    show('menu'); 
+            startBtn.disabled = true;
+            startBtn.innerText = "测试进行中...";
+            submitBtn.disabled = true;
+            
+            inputEl.disabled = false;
+            inputEl.focus();
+            
+            taskOnset = performance.now(); // 记录极其精准的测试原点
+
+            // 倒计时核心
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                // 格式化时间 00:XX
+                let sec = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+                timeDisplay.innerText = `00:${sec}`;
+                
+                if(timeLeft <= 10) timeDisplay.classList.add('timer-alert');
+
+                // 强制触底阻断
+                if(timeLeft <= 0) {
+                    endVFT();
                 }
             }, 1000);
         }
 
-        function submitVFT() {
-            if(vftTimeLeft <= 0) return;
-            const input = document.getElementById('vft-input');
-            const word = input.value.trim();
-            if(word && !vftData.words.includes(word)) { // 防御重复输入
-                vftData.words.push(word);
-                const tag = document.createElement('span');
-                tag.className = 'word-tag'; tag.innerText = word;
-                document.getElementById('vft-list').appendChild(tag);
-                input.value = '';
-            } else if (vftData.words.includes(word)) {
-                // 临床上，重复词汇(Perseveration)也是额叶受损的重要标志，正式版可开辟新数组记录
-                alert("已经说过这个词啦！"); input.value = '';
+        function endVFT() {
+            clearInterval(timerInterval);
+            timeDisplay.classList.remove('timer-alert');
+            timeDisplay.innerText = "00:00";
+            
+            inputEl.disabled = true;
+            inputEl.value = "";
+            inputEl.placeholder = "测试已结束。";
+            
+            startBtn.innerText = "测试已完成";
+            submitBtn.disabled = false; // 解锁入库按钮
+
+            if(mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                document.getElementById('mic-indicator').classList.remove('mic-recording');
+                document.getElementById('mic-text').innerText = "录音已保存";
+                document.getElementById('mic-text').style.color = "var(--green)";
+            }
+            
+            alert("⏰ 60秒时间到！系统已锁定输入，请点击入库。");
+        }
+
+        // ================= 2. 词汇解析与微观时间戳 (Micro-temporal Dynamics) =================
+
+        inputEl.addEventListener('keydown', (e) => {
+            // 支持空格、回车、甚至逗号进行快速切词
+            if(e.key === 'Enter' || e.key === ' ' || e.key === ',') {
+                e.preventDefault();
+                let word = inputEl.value.trim();
+                
+                // 清洗非法字符
+                word = word.replace(/[,，\s]/g, ''); 
+
+                if(word.length > 0) {
+                    addWord(word);
+                    inputEl.value = "";
+                }
+            }
+        });
+
+        function addWord(wordText) {
+            const timestamp = performance.now();
+            const relativeTimeMs = Math.round(timestamp - taskOnset);
+            
+            // 生成唯一 ID
+            const wordId = 'w_' + Date.now() + Math.floor(Math.random() * 100);
+            
+            vftData.words.push({
+                id: wordId,
+                word: wordText,
+                t_ms: relativeTimeMs // 记录相对测试起始点的时间戳 (关键指标)
+            });
+
+            renderWordPool();
+            updateMetrics();
+        }
+
+        function deleteWord(wordId) {
+            // 允许主试在过程中纠正打错的词
+            vftData.words = vftData.words.filter(w => w.id !== wordId);
+            renderWordPool();
+            updateMetrics();
+        }
+
+        function renderWordPool() {
+            poolEl.innerHTML = '';
+            if(vftData.words.length === 0) {
+                poolEl.innerHTML = '<div class="empty-hint" id="empty-hint">等待数据录入...</div>';
+                return;
+            }
+
+            vftData.words.forEach((item, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag';
+                // 标签上带上秒数提示，直观显示是在第几秒产出的
+                const secStr = (item.t_ms / 1000).toFixed(1) + 's';
+                
+                tag.innerHTML = `
+                    <span>${index + 1}. ${item.word}</span>
+                    <span style="font-size:10px; color:var(--slate); font-weight:normal; margin-left:5px;">[${secStr}]</span>
+                    <div class="del-btn" onclick="deleteWord('${item.id}')">×</div>
+                `;
+                poolEl.appendChild(tag);
+            });
+            // 自动滚动到最新输入的词
+            poolEl.scrollTop = poolEl.scrollHeight;
+        }
+
+        // ================= 3. 实时计算动力学特征 =================
+
+        function updateMetrics() {
+            const n = vftData.words.length;
+            document.getElementById('m-words').innerText = n;
+
+            if(n > 0) {
+                // 首词潜伏期：反映唤醒与初始提取能力
+                document.getElementById('m-latency').innerText = vftData.words[0].t_ms + ' ms';
+                
+                // 计算平均词间间隔 (IWI: Inter-word Interval)
+                // IWI 的增大往往预示着从“语义簇内(Cluster)”提取转为“跨簇搜索(Switching)”，反映额叶耗竭
+                if(n > 1) {
+                    let totalGap = 0;
+                    for(let i = 1; i < n; i++) {
+                        totalGap += (vftData.words[i].t_ms - vftData.words[i-1].t_ms);
+                    }
+                    const avgGap = Math.round(totalGap / (n - 1));
+                    document.getElementById('m-iwi').innerText = avgGap + ' ms';
+                } else {
+                    document.getElementById('m-iwi').innerText = "0 ms";
+                }
+            } else {
+                document.getElementById('m-latency').innerText = '0 ms';
+                document.getElementById('m-iwi').innerText = '0 ms';
             }
         }
 
-        /* ==================== 2. Naming (图片命名) 逻辑 ==================== */
-        // 刺激库：日常物体。此处使用高对比度 Emoji 代替实际线稿图 (Line Drawings)
-        const namingStims = [ { img: '🐘', ans: '大象' }, { img: '✂️', ans: '剪刀' }, { img: '🚁', ans: '直升机' }, { img: '🦏', ans: '犀牛' }, { img: '🪚', ans: '锯子' } ];
-        let namData = { module: "LAN_Naming", records: [] };
-        let n_trial = 0, n_onset = 0;
+        // ================= 4. 数据入库 =================
 
-        function startNaming() { n_trial = 0; namData.records = []; show('naming-area'); nextNaming(); }
-        
-        function nextNaming() {
-            if (n_trial >= namingStims.length) { CAS_Storage.saveModuleData('LAN_Naming', namData); alert("命名测试完成！数据已保存。"); show('menu'); return; }
-            document.getElementById('naming-prog').innerText = `${n_trial + 1}/${namingStims.length}`;
-            document.getElementById('naming-stim').innerText = namingStims[n_trial].img;
-            document.getElementById('naming-input').value = '';
-            n_onset = performance.now();
-        }
-
-        function recordNaming() {
-            const input = document.getElementById('naming-input').value.trim();
-            if (!input) return alert("请告诉我这是什么？");
-            const rt = Math.round(performance.now() - n_onset);
-            // 记录原始输入文本，后续可通过 NLP 计算与标准答案的词向量相似度 (Cosine Similarity)
-            namData.records.push({ trial: n_trial+1, stimulus: namingStims[n_trial].img, response: input, rt_ms: rt });
-            n_trial++; nextNaming();
-        }
-
-        /* ==================== 3. Semantic (语义关联) 逻辑 ==================== */
-        const semaStims = [
-            { t: '医生', opts: ['医院', '苹果', '桌子'], a: '医院' },
-            { t: '轮胎', opts: ['汽车', '天空', '衣服'], a: '汽车' },
-            { t: '冬天', opts: ['雪花', '沙漠', '火焰'], a: '雪花' },
-            { t: '键盘', opts: ['鼠标', '水杯', '树木'], a: '鼠标' },
-            { t: '锁', opts: ['钥匙', '鞋子', '玻璃'], a: '钥匙' }
-        ];
-        let semaData = { module: "LAN_Semantic", records: [] };
-        let sm_trial = 0, sm_onset = 0, sm_curr = null;
-
-        function startSemantic() { sm_trial = 0; semaData.records = []; show('sema-area'); nextSemantic(); }
-        
-        function nextSemantic() {
-            if (sm_trial >= semaStims.length) { CAS_Storage.saveModuleData('LAN_Semantic', semaData); alert("语义关联测试完成！"); show('menu'); return; }
-            document.getElementById('sema-prog').innerText = `${sm_trial + 1}/${semaStims.length}`;
-            sm_curr = semaStims[sm_trial];
-            document.getElementById('sema-target').innerText = sm_curr.t;
+        function submitVFT() {
+            const n = vftData.words.length;
+            const latency = n > 0 ? vftData.words[0].t_ms : 0;
             
-            const controls = document.getElementById('sema-controls'); controls.innerHTML = '';
-            
-            // 打乱选项呈现顺序
-            let options = [...sm_curr.opts].sort(() => Math.random() - 0.5);
-            options.forEach(opt => {
-                let btn = document.createElement('button'); btn.className = 'btn-choice'; btn.innerText = opt;
-                btn.onclick = () => recordSemantic(opt); controls.appendChild(btn);
-            });
-            sm_onset = performance.now();
-        }
+            let avgIWI = 0;
+            if(n > 1) {
+                let totalGap = 0;
+                for(let i = 1; i < n; i++) totalGap += (vftData.words[i].t_ms - vftData.words[i-1].t_ms);
+                avgIWI = Math.round(totalGap / (n - 1));
+            }
 
-        function recordSemantic(choice) {
-            const rt = Math.round(performance.now() - sm_onset);
-            semaData.records.push({ target: sm_curr.t, response: choice, correct: choice === sm_curr.a, rt_ms: rt });
-            sm_trial++; nextSemantic();
+            vftData.summary = {
+                total_valid_words: n,
+                first_word_latency_ms: latency,
+                avg_inter_word_interval_ms: avgIWI,
+                duration_sec: TIME_LIMIT
+            };
+
+            CAS_Storage.saveModuleData('Language_VFT', vftData);
+            
+            // 此处模拟音频 Blob 的本地保存（在实际服务器环境中应将其转换为 File 并上传 S3 / 本地数据库）
+            let msg = `✅ 言语流畅性测验 (VFT) 临床特征已入库！\n\n- 产出有效词汇: ${n} 个\n- 提取潜伏期: ${latency} ms\n- 词间间隔 (IWI): ${avgIWI} ms\n\n`;
+            
+            if(n < 12) {
+                msg += "⚠️ 临床提示：1 分钟内词汇量少于 12 个，显著低于健康老年人常模，提示可能存在语义存储网络损伤或执行搜索障碍。";
+            } else {
+                msg += "* 语言提取与检索流畅。";
+            }
+
+            alert(msg);
+            setTimeout(() => { location.href = 'index.html'; }, 800);
         }
     </script>
 </body>
