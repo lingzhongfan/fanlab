@@ -3,234 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-EMO | 情绪与社会认知评估</title>
+    <title>CAS-EMO | 社会认知与面孔情绪识别 (临床标准版)</title>
     <style>
-        /* 科技温情风 CSS */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --slate: #64748b; }
-        body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: manipulation; }
-        .container { max-width: 700px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --teal: #0d9488; --rose: #e11d48; --slate: #64748b; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); user-select: none; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        .module-header { border-left: 6px solid var(--blue); padding-left: 15px; margin-bottom: 30px; }
+        .module-header { border-left: 6px solid var(--rose); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
-        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        /* 按钮系统 */
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 15px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: flex-start; gap: 12px; }
-        .btn-menu { background: var(--light-blue); color: var(--blue); border: 1px solid #e0e7ff; }
-        .btn-menu:hover { background: var(--blue); color: white; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(79, 70, 229, 0.2); }
-        .btn-action { background: var(--blue); color: white; justify-content: center; margin-top: 20px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-        .btn-action:active { transform: scale(0.98); }
-        .btn-action:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
+        .sys-btn { width: 100%; padding: 20px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.2s; background: var(--rose); color: white; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.2);}
+        .sys-btn:hover { background: #be123c; transform: translateY(-2px); }
 
-        /* 优化的量表滑块 */
-        .slider-box { margin-bottom: 35px; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px dashed #e2e8f0; }
-        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .slider-header label { font-weight: bold; color: var(--primary); font-size: 15px; }
-        .val-badge { background: var(--blue); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
-        input[type=range] { -webkit-appearance: none; width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; background: white; border: 4px solid var(--blue); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .labels { display: flex; justify-content: space-between; font-size: 13px; color: var(--slate); margin-top: 12px; font-weight: 500; }
+        /* 刺激呈现区 */
+        .stimulus-workspace { position: relative; width: 100%; height: 350px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+        
+        /* 临床替换提示：
+           如果是真实的科研项目，请将 .face-placeholder 里的 emoji 替换为 <img src="..."> 
+           指向本地的 Ekman 或 KDEF 标准面孔图片 
+        */
+        .face-placeholder { font-size: 120px; line-height: 1; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+        .fixation-cross { font-size: 60px; color: var(--slate); font-weight: bold; }
 
-        /* BART 气球 */
-        #bart-workspace { width: 100%; height: 300px; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 20px; display: flex; align-items: flex-end; justify-content: center; position: relative; margin-bottom: 25px; overflow: hidden; }
-        #balloon { width: 40px; height: 50px; background: radial-gradient(circle at 30% 30%, #fb7185, #e11d48); border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; transition: all 0.15s ease-out; position: relative; bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 35px; }
+        .trial-counter { position: absolute; top: 15px; right: 20px; font-size: 14px; color: var(--slate); font-weight: bold; }
 
-        /* FER 面孔与 Stroop */
-        .stimulus-box { font-size: 90px; margin: 50px 0; font-weight: bold; text-align: center; display: flex; justify-content: center; align-items: center; height: 120px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        .btn-choice { background: #f1f5f9; color: var(--primary); border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px 0; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-choice:active { background: var(--blue); color: white; border-color: var(--blue); transform: scale(0.95); }
+        /* 答题面板 */
+        .response-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .btn-emotion { padding: 20px; background: white; border: 2px solid #e2e8f0; border-radius: 16px; font-size: 20px; font-weight: bold; color: var(--primary); cursor: pointer; transition: 0.1s; }
+        .btn-emotion:active { background: var(--rose); color: white; border-color: var(--rose); transform: scale(0.96); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--blue); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--rose); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
     <div class="container" id="menu">
         <div class="module-header">
-            <h2>❤️ 情感与社会认知 (CAS-EMO)</h2>
-            <p>对标 NIH Toolbox: 包含情绪状态、心理幸福感、社会支持与行为决策。</p>
+            <h2>😃 面孔情绪识别 (Social Cognition)</h2>
+            <p><strong>临床靶向：</strong>评估社会认知能力与杏仁核/梭状回面孔区网络。早期额颞叶痴呆 (bvFTD) 与精神分裂症患者往往在此项测试中出现特异性的“恐惧/厌恶”识别障碍。<br>
+            *包含 30 个随机试次，测量识别准确率与反应时。</p>
         </div>
-        
-        <h3 style="font-size: 15px; color: var(--slate); margin-top: 30px;">主观量表 (Self-Report)</h3>
-        <button class="sys-btn btn-menu" onclick="show('ema-area')">📊 1. 瞬时状态与幸福感 (EMA+)</button>
-        <button class="sys-btn btn-menu" onclick="show('social-area')">🤝 2. 社会支持与孤独感筛查</button>
-        <button class="sys-btn btn-menu" onclick="show('b5-area')">🧠 3. 大五人格特质画像 (Big 5)</button>
-        
-        <h3 style="font-size: 15px; color: var(--slate); margin-top: 30px;">行为与社会认知 (Behavioral)</h3>
-        <button class="sys-btn btn-menu" onclick="startFER()">😃 4. 面孔情绪识别任务 (FER) <span style="font-size:12px; background:#f43f5e; color:white; padding:2px 8px; border-radius:10px; margin-left:auto;">NEW</span></button>
-        <button class="sys-btn btn-menu" onclick="startBART()">🎈 5. BART 气球风险决策任务</button>
-        <button class="sys-btn btn-menu" onclick="startEmoStroop()">⚡ 6. 情绪 Stroop 注意偏向</button>
+        <button class="sys-btn" onclick="startFER()">▶ 开始测试 (30 试次)</button>
     </div>
 
-    <div class="container hidden" id="ema-area">
-        <div class="module-header"><h2>瞬时状态与幸福感</h2><p>请根据您此时此刻的感受拖动滑块。</p></div>
-        <div class="slider-box"><div class="slider-header"><label>1. 感到【紧张/焦虑】 (负性)</label><span class="val-badge" id="v1">0%</span></div><input type="range" id="ema-1" min="0" max="100" value="0" oninput="updateVal('ema-1','v1')"><div class="labels"><span>完全没有</span><span>极度强烈</span></div></div>
-        <div class="slider-box"><div class="slider-header"><label>2. 感到【情绪低落】 (负性)</label><span class="val-badge" id="v2">0%</span></div><input type="range" id="ema-2" min="0" max="100" value="0" oninput="updateVal('ema-2','v2')"><div class="labels"><span>完全没有</span><span>极度强烈</span></div></div>
-        <div class="slider-box"><div class="slider-header"><label>3. 感到【精力充沛/愉悦】 (积极/幸福感)</label><span class="val-badge" id="v3" style="background:var(--green);">0%</span></div><input type="range" id="ema-3" min="0" max="100" value="0" oninput="updateVal('ema-3','v3')"><div class="labels"><span>完全没有</span><span>极度强烈</span></div></div>
-        <button class="sys-btn btn-action" onclick="saveEMA()">计算得分并入库</button>
-    </div>
-
-    <div class="container hidden" id="social-area">
-        <div class="module-header"><h2>社会关系与孤独感</h2><p>社会网络退化是认知障碍的极早期预警信号。</p></div>
-        <div class="slider-box"><div class="slider-header"><label>1. 感到被周围人孤立/缺乏陪伴</label><span class="val-badge" id="s1">0%</span></div><input type="range" id="soc-1" min="0" max="100" value="0" oninput="updateVal('soc-1','s1')"><div class="labels"><span>从不</span><span>总是</span></div></div>
-        <div class="slider-box"><div class="slider-header"><label>2. 遇到困难时，能得到家人的情感支持</label><span class="val-badge" id="s2" style="background:var(--green);">0%</span></div><input type="range" id="soc-2" min="0" max="100" value="0" oninput="updateVal('soc-2','s2')"><div class="labels"><span>从不</span><span>总是</span></div></div>
-        <button class="sys-btn btn-action" onclick="saveSocial()">保存社会关系数据</button>
-    </div>
-
-    <div class="container hidden" id="b5-area">
-        <div class="module-header"><h2>大五人格 (Big 5)</h2><p>特质评估 (0=极不符合, 100=非常符合)</p></div>
-        <div class="slider-box"><div class="slider-header"><label>O. 开放接受新事物</label><span class="val-badge" id="b1">50%</span></div><input type="range" id="b5-o" min="0" max="100" value="50" oninput="updateVal('b5-o','b1')"></div>
-        <div class="slider-box"><div class="slider-header"><label>N. 情绪敏感、易波动</label><span class="val-badge" id="b2">50%</span></div><input type="range" id="b5-n" min="0" max="100" value="50" oninput="updateVal('b5-n','b2')"></div>
-        <button class="sys-btn btn-action" onclick="saveB5()">保存人格特质</button>
-    </div>
-
-    <div class="container hidden" id="fer-area">
-        <div class="module-header"><h2>面孔情绪识别 (FER)</h2><p>请以最快速度指出上方表情所代表的情绪。</p></div>
-        <div style="font-weight:bold; color:var(--blue); margin-bottom: 10px;">进度: <span id="fer-prog">1/8</span></div>
-        <div class="stimulus-box" id="fer-face">😐</div>
-        <div class="grid-3" id="fer-controls">
-            <button class="btn-choice" onclick="recordFER('愤怒')">愤怒</button>
-            <button class="btn-choice" onclick="recordFER('开心')">开心</button>
-            <button class="btn-choice" onclick="recordFER('悲伤')">悲伤</button>
-            <button class="btn-choice" onclick="recordFER('恐惧')">恐惧</button>
-            <button class="btn-choice" onclick="recordFER('中性')">中性</button>
-            <button class="btn-choice" onclick="recordFER('厌恶')">厌恶</button>
+    <div class="container hidden" id="task-area">
+        <div class="module-header">
+            <h2>情绪识别</h2>
+            <p>请以最快速度准确判断屏幕中人物的情绪。如果长时间未操作将自动记为错误。</p>
         </div>
-    </div>
 
-    <div class="container hidden" id="bart-area">
-        <div class="module-header"><h2>BART 风险决策</h2></div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-            <div style="font-size:16px; font-weight:bold; color:var(--slate);">轮次: <span id="bart-round" style="color:var(--blue);">1/5</span></div>
-            <div style="font-size:18px; font-weight:bold;">本轮积累: <span id="bart-pot" style="color:var(--red); font-size:24px;">$0</span></div>
+        <div class="stimulus-workspace">
+            <div class="trial-counter" id="fer-counter">进度: 1 / 30</div>
+            <div id="stimulus-container">
+                </div>
         </div>
-        <div id="bart-workspace"><div id="balloon"></div></div>
-        <div class="grid-3" style="grid-template-columns: 1fr 1fr;">
-            <button class="sys-btn btn-action" id="btn-pump" onclick="pumpBalloon()" style="margin:0; box-shadow:none;">🎈 充气 (+1)</button>
-            <button class="sys-btn" style="background:var(--green); color:white; margin:0;" id="btn-collect" onclick="collectMoney()">💰 收集收益</button>
-        </div>
-    </div>
 
-    <div class="container hidden" id="emo-area">
-        <div class="module-header"><h2>情绪 Stroop 注意偏向</h2><p>请点击文字实际显示的物理颜色，忽略文字含义。</p></div>
-        <div class="stimulus-box" id="emo-word">+</div>
-        <div class="grid-3 hidden" id="emo-controls">
-            <button class="btn-choice" style="background:var(--red); color:white; border:none;" onclick="recordES('red')">红</button>
-            <button class="btn-choice" style="background:var(--green); color:white; border:none;" onclick="recordES('green')">绿</button>
-            <button class="btn-choice" style="background:var(--blue); color:white; border:none;" onclick="recordES('blue')">蓝</button>
+        <div class="response-board" id="response-board">
+            <button class="btn-emotion" onclick="recordResponse('happy')">高兴</button>
+            <button class="btn-emotion" onclick="recordResponse('sad')">悲伤</button>
+            <button class="btn-emotion" onclick="recordResponse('angry')">愤怒</button>
+            <button class="btn-emotion" onclick="recordResponse('fear')">恐惧</button>
+            <button class="btn-emotion" onclick="recordResponse('disgust')">厌恶</button>
+            <button class="btn-emotion" onclick="recordResponse('neutral')">中性</button>
         </div>
     </div>
 
     <script>
-        // 核心 UI 切换
-        function show(id) {
-            ['menu', 'ema-area', 'social-area', 'b5-area', 'fer-area', 'bart-area', 'emo-area'].forEach(d => {
-                const el = document.getElementById(d); if(el) el.classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
-        }
+        // 核心数据结构
+        let ferData = { module: "Emotion_FER", correct_count: 0, errors: 0, records: [], summary: {} };
+        const TOTAL_TRIALS = 30;
+        let ferSequence = [];
+        let currentTrial = 0;
+        let trialOnset = 0;
+        let responseTimeout = null;
 
-        function updateVal(inputID, spanID) { document.getElementById(spanID).innerText = document.getElementById(inputID).value + "%"; }
-
-        // 量表保存计算逻辑
-        function saveEMA() {
-            const neg1 = parseInt(document.getElementById('ema-1').value);
-            const neg2 = parseInt(document.getElementById('ema-2').value);
-            const pos1 = parseInt(document.getElementById('ema-3').value);
-            CAS_Storage.saveModuleData('Emotion_EMA_Wellbeing', { 
-                negative_affect: (neg1 + neg2) / 2, positive_affect: pos1 
-            });
-            alert("状态与幸福感保存成功！"); show('menu');
-        }
-        function saveSocial() {
-            CAS_Storage.saveModuleData('Emotion_Social', { loneliness: document.getElementById('soc-1').value, support: document.getElementById('soc-2').value });
-            alert("社会支持评分保存成功！"); show('menu');
-        }
-        function saveB5() {
-            CAS_Storage.saveModuleData('Emotion_Big5', { O: document.getElementById('b5-o').value, N: document.getElementById('b5-n').value });
-            alert("人格画像保存成功！"); show('menu');
-        }
-
-        /* ================= 4. FER 面孔情绪识别逻辑 (NEW) ================= */
-        const ferStimuli = [
-            { face: '😠', ans: '愤怒' }, { face: '😊', ans: '开心' }, 
-            { face: '😨', ans: '恐惧' }, { face: '😢', ans: '悲伤' },
-            { face: '😐', ans: '中性' }, { face: '🤢', ans: '厌恶' }
+        // 情绪刺激库 (科研部署时可替换为标准图片 URL)
+        const emotionStimuli = [
+            { id: 'happy', icon: '😀' }, { id: 'sad', icon: '😢' },
+            { id: 'angry', icon: '😡' }, { id: 'fear', icon: '😨' },
+            { id: 'disgust', icon: '🤢' }, { id: 'neutral', icon: '😐' }
         ];
-        let ferData = { module: "Emotion_FER", records: [] };
-        let fer_trial = 0, fer_onset = 0, fer_current = null;
+
+        // 界面路由
+        function show(id) {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('task-area').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        // 生成随机测试序列 (每种情绪 5 次)
+        function generateSequence() {
+            let seq = [];
+            emotionStimuli.forEach(emo => {
+                for(let i=0; i<5; i++) {
+                    seq.push({ targetEmotion: emo.id, visual: emo.icon });
+                }
+            });
+            // Fisher-Yates 打乱算法
+            for (let i = seq.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [seq[i], seq[j]] = [seq[j], seq[i]];
+            }
+            return seq;
+        }
 
         function startFER() {
-            fer_trial = 0; ferData.records = []; show('fer-area'); nextFER();
+            ferData = { module: "Emotion_FER", correct_count: 0, errors: 0, records: [], summary: {} };
+            ferSequence = generateSequence();
+            currentTrial = 0;
+            show('task-area');
+            nextTrial();
         }
-        function nextFER() {
-            if(fer_trial >= ferStimuli.length) {
-                CAS_Storage.saveModuleData('Emotion_FER', ferData);
-                alert("面孔识别测试完成！数据已分析入库。"); show('menu'); return;
+
+        function nextTrial() {
+            if (currentTrial >= TOTAL_TRIALS) {
+                finishFER();
+                return;
             }
-            document.getElementById('fer-prog').innerText = `${fer_trial + 1}/${ferStimuli.length}`;
-            fer_current = ferStimuli[fer_trial];
-            document.getElementById('fer-face').innerText = '+';
+
+            document.getElementById('fer-counter').innerText = `进度: ${currentTrial + 1} / ${TOTAL_TRIALS}`;
+            document.getElementById('response-board').style.pointerEvents = 'none'; // 锁定作答区
+            document.getElementById('response-board').style.opacity = '0.5';
+
+            const container = document.getElementById('stimulus-container');
             
+            // 步骤 1: 呈现注视点 (500ms)，让受试者注意力集中到屏幕中央
+            container.innerHTML = '<div class="fixation-cross">+</div>';
+
             setTimeout(() => {
-                document.getElementById('fer-face').innerText = fer_current.face;
-                fer_onset = performance.now();
-            }, 600);
-        }
-        function recordFER(choice) {
-            if(document.getElementById('fer-face').innerText === '+') return; // 防止提前抢答
-            const rt = Math.round(performance.now() - fer_onset);
-            ferData.records.push({ face: fer_current.face, response: choice, correct: choice === fer_current.ans, rt_ms: rt });
-            fer_trial++; nextFER();
+                // 步骤 2: 呈现目标情绪面孔
+                const stim = ferSequence[currentTrial];
+                
+                // 【科研替换点】如果是真实图片，请替换为 `<img src="${stim.visual}" alt="face">`
+                container.innerHTML = `<div class="face-placeholder">${stim.visual}</div>`;
+                
+                document.getElementById('response-board').style.pointerEvents = 'auto'; // 解锁作答区
+                document.getElementById('response-board').style.opacity = '1';
+                
+                trialOnset = performance.now();
+
+                // 步骤 3: 5000ms 超时惩罚机制 (防止发呆)
+                responseTimeout = setTimeout(() => {
+                    recordResponse('TIMEOUT');
+                }, 5000);
+
+            }, 500); // ISI = 500ms
         }
 
-        /* ================= 5. BART 核心逻辑 (修复完美收集版) ================= */
-        let bartData = { module: "Emotion_BART", trials: [], total_gain: 0 };
-        let b_round = 1, b_pumps = 0, b_popLimit = 0;
+        function recordResponse(selectedEmotion) {
+            clearTimeout(responseTimeout); // 清除超时计时器
+            document.getElementById('response-board').style.pointerEvents = 'none'; // 立即锁定，防止连击
 
-        function startBART() { b_round = 1; bartData.trials = []; bartData.total_gain = 0; show('bart-area'); nextBRound(); }
-        function nextBRound() {
-            if(b_round > 5) { CAS_Storage.saveModuleData('Emotion_BART', bartData); alert(`BART结束，总赚取: $${bartData.total_gain}`); show('menu'); return; }
-            b_pumps = 0; b_popLimit = Math.floor(Math.random() * 12) + 3; 
-            document.getElementById('bart-round').innerText = `${b_round}/5`; document.getElementById('bart-pot').innerText = `$0`;
-            const b = document.getElementById('balloon'); b.innerText = ""; b.style.width = '50px'; b.style.height = '60px'; b.style.background = 'radial-gradient(circle at 30% 30%, #fb7185, #e11d48)';
-            document.getElementById('btn-pump').disabled = false; document.getElementById('btn-collect').disabled = false;
-        }
-        function pumpBalloon() {
-            b_pumps++;
-            if(b_pumps >= b_popLimit) {
-                document.getElementById('btn-pump').disabled = true; document.getElementById('btn-collect').disabled = true;
-                const b = document.getElementById('balloon'); b.style.background = 'transparent'; b.innerText = "💥";
-                bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'popped', gain: 0 });
-                setTimeout(() => { b_round++; nextBRound(); }, 1200);
-            } else {
-                const b = document.getElementById('balloon'); b.style.width = (50 + b_pumps * 12) + 'px'; b.style.height = (60 + b_pumps * 15) + 'px';
-                document.getElementById('bart-pot').innerText = `$${b_pumps}`;
-            }
-        }
-        function collectMoney() {
-            if(b_pumps === 0) return alert("请先充气获取收益！");
-            document.getElementById('btn-pump').disabled = true; document.getElementById('btn-collect').disabled = true;
-            bartData.total_gain += b_pumps;
-            bartData.trials.push({ round: b_round, pumps: b_pumps, status: 'collected', gain: b_pumps });
-            alert(`✅ 成功收集: $${b_pumps}`); b_round++; nextBRound();
+            const rt = Math.round(performance.now() - trialOnset);
+            const target = ferSequence[currentTrial].targetEmotion;
+            const isCorrect = (selectedEmotion === target);
+
+            if (isCorrect) ferData.correct_count++;
+            else ferData.errors++;
+
+            ferData.records.push({
+                target: target,
+                response: selectedEmotion,
+                correct: isCorrect,
+                rt_ms: selectedEmotion === 'TIMEOUT' ? 5000 : rt
+            });
+
+            currentTrial++;
+            
+            // 清空屏幕，给予极短的视觉间隔后进入下一题
+            document.getElementById('stimulus-container').innerHTML = '';
+            setTimeout(nextTrial, 250); 
         }
 
-        /* ================= 6. Stroop 逻辑 ================= */
-        let es_onset = 0, es_trial = 0;
-        function startEmoStroop() { es_trial = 0; show('emo-area'); nextES(); }
-        function nextES() {
-            if(es_trial >= 5) { alert("测试完成"); show('menu'); return; }
-            document.getElementById('emo-controls').classList.add('hidden'); document.getElementById('emo-word').innerText = "+"; document.getElementById('emo-word').style.color = "#cbd5e1";
-            setTimeout(() => {
-                document.getElementById('emo-word').innerText = "失败"; document.getElementById('emo-word').style.color = "#ef4444";
-                document.getElementById('emo-controls').classList.remove('hidden'); es_onset = performance.now();
-            }, 800);
+        function finishFER() {
+            // 计算平均反应时 (仅计算作答正确的试次)
+            const correctTrials = ferData.records.filter(r => r.correct);
+            const avgRt = correctTrials.length > 0 
+                ? Math.round(correctTrials.reduce((sum, r) => sum + r.rt_ms, 0) / correctTrials.length) 
+                : 0;
+            
+            // 计算总体准确率
+            const accuracy = Math.round((ferData.correct_count / TOTAL_TRIALS) * 100);
+
+            ferData.summary = {
+                accuracy_percent: accuracy,
+                avg_correct_rt_ms: avgRt,
+                total_trials: TOTAL_TRIALS,
+                timeout_count: ferData.records.filter(r => r.response === 'TIMEOUT').length
+            };
+
+            CAS_Storage.saveModuleData('Emotion_FER', ferData);
+            
+            alert(`✅ FER 面孔识别测验完成！\n\n- 准确率: ${accuracy}%\n- 平均反应时: ${avgRt} ms\n- 超时未答: ${ferData.summary.timeout_count} 次`);
+            location.href = 'index.html';
         }
-        function recordES(c) { es_trial++; nextES(); }
     </script>
 </body>
 </html>
