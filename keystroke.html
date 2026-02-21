@@ -3,36 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-MOT | 按键动力学评估</title>
+    <title>NeuroMap-KEY | 按键微观动力学评估 (科研完全体)</title>
     <style>
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --teal: #0d9488; --orange: #f97316; --slate: #64748b; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --teal: #0d9488; --orange: #f97316; --slate: #64748b; --red: #f43f5e;}
         body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        .container { max-width: 900px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         
         .module-header { border-left: 6px solid var(--orange); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
         .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
-        
 
-        /* 抄写参考文本区 */
-        .reference-box { background: #fff7ed; border: 2px dashed #fed7aa; padding: 25px; border-radius: 16px; margin-bottom: 25px; text-align: center; }
+        /* 参考文本区 */
+        .reference-box { background: #fff7ed; border: 2px dashed #fed7aa; padding: 25px; border-radius: 16px; margin-bottom: 25px; }
         .reference-box p { margin: 0 0 10px 0; color: #9a3412; font-weight: bold; font-size: 15px; }
-        .ref-text { font-family: 'Courier New', Courier, monospace; font-size: 26px; color: var(--orange); font-weight: bold; letter-spacing: 2px; user-select: none; }
+        .ref-text { font-family: 'Courier New', Courier, monospace; font-size: 20px; color: var(--orange); font-weight: bold; line-height: 1.5; user-select: none; }
 
         /* 输入区 */
         .input-workspace { position: relative; margin-bottom: 30px; }
-        textarea { width: 100%; height: 120px; box-sizing: border-box; padding: 20px; border: 2px solid #cbd5e1; border-radius: 16px; font-size: 22px; font-family: 'Courier New', Courier, monospace; outline: none; transition: 0.3s; resize: none; color: var(--primary); font-weight: bold;}
+        textarea { width: 100%; height: 180px; box-sizing: border-box; padding: 20px; border: 2px solid #cbd5e1; border-radius: 16px; font-size: 20px; font-family: 'Courier New', Courier, monospace; outline: none; transition: 0.3s; resize: none; color: var(--primary); font-weight: bold; line-height: 1.5;}
         textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 4px #ffedd5; }
         textarea:disabled { background: #f1f5f9; cursor: not-allowed; }
 
         /* 实时仪表盘 */
-        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
-        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .metrics-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; transition: 0.2s;}
         .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
-        .metric-card strong { font-size: 24px; color: var(--primary); font-family: monospace; }
+        .metric-card strong { font-size: 22px; color: var(--primary); font-family: monospace; }
         .highlight-val { color: var(--orange) !important; }
 
-        .btn-submit { width: 100%; padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; background: var(--orange); color: white; box-shadow: 0 8px 20px rgba(249, 115, 22, 0.2); }
+        /* 提交按钮 */
+        .btn-submit { width: 100%; padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; background: var(--orange); color: white; box-shadow: 0 8px 20px rgba(249, 115, 22, 0.2);}
         .btn-submit:hover { background: #ea580c; transform: translateY(-2px); }
     </style>
     <script src="cas-storage.js"></script>
@@ -42,77 +43,69 @@
 
     <div class="container">
         <div class="module-header">
-            <h2>⌨️ 按键动力学 (Keystroke Dynamics)</h2>
-            <p><strong>临床靶向：</strong>捕捉帕金森病 (PD) 早期的运动强直与动作迟缓。<br>
-            *为剔除输入法带来的认知延迟噪音，请使用实体键盘抄写以下纯英文字符串。</p>
+            <h2>⌨️ 按键微观动力学 (Keystroke Dynamics)</h2>
+            <p><strong>临床靶向：</strong>捕捉帕金森病 (PD) 早期的运动迟缓与肌肉强直引起的亚毫秒级微观动作变异。<br>
+            *基于大容量文本抄写，提取滞留时间均值与变异系数 (CV)。</p>
         </div>
 
         <div class="reference-box">
-            <p>请在下方输入框中准确且快速地抄写这段文字：</p>
-            <div class="ref-text" id="target-text">the quick brown fox jumps over the lazy dog</div>
+            <p>⚠️ 临床要求：请关闭中文输入法！准确、连贯地抄写下方段落 (约需 60 秒)：</p>
+            <div class="ref-text" id="target-text">The rapid development of digital phenotyping allows researchers to capture subtle motor fluctuations in real time. Patients with early neurodegenerative diseases often show increased dwell times and higher variance before clinical symptoms appear. Please keep typing steadily.</div>
         </div>
 
         <div class="input-workspace">
-            <textarea id="typing-area" placeholder="点击此处开始打字..." autocomplete="off" spellcheck="false"></textarea>
+            <textarea id="typing-area" placeholder="点击此处开始打字 (请尽量不要按退格键，打错继续即可)..." autocomplete="off" spellcheck="false" onpaste="return false;" ondrop="return false;"></textarea>
         </div>
 
         <div class="metrics-board">
-            <div class="metric-card"><span>总按键次数</span><strong id="m-keys">0</strong></div>
-            <div class="metric-card"><span>平均滞留时间 (Dwell)</span><strong id="m-dwell" class="highlight-val">0 ms</strong></div>
-            <div class="metric-card"><span>平均飞行时间 (Flight)</span><strong id="m-flight">0 ms</strong></div>
+            <div class="metric-card"><span>总按键数</span><strong id="m-keys">0</strong></div>
+            <div class="metric-card"><span>均滞留 (Dwell)</span><strong id="m-dwell" class="highlight-val">0 ms</strong></div>
+            <div class="metric-card"><span>滞留变异 (CV)</span><strong id="m-cv" class="highlight-val">0.0 %</strong></div>
+            <div class="metric-card"><span>均飞行 (Flight)</span><strong id="m-flight">0 ms</strong></div>
         </div>
 
-        <button class="btn-submit" onclick="submitKeystroke()">💾 提取微观按键特征并入库</button>
+        <button class="btn-submit" onclick="submitKeystroke()">💾 提取高维动力学特征并入库</button>
     </div>
 
     <script>
         const inputArea = document.getElementById('typing-area');
+        let keystrokeData = { module: "MOT_Keystroke", raw_events: [], key_pairs: [], summary: {} };
         
-        // 核心数据结构
-        let keystrokeData = {
-            module: "MOT_Keystroke",
-            raw_events: [],       // 记录每一次按下和抬起的时间戳
-            key_pairs: [],        // 记录完整的 Dwell 和 Flight 对
-            summary: {}
-        };
-
-        // 临时变量，用于追踪按键状态
         let activeKeys = {}; 
         let lastKeyupTime = null;
-        let totalDwellTime = 0;
-        let validDwellCount = 0;
-        let totalFlightTime = 0;
-        let validFlightCount = 0;
+        let dwellTimesArray = []; // 存储所有有效的 Dwell Time 用于计算方差
+        let flightTimesArray = [];
 
-        // 监听按下事件 (计算 Flight Time 和 Dwell 起点)
+        // 需要过滤的非字符功能键
+        const ignoredKeys = new Set(["Shift", "Backspace", "CapsLock", "Control", "Alt", "Meta", "Enter", "Tab", "Escape"]);
+
         inputArea.addEventListener('keydown', (e) => {
-            // 屏蔽功能键干扰
-            if(e.key === "Shift" || e.key === "Backspace" || e.key === "CapsLock") return;
+            // 屏蔽非法功能键干扰
+            if(ignoredKeys.has(e.key)) return;
+            // 屏蔽组合键 (如 Ctrl+C, Cmd+V)，防止系统层面的作弊绕过
+            if(e.ctrlKey || e.metaKey || e.altKey) return;
             
             const now = performance.now();
             const keyChar = e.key;
 
-            // 避免长按触发的重复 keydown
+            // 避免长按触发的操作系统级 keydown 重复事件
             if(!activeKeys[keyChar]) {
-                activeKeys[keyChar] = now; // 记录按下时间
+                activeKeys[keyChar] = now; 
                 
-                // 计算飞行时间 (Flight Time = 当前 keydown - 上一个 keyup)
+                // 计算飞行时间 (Flight Time = 当前 keydown - 上一次任意键的 keyup)
                 if(lastKeyupTime !== null) {
                     const flightTime = now - lastKeyupTime;
-                    if(flightTime > 0 && flightTime < 2000) { // 剔除异常长的停顿
-                        totalFlightTime += flightTime;
-                        validFlightCount++;
-                        updateUI();
+                    // 剔除受试者中途发呆、休息的极端长停顿噪音 (>2000ms 视为非运动学停顿)
+                    if(flightTime > 0 && flightTime < 2000) {
+                        flightTimesArray.push(flightTime);
                     }
                 }
-                
                 keystrokeData.raw_events.push({ action: 'down', key: keyChar, t: Math.round(now) });
             }
         });
 
-        // 监听抬起事件 (计算 Dwell Time)
         inputArea.addEventListener('keyup', (e) => {
-            if(e.key === "Shift" || e.key === "Backspace" || e.key === "CapsLock") return;
+            if(ignoredKeys.has(e.key)) return;
 
             const now = performance.now();
             const keyChar = e.key;
@@ -121,58 +114,78 @@
             if(activeKeys[keyChar]) {
                 const dwellTime = now - activeKeys[keyChar]; // 滞留时间 = keyup - keydown
                 
-                totalDwellTime += dwellTime;
-                validDwellCount++;
+                // 剔除异常的按键粘连 (>1000ms 视为异常操作而非病理性粘滞)
+                if(dwellTime > 0 && dwellTime < 1000) {
+                    dwellTimesArray.push(dwellTime);
+                    keystrokeData.key_pairs.push({ key: keyChar, dwell_ms: Math.round(dwellTime) });
+                }
                 
-                keystrokeData.key_pairs.push({
-                    key: keyChar,
-                    dwell_ms: Math.round(dwellTime)
-                });
-                
-                delete activeKeys[keyChar]; // 清除状态
+                delete activeKeys[keyChar]; // 清理状态，等待下一次按下
                 keystrokeData.raw_events.push({ action: 'up', key: keyChar, t: Math.round(now) });
                 
-                updateUI();
+                // 限制 UI 刷新频率以节省 JS 线程性能 (每 5 个字符刷新一次仪表盘)
+                if(dwellTimesArray.length % 5 === 0) updateUI();
             }
             
-            // 自动判断是否完成抄写
-            if(inputArea.value.trim().toLowerCase() === document.getElementById('target-text').innerText.trim()) {
-                inputArea.style.borderColor = "var(--green)";
-                inputArea.disabled = true;
+            // 自动判断是否完成抄写 (对比字符长度)
+            if(inputArea.value.length >= document.getElementById('target-text').innerText.length) {
+                inputArea.style.borderColor = "var(--teal)";
+                updateUI(); // 最终更新一次
             }
         });
 
+        // 核心统计算法：平均数 (Mean) 与 变异系数 (CV = StdDev / Mean * 100)
+        function calculateStats(arr) {
+            if(arr.length === 0) return { mean: 0, cv: 0 };
+            const sum = arr.reduce((a, b) => a + b, 0);
+            const mean = sum / arr.length;
+            const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length;
+            const stdDev = Math.sqrt(variance);
+            const cv = mean > 0 ? (stdDev / mean) * 100 : 0; 
+            return { mean: Math.round(mean), cv: cv.toFixed(1) };
+        }
+
         function updateUI() {
-            document.getElementById('m-keys').innerText = validDwellCount;
+            document.getElementById('m-keys').innerText = dwellTimesArray.length;
             
-            if(validDwellCount > 0) {
-                const avgDwell = totalDwellTime / validDwellCount;
-                document.getElementById('m-dwell').innerText = Math.round(avgDwell) + ' ms';
-                // 预警提示：健康年轻人一般在 80-120ms，若超过 200ms 提示严重运动迟缓
-                if(avgDwell > 200) document.getElementById('m-dwell').style.color = 'var(--red)';
-            }
+            const dwellStats = calculateStats(dwellTimesArray);
+            document.getElementById('m-dwell').innerText = dwellStats.mean + ' ms';
+            document.getElementById('m-cv').innerText = dwellStats.cv + ' %';
             
-            if(validFlightCount > 0) {
-                const avgFlight = totalFlightTime / validFlightCount;
-                document.getElementById('m-flight').innerText = Math.round(avgFlight) + ' ms';
+            // 临床实时预警机制：Dwell 变异极大，提示严重震颤或肌肉强直引起的按键失稳
+            if(dwellStats.cv > 30) {
+                document.getElementById('m-cv').style.color = 'var(--red)';
+            } else {
+                document.getElementById('m-cv').style.color = 'var(--orange)';
             }
+
+            const flightStats = calculateStats(flightTimesArray);
+            document.getElementById('m-flight').innerText = flightStats.mean + ' ms';
         }
 
         function submitKeystroke() {
-            if(validDwellCount < 10) return alert("按键数据过少，请至少抄写一部分文本。");
+            // 临床底线：少于 50 次有效敲击，无法算出具有统计学意义的 CV
+            if(dwellTimesArray.length < 50) return alert("数据量过少！临床有效分析至少需要 50 次按键记录，请受试者继续抄写。");
+
+            const dwellStats = calculateStats(dwellTimesArray);
+            const flightStats = calculateStats(flightTimesArray);
 
             keystrokeData.summary = {
-                avg_dwell_ms: Math.round(totalDwellTime / validDwellCount),
-                avg_flight_ms: validFlightCount > 0 ? Math.round(totalFlightTime / validFlightCount) : 0,
-                total_keys_pressed: validDwellCount
+                avg_dwell_ms: dwellStats.mean,
+                dwell_cv: parseFloat(dwellStats.cv),
+                avg_flight_ms: flightStats.mean,
+                flight_cv: parseFloat(flightStats.cv),
+                total_keys_pressed: dwellTimesArray.length
             };
 
             CAS_Storage.saveModuleData('MOT_Keystroke', keystrokeData);
             
-            let msg = `✅ 按键动力学特征已入库！\n\n- 平均滞留时间 (Dwell): ${keystrokeData.summary.avg_dwell_ms} ms\n- 平均飞行时间 (Flight): ${keystrokeData.summary.avg_flight_ms} ms`;
+            let msg = `✅ 临床级按键动力学入库！\n\n- 采集有效数据点: ${dwellTimesArray.length} 击\n- 平均滞留时间: ${dwellStats.mean} ms\n- 滞留变异系数(CV): ${dwellStats.cv}%\n\n`;
             
-            if(keystrokeData.summary.avg_dwell_ms > 200) {
-                msg += "\n\n⚠️ 临床提示：受试者的 Dwell Time 显著延长，提示可能存在锥体外系症状引起的肌肉强直或运动迟缓。";
+            if(dwellStats.cv > 30) {
+                msg += "⚠️ 临床提示：受试者的 Dwell CV 显著高于常模，提示动作执行中存在明显的微观起伏与衰减，高度疑似锥体外系症状引起的肌肉强直。";
+            } else {
+                msg += "* 键盘微观运动控制状态稳定。";
             }
 
             alert(msg);
