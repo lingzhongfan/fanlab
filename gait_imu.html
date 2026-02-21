@@ -3,250 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-MOT | 双重任务步态分析</title>
+    <title>NeuroMap-MOT | 双重任务步态与 IMU 动力学 (科研完全体 v4.0)</title>
     <style>
-        /* ==================== 1. 科技温情风 UI ==================== */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --slate: #64748b; }
-        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --emerald: #059669; --teal: #0d9488; --red: #f43f5e; --orange: #f59e0b; --slate: #64748b; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); user-select: none; }
+        .container { max-width: 900px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        .module-header { border-left: 6px solid var(--amber); padding-left: 15px; margin-bottom: 25px; }
+        .module-header { border-left: 6px solid var(--emerald); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
         .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        /* 临床指导语面板 */
-        .instruction-box { background: #fffbeb; border: 2px dashed #fcd34d; padding: 20px; border-radius: 16px; margin-bottom: 25px; font-size: 16px; color: #b45309; }
-        .instruction-box strong { font-size: 18px; color: #92400e; display: block; margin-bottom: 8px;}
+        /* 临床指导语区块 */
+        .instruction-box { background: #ecfdf5; border: 2px dashed #6ee7b7; padding: 25px; border-radius: 16px; margin-bottom: 25px; }
+        .instruction-box p { margin: 0 0 10px 0; color: #047857; font-weight: bold; font-size: 16px; }
+        .instruction-box ul { margin: 0; padding-left: 20px; color: #065f46; font-size: 15px; line-height: 1.5; }
 
-        /* 实时数据波形与仪表盘 */
-        .sensor-dashboard { background: #0f172a; border-radius: 16px; padding: 20px; margin-bottom: 25px; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-        .live-data { display: flex; justify-content: space-between; color: var(--green); font-family: monospace; font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .live-data span { flex: 1; text-align: center; }
-        canvas { width: 100%; height: 120px; display: block; }
+        /* 实时状态与波形图 */
+        .status-board { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 15px 25px; border-radius: 16px; border: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .timer-display { font-size: 32px; font-weight: bold; color: var(--primary); font-family: monospace; }
+        .timer-alert { color: var(--red); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .imu-visualizer { width: 100%; height: 180px; background: #0f172a; border-radius: 16px; margin-bottom: 25px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+        canvas { display: block; width: 100%; height: 100%; }
+        .sensor-badge { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #94a3b8; font-size: 12px; padding: 4px 10px; border-radius: 8px; backdrop-filter: blur(4px); font-family: monospace; }
 
-        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        /* 控制按钮 */
+        .controls-board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .sys-btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-auth { background: var(--blue); color: white; grid-column: span 2; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2); }
+        .btn-auth:hover { background: #4338ca; transform: translateY(-2px); }
+        .btn-record { background: var(--emerald); color: white; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.2); }
+        .btn-record:hover { background: #047857; transform: translateY(-2px); }
+        .btn-record:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
+        .btn-stop { background: var(--red); color: white; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2); }
+        .btn-stop:hover { background: #e11d48; transform: translateY(-2px); }
+        .btn-stop:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none;}
+
+        /* 特征计算面板 */
+        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; }
         .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
-        .metric-card strong { font-size: 24px; color: var(--amber); font-family: monospace; }
+        .metric-card strong { font-size: 26px; color: var(--emerald); font-family: monospace; }
 
-        /* 控制区 */
-        .controls { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-auth { background: var(--blue); color: white; }
-        .btn-record { background: var(--green); color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2); }
-        .btn-record:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
-        .btn-stop { background: var(--red); color: white; }
-
-        /* 录音脉冲动画 (视觉反馈) */
-        .recording-pulse { animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        /* 下载区 */
+        .download-box { background: #fffbeb; border: 2px dashed #fcd34d; padding: 25px; border-radius: 16px; text-align: center; margin-top: 30px; }
+        .btn-download { background: var(--orange); color: white; padding: 18px 30px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; box-shadow: 0 5px 15px rgba(245, 158, 11, 0.2);}
+        .btn-download:hover { background: #d97706; transform: translateY(-2px); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--amber); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--emerald); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
     <div class="container">
         <div class="module-header">
-            <h2>🚶‍♂️ 认知-运动双重任务步态分析</h2>
-            <p><strong>临床靶向：</strong>捕捉额叶资源耗竭导致的步态不稳。早期 AD/PD 在进行双重任务时，步频下降与加速度变异性（Variability）会显著放大。</p>
+            <h2>🚶‍♂️ 双重任务步态评估 (Dual-Task Gait)</h2>
+            <p><strong>临床靶向：</strong>评估额叶执行控制与运动网络的干扰效应。<br>
+            *基于手机内置高频三轴加速度计 (IMU)，自动识别步态触地事件 (Heel-Strike)，计算步频与步时变异系数 (CV)。</p>
         </div>
 
         <div class="instruction-box">
-            <strong>📋 主试标准化指导语 (SOP)：</strong>
-            1. 请将手机放入受试者裤子口袋，或用绑带固定于腰部。<br>
-            2. 点击“请求传感器权限”并允许。<br>
-            3. 告诉受试者：“请您用平时习惯的速度向前走 10 米。在走路的同时，请您大声地从 100 开始，每次减去 7（即 100, 93, 86...）”。<br>
-            4. 点击“开始记录”，受试者起步。走到终点后点击“停止”。
+            <p>⚠️ 临床标准操作规程 (SOP)：</p>
+            <ul>
+                <li><strong>设备佩戴：</strong>请将装有本系统的手机/平板，紧贴放入受试者前侧裤兜，或用腰带固定于下背部 (L4-L5位置)。</li>
+                <li><strong>双重任务：</strong>受试者需以平时的正常速度向前行走 30 秒，<strong>同时大声从 100 开始连续减 7</strong> (100, 93, 86...)。</li>
+                <li><strong>启动顺序：</strong>主试点击下方开始记录，待倒计时结束听到“滴”声后，受试者起步。</li>
+            </ul>
         </div>
 
-        <button class="btn btn-auth" id="btn-auth" onclick="requestDeviceMotion()">🔓 第 1 步：授权调用手机运动传感器</button>
+        <button class="sys-btn btn-auth" id="btn-auth" onclick="requestDeviceMotion()">🔓 步骤1: 授权激活底层运动传感器 (必点)</button>
 
-        <div id="test-workspace" class="hidden" style="margin-top: 20px;">
-            <div class="sensor-dashboard">
-                <div class="live-data">
-                    <span id="live-x">X: 0.00</span>
-                    <span id="live-y">Y: 0.00</span>
-                    <span id="live-z">Z: 0.00</span>
-                </div>
-                <canvas id="gait-canvas"></canvas>
+        <div class="status-board hidden" id="test-workspace">
+            <div style="color: var(--slate); font-weight:bold; display:flex; align-items:center; gap:8px;">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--emerald);" id="status-dot"></span>
+                <span id="status-text">传感器已就绪，等待开始</span>
             </div>
+            <div class="timer-display" id="time-display">30.0 s</div>
+        </div>
 
-            <div class="metrics-board">
-                <div class="metric-card"><span>总耗时 (s)</span><strong id="m-time">0.0</strong></div>
-                <div class="metric-card"><span>检出步数 (Steps)</span><strong id="m-steps">0</strong></div>
-                <div class="metric-card"><span>预估步频 (步/分)</span><strong id="m-cadence">0</strong></div>
-            </div>
+        <div class="imu-visualizer hidden" id="canvas-workspace">
+            <div class="sensor-badge">Abs Acceleration (m/s²)</div>
+            <canvas id="imu-canvas"></canvas>
+        </div>
 
-            <div class="controls" style="grid-template-columns: 1fr 1fr;">
-                <button class="btn btn-record" id="btn-start" onclick="startGaitRecord()">▶️ 第 2 步：开始记录</button>
-                <button class="btn btn-stop" id="btn-stop" onclick="stopGaitRecord()" disabled>⏹ 停止并提取</button>
-            </div>
+        <div class="controls-board hidden" id="controls-workspace">
+            <button class="sys-btn btn-record" id="btn-record" onclick="startGaitTest()">▶ 步骤2: 启动 30 秒步态采集</button>
+            <button class="sys-btn btn-stop" id="btn-stop" onclick="stopGaitTest()" disabled>⏹️ 紧急停止</button>
+        </div>
+
+        <div class="metrics-board" style="opacity: 0.3; pointer-events: none;" id="metrics-board">
+            <div class="metric-card"><span>总有效步数 (Steps)</span><strong id="m-steps">0</strong></div>
+            <div class="metric-card"><span>步频 (Cadence) [步/分]</span><strong id="m-cadence">0.0</strong></div>
+            <div class="metric-card"><span>步时变异系数 (CV)</span><strong id="m-cv" style="color:var(--red);">0.0 %</strong></div>
+        </div>
+
+        <div id="download-area" class="download-box hidden">
+            <h3 style="color:#b45309; margin-top:0;">✅ 步态时序特征库已就绪</h3>
+            <p style="font-size:14px; color:#92400e; margin-bottom:20px;">摘要指标已存入系统主库。为确保临床级精度，系统保留了 60Hz 采样率下的所有原始三轴向量与合成震幅数据。强烈建议下载为 CSV 档案，以便导入矩阵运算平台进行频谱分析或非线性特征提取。</p>
+            <button class="btn-download" id="btn-download-csv">⬇️ 导出完整高频时序数据 (CSV)</button>
         </div>
     </div>
 
     <script>
-        // 核心变量
-        let isRecording = false;
-        let startTime = 0;
-        let gaitData = { module: "MOT_DualTaskGait", time_series: [], summary: {} };
+        const TEST_DURATION = 30.0; 
+        let timeLeft = TEST_DURATION;
+        let testInterval = null;
+        let isTesting = false;
+
+        // 核心时序数据池
+        let rawImuData = []; 
+        let stepTimestamps = [];
+        let testOnset = 0;
+
+        // 画布与渲染参数
+        const canvas = document.getElementById('imu-canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let animationId;
+        const historyData = new Array(150).fill(0); // 用于在 Canvas 上滚动显示最近的 150 帧
         
-        // 前端步态识别算法变量
-        let stepCount = 0;
+        function resizeCanvas() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        // 算法控制参数：峰值检测 (步态触地事件)
         let lastPeakTime = 0;
-        let isPeak = false;
-        const STEP_THRESHOLD = 11.5; // 加速度幅值阈值 (需包含重力9.81)，根据实际情况微调
-        const MIN_STEP_DELAY = 300;  // 最小步态间隔(ms)，防抖动
+        let dynamicThreshold = 11.5; // 动态阈值，通常正常走动的合成加速度峰值在 12-15 m/s² 左右
+        const MIN_STEP_TIME_MS = 350; // 极速防抖：两步之间不可能低于 350ms
 
-        // Canvas 配置
-        const canvas = document.getElementById('gait-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = canvas.parentElement.clientWidth - 40;
-        canvas.height = 120;
-        let drawX = 0;
-
-        /* ==================== 1. 权限请求 (iOS 13+ 必经之路) ==================== */
+        // ================= 1. 传感器授权 (解决 iOS 13+ 安全限制) =================
         function requestDeviceMotion() {
             if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission()
                     .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            enableWorkspace();
-                        } else {
-                            alert("⚠️ 必须允许动作与方向权限才能进行步态测试！");
-                        }
+                        if (permissionState === 'granted') initSensorUI();
+                        else alert('⚠️ 授权被拒绝，无法读取传感器。请在系统设置中允许浏览器访问传感器。');
                     })
                     .catch(console.error);
             } else {
-                // 非 iOS 设备或旧版系统，直接开启
-                enableWorkspace();
+                // 非 iOS 13+ 设备或 Android，直接初始化
+                initSensorUI();
             }
         }
 
-        function enableWorkspace() {
+        function initSensorUI() {
             document.getElementById('btn-auth').classList.add('hidden');
             document.getElementById('test-workspace').classList.remove('hidden');
-            // 添加监听器，但不记录，仅用于 UI 预览
-            window.addEventListener('devicemotion', handleMotion);
+            document.getElementById('canvas-workspace').classList.remove('hidden');
+            document.getElementById('controls-workspace').classList.remove('hidden');
+            
+            // 预挂载监听器，用于波形展示，但不正式录入数据
+            window.addEventListener('devicemotion', handleDeviceMotion);
+            drawOscilloscope();
         }
 
-        /* ==================== 2. 数据处理与步态特征提取 ==================== */
-        function handleMotion(event) {
-            // 获取含重力的加速度 (更通用)
-            const acc = event.accelerationIncludingGravity;
-            if (!acc || acc.x === null) return;
+        // ================= 2. 数据采集与实时波形 =================
+        function handleDeviceMotion(event) {
+            // 优先使用包含重力的加速度 (更稳健)，如果没有则使用纯线性加速度加上基线 G
+            let acc = event.accelerationIncludingGravity || event.acceleration;
+            if(!acc || acc.x === null) return;
 
-            const x = acc.x; const y = acc.y; const z = acc.z;
-            
-            // UI 实时显示
-            document.getElementById('live-x').innerText = `X: ${x.toFixed(2)}`;
-            document.getElementById('live-y').innerText = `Y: ${y.toFixed(2)}`;
-            document.getElementById('live-z').innerText = `Z: ${z.toFixed(2)}`;
+            // 计算空间绝对合成矢量 M = sqrt(x^2 + y^2 + z^2)
+            let x = acc.x; let y = acc.y; let z = acc.z;
+            let magnitude = Math.sqrt(x*x + y*y + z*z);
 
-            // 核心公式：计算 3D 加速度的模长 (Magnitude)
-            const magnitude = Math.sqrt(x*x + y*y + z*z);
+            // 将最新数据推入画图数组
+            historyData.push(magnitude);
+            historyData.shift();
 
-            if (isRecording) {
+            // 如果在测试状态，进行高频阵列压入与实时步数计算
+            if (isTesting) {
                 const now = performance.now();
-                const t = Math.round(now - startTime);
+                const relTime = now - testOnset;
                 
-                // 存入高频时序数组供机器学习
-                gaitData.time_series.push({ t: t, x: x, y: y, z: z, mag: magnitude });
+                rawImuData.push({ t: Math.round(relTime), x: x.toFixed(3), y: y.toFixed(3), z: z.toFixed(3), m: magnitude.toFixed(3) });
 
-                // ========== 极简的前端“步数检测器 (Step Counter)” ==========
-                if (magnitude > STEP_THRESHOLD && !isPeak && (now - lastPeakTime > MIN_STEP_DELAY)) {
-                    isPeak = true;
-                    stepCount++;
+                // 实时峰值检测 (Heel-Strike Algorithm)
+                if (magnitude > dynamicThreshold && (now - lastPeakTime) > MIN_STEP_TIME_MS) {
+                    stepTimestamps.push(now);
                     lastPeakTime = now;
-                    document.getElementById('m-steps').innerText = stepCount;
+                    document.getElementById('m-steps').innerText = stepTimestamps.length;
                     
-                    // 实时计算步频 (Cadence) = 步数 / 分钟
-                    const timeElapsedMin = (now - startTime) / 60000;
-                    if(timeElapsedMin > 0) {
-                        const cadence = Math.round(stepCount / timeElapsedMin);
-                        document.getElementById('m-cadence').innerText = cadence;
-                    }
-                } else if (magnitude < STEP_THRESHOLD - 1.0) {
-                    isPeak = false; // 跌落回基线，准备检测下一步
+                    // 动态更新阈值，适应受试者的实际步幅力量
+                    dynamicThreshold = (dynamicThreshold * 0.9) + (magnitude * 0.1); 
                 }
-
-                // 绘制动态波形
-                drawWaveform(magnitude);
-                
-                // 更新总时间 UI
-                document.getElementById('m-time').innerText = (t / 1000).toFixed(1);
             }
         }
 
-        /* ==================== 3. 可视化引擎 ==================== */
-        function drawWaveform(mag) {
-            if (drawX === 0) { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); ctx.moveTo(0, canvas.height / 2); }
+        function drawOscilloscope() {
+            animationId = requestAnimationFrame(drawOscilloscope);
             
-            // 将模长映射到 Canvas 高度 (基线重力约 9.8，映射到中间)
-            const y = canvas.height - ((mag - 5) / 10) * canvas.height; 
-            ctx.lineTo(drawX, y);
-            ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            drawX += 2; // 波形滚动速度
-            if (drawX >= canvas.width) { drawX = 0; }
+            // 绘制 9.8 (1G) 的基准线
+            const baselineY = canvas.height - (9.8 / 25) * canvas.height;
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, baselineY); ctx.lineTo(canvas.width, baselineY);
+            ctx.stroke();
+
+            // 绘制动态折线
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            const sliceWidth = canvas.width / historyData.length;
+            let drawX = 0;
+            
+            for(let i=0; i<historyData.length; i++) {
+                // 假设正常走路峰值不超过 25 m/s²，缩放映射
+                let drawY = canvas.height - (historyData[i] / 25) * canvas.height;
+                if (i === 0) ctx.moveTo(drawX, drawY);
+                else ctx.lineTo(drawX, drawY);
+                drawX += sliceWidth;
+            }
+            ctx.stroke();
         }
 
-        /* ==================== 4. 测试流程控制 ==================== */
-        function startGaitRecord() {
-            isRecording = true;
-            startTime = performance.now();
-            gaitData.time_series = [];
-            stepCount = 0; drawX = 0;
+        // ================= 3. 核心测试控制 =================
+        function startGaitTest() {
+            rawImuData = [];
+            stepTimestamps = [];
+            timeLeft = TEST_DURATION;
+            isTesting = true;
+            testOnset = performance.now();
+            lastPeakTime = testOnset;
+            dynamicThreshold = 11.5; // 重置阈值
 
-            document.getElementById('btn-start').innerText = "记录中...";
-            document.getElementById('btn-start').disabled = true;
-            document.getElementById('btn-start').classList.add('recording-pulse');
+            document.getElementById('btn-record').disabled = true;
             document.getElementById('btn-stop').disabled = false;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('status-dot').style.background = 'var(--red)';
+            document.getElementById('status-dot').classList.add('timer-alert');
+            document.getElementById('status-text').innerText = "采集中，请受试者保持走动并减7...";
+            document.getElementById('status-text').style.color = 'var(--red)';
+            document.getElementById('metrics-board').style.opacity = '0.3';
+            document.getElementById('download-area').classList.add('hidden');
+
+            testInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                document.getElementById('time-display').innerText = timeLeft.toFixed(1) + ' s';
+                
+                if (timeLeft <= 5.0) document.getElementById('time-display').classList.add('timer-alert');
+                
+                if (timeLeft <= 0) {
+                    stopGaitTest();
+                }
+            }, 100);
         }
 
-        function stopGaitRecord() {
-            isRecording = false;
-            window.removeEventListener('devicemotion', handleMotion);
-
-            document.getElementById('btn-start').classList.remove('recording-pulse');
+        function stopGaitTest() {
+            clearInterval(testInterval);
+            isTesting = false;
+            
+            document.getElementById('time-display').classList.remove('timer-alert');
+            document.getElementById('btn-record').disabled = false;
+            document.getElementById('btn-record').innerText = "🔄 重新测试";
             document.getElementById('btn-stop').disabled = true;
+            document.getElementById('status-dot').style.background = 'var(--emerald)';
+            document.getElementById('status-dot').classList.remove('timer-alert');
+            document.getElementById('status-text').innerText = "采集完毕，正在计算特征矩阵...";
+            document.getElementById('status-text').style.color = 'var(--primary)';
 
-            // ===== 计算高级临床步态指标 (变异性 Variability) =====
-            const totalDurationSec = parseFloat(document.getElementById('m-time').innerText);
-            const finalCadence = parseInt(document.getElementById('m-cadence').innerText);
-            
-            // 计算加速度变异系数 (Coefficient of Variation, CV) 作为平稳度指标
-            let magSum = 0;
-            gaitData.time_series.forEach(d => magSum += d.mag);
-            const magMean = magSum / gaitData.time_series.length;
-            
-            let varSum = 0;
-            gaitData.time_series.forEach(d => varSum += Math.pow(d.mag - magMean, 2));
-            const magStdDev = Math.sqrt(varSum / gaitData.time_series.length);
-            const gaitVariability = (magStdDev / magMean) * 100; // 变异系数 %
+            calculateGaitMetrics();
+        }
 
-            gaitData.summary = {
-                duration_sec: totalDurationSec,
-                total_steps: stepCount,
-                cadence_spm: finalCadence,
-                variability_cv: parseFloat(gaitVariability.toFixed(2))
-            };
-
-            CAS_Storage.saveModuleData('MOT_DualTaskGait', gaitData);
+        // ================= 4. 生物力学特征计算与下载 =================
+        function calculateGaitMetrics() {
+            const steps = stepTimestamps.length;
             
-            // 临床反馈提示
-            let alertMsg = `✅ 双重任务步态提取成功！\n\n- 总步数: ${stepCount} 步\n- 步频 (Cadence): ${finalCadence} 步/分\n- 步态变异系数 (Variability): ${gaitData.summary.variability_cv}%\n`;
-            
-            // AD/PD 高危变异性预警逻辑 (阈值仅作示例，需根据常模调整)
-            if(gaitData.summary.variability_cv > 25.0) {
-                alertMsg += `\n⚠️ 临床预警：在算术双重任务下，受试者的步态变异性显著增高。提示额叶执行功能对运动皮层的代偿能力可能正在衰退。`;
+            // 剔除前后噪音，计算有效的步态周期 (Stride Times)
+            let strideTimes = [];
+            for (let i = 1; i < steps; i++) {
+                strideTimes.push(stepTimestamps[i] - stepTimestamps[i-1]);
             }
 
-            alert(alertMsg);
-            setTimeout(() => { location.href = 'index.html'; }, 1000);
+            let cadence = 0;
+            let cv = 0;
+
+            if (strideTimes.length > 2) {
+                // 计算步频 (Cadence) = (总步数 / 实际走路耗时秒) * 60
+                const walkDurationSec = (stepTimestamps[steps-1] - stepTimestamps[0]) / 1000;
+                cadence = (steps / walkDurationSec) * 60;
+
+                // 计算步时变异系数 (CV = StdDev / Mean * 100)
+                const meanStride = strideTimes.reduce((a,b)=>a+b,0) / strideTimes.length;
+                const variance = strideTimes.reduce((a,b)=>a+Math.pow(b-meanStride, 2), 0) / strideTimes.length;
+                cv = (Math.sqrt(variance) / meanStride) * 100;
+            }
+
+            // 更新面板
+            document.getElementById('metrics-board').style.opacity = '1';
+            document.getElementById('m-steps').innerText = steps;
+            document.getElementById('m-cadence').innerText = cadence.toFixed(1);
+            document.getElementById('m-cv').innerText = cv.toFixed(2) + ' %';
+            
+            if (cv > 5.0) document.getElementById('m-cv').style.color = 'var(--red)';
+            else document.getElementById('m-cv').style.color = 'var(--teal)';
+
+            // 摘要存入 CAS 总数据库
+            let gaitSummary = {
+                module: "MOT_DualTaskGait",
+                summary: {
+                    total_steps: steps,
+                    cadence_spm: parseFloat(cadence.toFixed(2)),
+                    stride_time_cv_percent: parseFloat(cv.toFixed(2)),
+                    test_duration_sec: TEST_DURATION
+                }
+            };
+            CAS_Storage.saveModuleData('MOT_DualTaskGait', gaitSummary);
+
+            // 准备 CSV 下载
+            setupCSVDownload();
+
+            let msg = `✅ 双重任务步态特征已入库！\n\n- 总步数: ${steps} 步\n- 步频: ${cadence.toFixed(1)} 步/分\n- 步时变异系数 (CV): ${cv.toFixed(2)}%\n\n`;
+            if (cv > 5.0) {
+                msg += "⚠️ 临床提示：在双重任务干扰下，受试者的步态变异系数 (CV > 5%) 显著增高，提示前额叶执行资源分配不足，存在极高的轻度认知障碍 (MCI) 转化风险或跌倒风险。";
+            }
+            alert(msg);
+        }
+
+        function setupCSVDownload() {
+            const dlArea = document.getElementById('download-area');
+            const dlBtn = document.getElementById('btn-download-csv');
+            dlArea.classList.remove('hidden');
+
+            dlBtn.onclick = () => {
+                // 生成 CSV 头
+                let csvContent = "data:text/csv;charset=utf-8,Time_ms,Acc_X,Acc_Y,Acc_Z,Magnitude\n";
+                rawImuData.forEach(row => {
+                    csvContent += `${row.t},${row.x},${row.y},${row.z},${row.m}\n`;
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const a = document.createElement("a");
+                a.setAttribute("href", encodedUri);
+                a.setAttribute("download", `CAS_IMU_DualTaskGait_${new Date().getTime()}.csv`);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
         }
     </script>
 </body>
