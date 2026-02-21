@@ -3,52 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap -COG | 全维度认知功能评估</title>
+    <title>NeuroMap-COG | 全维度认知功能评估 (科研临床版 v4.0)</title>
     <style>
         /* ==================== UI 基础与色彩规范 ==================== */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --slate: #64748b; }
-        /* 禁用双击放大与文本选中，防止老年人误触打断测试 */
+        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --orange: #f59e0b; --slate: #64748b; }
         body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: manipulation; user-select: none; }
-        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        /* 模块标题与按钮通用样式 */
-        .module-header { border-left: 6px solid var(--blue); padding-left: 15px; margin-bottom: 30px; }
+        .module-header { border-left: 6px solid var(--blue); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
-        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.5; }
+        
+        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
         .btn-menu { background: var(--light-blue); color: var(--blue); border: 1px solid #e0e7ff; }
         .btn-menu:hover { background: var(--blue); color: white; transform: translateX(5px); }
         .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-large { padding: 25px; font-size: 20px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; color: var(--primary); cursor: pointer; font-weight: bold; transition: 0.1s;}
+        .btn-large { padding: 25px; font-size: 22px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; color: var(--primary); cursor: pointer; font-weight: bold; transition: 0.1s;}
         .btn-large:active { background: var(--blue); color: white; border-color: var(--blue); transform: scale(0.96); }
 
-        /* ==================== 各范式专属 UI 设计 ==================== */
+        /* ==================== 临床范式专属视图 ==================== */
         
-        /* 1. Corsi 空间记忆跨度 */
+        /* 倒计时面板 (用于 DSST, Pattern 等限时任务) */
+        .timer-board { background: #fff1f2; color: var(--red); font-size: 24px; font-weight: bold; text-align: center; padding: 10px; border-radius: 12px; border: 2px dashed #fecdd3; margin-bottom: 20px; font-family: monospace;}
+        
+        /* Corsi */
         .corsi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 30px auto; }
         .corsi-block { aspect-ratio: 1; background: #e2e8f0; border-radius: 16px; cursor: pointer; transition: 0.1s; }
         .corsi-block.active { background: var(--blue); transform: scale(0.95); box-shadow: 0 0 15px rgba(79, 70, 229, 0.5); }
         
-        /* 2. Stroop / 5. Flanker 中央刺激区 */
-        .stim-large { font-size: 80px; font-weight: bold; text-align: center; margin: 60px 0; letter-spacing: 5px; }
-        .flanker-stim { font-size: 60px; font-weight: bold; letter-spacing: 15px; text-align: center; margin: 60px 0; font-family: monospace; }
+        /* Stroop / Flanker / DCCS 中央刺激 */
+        .stim-large { font-size: 80px; font-weight: bold; text-align: center; margin: 50px 0; letter-spacing: 5px; }
+        .flanker-stim { font-size: 65px; font-weight: bold; letter-spacing: 12px; text-align: center; margin: 50px 0; font-family: monospace; }
         
-        /* 3. TMT-B 连线测试画布 */
-        #tmt-board { position: relative; width: 100%; height: 350px; background: #f8fafc; border: 2px dashed #e2e8f0; border-radius: 20px; overflow: hidden; margin-top: 20px;}
-        .tmt-node { position: absolute; width: 50px; height: 50px; background: white; border: 3px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s;}
-        .tmt-node.clicked { background: var(--green); color: white; border-color: var(--green); }
+        /* TMT-B (25节点临床版) */
+        #tmt-board { position: relative; width: 100%; height: 500px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; overflow: hidden; margin-top: 15px;}
+        .tmt-node { position: absolute; width: 40px; height: 40px; background: white; border: 3px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .tmt-node.clicked { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 0 10px rgba(16,185,129,0.5);}
         .tmt-node.error { background: var(--red); color: white; border-color: var(--red); animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
-        /* 4. DSST / 6. DCCS / 7. Pattern */
-        .dsst-key { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; background: #f1f5f9; padding: 15px; border-radius: 16px;}
-        .dsst-pair { text-align: center; background: white; padding: 10px 20px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 24px; }
-        .dsst-pair span { display: block; font-size: 16px; color: var(--blue); font-weight: bold; border-top: 1px solid #e2e8f0; margin-top: 5px; padding-top: 5px; }
+        /* DSST / Pattern */
+        .dsst-key { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; background: #f1f5f9; padding: 15px; border-radius: 16px; flex-wrap: wrap;}
+        .dsst-pair { text-align: center; background: white; padding: 8px 15px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 22px; }
+        .dsst-pair span { display: block; font-size: 14px; color: var(--blue); font-weight: bold; border-top: 1px dashed #cbd5e1; margin-top: 5px; padding-top: 5px; }
+        
         .dccs-rule { text-align: center; font-size: 24px; font-weight: bold; color: var(--red); margin-bottom: 20px; padding: 15px; background: #fff1f2; border-radius: 16px; border: 2px dashed #fecdd3; }
-        .dccs-card { background: white; border: 2px solid #e2e8f0; border-radius: 20px; padding: 30px; text-align: center; font-size: 60px; cursor: pointer; }
-        .pattern-box { display: flex; justify-content: center; gap: 40px; margin: 50px 0; }
-        .pattern-item { font-size: 70px; background: #f8fafc; padding: 30px; border-radius: 24px; border: 1px solid #e2e8f0; }
+        .dccs-card { background: white; border: 2px solid #cbd5e1; border-radius: 20px; padding: 30px; text-align: center; font-size: 60px; cursor: pointer; }
+        
+        .pattern-box { display: flex; justify-content: center; gap: 40px; margin: 30px 0; }
+        .pattern-item { font-size: 80px; background: #f8fafc; padding: 30px; border-radius: 24px; border: 2px solid #cbd5e1; }
+        
+        /* 进度指示器 */
+        .trial-counter { text-align: center; font-size: 14px; color: var(--slate); font-weight: bold; margin-bottom: 10px; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
@@ -57,31 +64,41 @@
 
     <div class="container" id="menu">
         <div class="module-header">
-            <h2>🧠 认知功能 (CAS-COG)</h2>
-            <p>基于经典神经心理学范式与 NIH Toolbox 数字化构建，映射前额叶-顶叶执行控制网络。</p>
+            <h2>🧠 认知与执行控制 (Clinical V4.0)</h2>
+            <p>基于 NIH Toolbox 标准。已升级为临床级参数：大容量试次、不平衡冲突设计与高压限时测量。</p>
         </div>
         
-        <h3 style="font-size: 15px; color: var(--slate);">经典认知范式</h3>
-        <button class="sys-btn btn-menu" onclick="startCorsi()">🧩 1. Corsi 自适应空间工作记忆</button>
-        <button class="sys-btn btn-menu" onclick="startStroop()">🚥 2. Stroop 经典执行抑制控制</button>
-        <button class="sys-btn btn-menu" onclick="startTMT()">🔗 3. TMT-B 连线测试 (任务切换)</button>
-        <button class="sys-btn btn-menu" onclick="startDSST()">🔢 4. DSST 数字符号转换</button>
+        <h3 style="font-size: 14px; color: var(--slate); text-transform: uppercase;">▶ 记忆与执行网络 (Memory & Executive)</h3>
+        <button class="sys-btn btn-menu" onclick="startCorsi()">🧩 1. Corsi 空间工作记忆 (自适应边界)</button>
+        <button class="sys-btn btn-menu" onclick="startTMT()">🔗 2. TMT-B 连线测试 (临床标准 25节点)</button>
+        <button class="sys-btn btn-menu" onclick="startStroop()">🚥 3. Stroop 词色干扰 (30试次 7:3冲突比)</button>
+        <button class="sys-btn btn-menu" onclick="startFlanker()">🎯 4. Flanker 侧抑制 (30试次 7:3冲突比)</button>
+        <button class="sys-btn btn-menu" onclick="startDCCS()">🔄 5. DCCS 维度变化柔性 (30试次)</button>
         
-        <h3 style="font-size: 15px; color: var(--slate); margin-top:20px;">NIH 对标范式</h3>
-        <button class="sys-btn btn-menu" onclick="startFlanker()">🎯 5. Flanker 侧抑制注意力测试</button>
-        <button class="sys-btn btn-menu" onclick="startDCCS()">🔄 6. DCCS 维度变化卡片分类</button>
-        <button class="sys-btn btn-menu" onclick="startPattern()">⚡ 7. Pattern 模式比较加工速度</button>
+        <h3 style="font-size: 14px; color: var(--slate); margin-top:25px; text-transform: uppercase;">▶ 加工速度与敏锐度 (Processing Speed)</h3>
+        <button class="sys-btn btn-menu" onclick="startDSST()">🔢 6. DSST 数字符号转换 (90秒高压限时)</button>
+        <button class="sys-btn btn-menu" onclick="startPattern()">⚡ 7. Pattern 模式比较加工 (90秒高压限时)</button>
     </div>
 
     <div class="container hidden" id="corsi-area">
-        <div class="module-header"><h2>Corsi 空间跨度</h2><p>测试视空间工作记忆容量。请记住方块闪烁的顺序，并在闪烁结束后按原顺序点击。</p></div>
+        <div class="module-header"><h2>Corsi 空间跨度</h2><p>测试视空间工作记忆容量。请记住方块闪烁的顺序，闪烁结束后按原顺序点击。</p></div>
         <div style="text-align:center; font-weight:bold; color:var(--blue); font-size:18px;" id="corsi-level">当前广度: 3</div>
         <div class="corsi-grid" id="corsi-grid"></div>
         <p style="text-align:center; color:var(--slate); font-size:15px; font-weight:bold;" id="corsi-msg">准备开始...</p>
     </div>
 
+    <div class="container hidden" id="tmt-area">
+        <div class="module-header"><h2>TMT-B (25 节点临床版)</h2><p>测试认知柔性与任务集切换能力。请按【数字-字母】交替顺序点击 (1 ➔ A ➔ 2 ➔ B... 12 ➔ L ➔ 13)</p></div>
+        <div style="font-weight:bold; color:var(--blue); display:flex; justify-content:space-between; align-items:center;">
+            <span>寻找目标: <span id="tmt-target" style="font-size:28px; color:var(--red);">1</span></span>
+            <span id="tmt-timer" style="font-family:monospace; font-size:20px; color:var(--slate);">0.0s</span>
+        </div>
+        <div id="tmt-board"></div>
+    </div>
+
     <div class="container hidden" id="stroop-area">
-        <div class="module-header"><h2>Stroop 执行抑制</h2><p>测试抗干扰能力。请忽略文字本身的含义，点击文字实际显示的【颜色】。</p></div>
+        <div class="module-header"><h2>Stroop 执行抑制</h2><p>测试前扣带回(ACC)的冲突监测与优势反应抑制。请忽略文字含义，点击文字实际显示的【颜色】。</p></div>
+        <div class="trial-counter" id="stroop-counter">进度: 1 / 30</div>
         <div class="stim-large" id="stroop-word">+</div>
         <div class="grid-layout hidden" id="stroop-controls" style="grid-template-columns: 1fr 1fr 1fr;">
             <button class="btn-large" style="color:var(--red);" onclick="recordStroop('red')">红</button>
@@ -90,26 +107,9 @@
         </div>
     </div>
 
-    <div class="container hidden" id="tmt-area">
-        <div class="module-header"><h2>TMT-B 任务切换</h2><p>测试认知柔性与任务集切换能力。请按数字与字母交替的顺序点击 (1 ➔ A ➔ 2 ➔ B...)</p></div>
-        <div style="font-weight:bold; color:var(--blue);">寻找目标: <span id="tmt-target" style="font-size:24px;">1</span></div>
-        <div id="tmt-board"></div>
-    </div>
-
-    <div class="container hidden" id="dsst-area">
-        <div class="module-header"><h2>DSST 符号转换</h2><p>测试视觉-运动协调与加工速度。请根据上方对应规则，为中间的符号选择正确的数字。</p></div>
-        <div class="dsst-key" id="dsst-key"></div>
-        <div class="stim-large" id="dsst-target">★</div>
-        <div class="grid-layout" id="dsst-controls" style="grid-template-columns: repeat(4, 1fr);">
-            <button class="btn-large" onclick="recordDSST(1)">1</button>
-            <button class="btn-large" onclick="recordDSST(2)">2</button>
-            <button class="btn-large" onclick="recordDSST(3)">3</button>
-            <button class="btn-large" onclick="recordDSST(4)">4</button>
-        </div>
-    </div>
-
     <div class="container hidden" id="flanker-area">
         <div class="module-header"><h2>Flanker 侧抑制</h2><p>测试选择性注意网络。请只判断【最中间箭头】的方向，忽略两边的干扰箭头。</p></div>
+        <div class="trial-counter" id="flanker-counter">进度: 1 / 30</div>
         <div class="flanker-stim" id="flanker-stim">+</div>
         <div class="grid-layout hidden" id="flanker-controls">
             <button class="btn-large" onclick="recordFlanker('left')">← 左</button>
@@ -118,17 +118,33 @@
     </div>
 
     <div class="container hidden" id="dccs-area">
-        <div class="module-header"><h2>DCCS 认知柔性</h2><p>测试规则切换与执行控制。请严格按照上方的提示规则（颜色或形状）对卡片进行匹配。</p></div>
+        <div class="module-header"><h2>DCCS 维度变化卡片</h2><p>测试规则切换控制。请严格按照上方提示的规则（颜色或形状）对卡片进行匹配。</p></div>
+        <div class="trial-counter" id="dccs-counter">进度: 1 / 30</div>
         <div class="dccs-rule" id="dccs-rule">按【颜色】匹配</div>
         <div class="stim-large" id="dccs-target">🐰</div>
         <div class="grid-layout" id="dccs-controls">
-            <div class="dccs-card" onclick="recordDCCS(0)" id="dccs-opt1"></div>
-            <div class="dccs-card" onclick="recordDCCS(1)" id="dccs-opt2"></div>
+            <div class="dccs-card" onclick="recordDCCS(0)" id="dccs-opt1">🔴⛵</div>
+            <div class="dccs-card" onclick="recordDCCS(1)" id="dccs-opt2">🔵🐰</div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="dsst-area">
+        <div class="module-header"><h2>DSST 符号转换 (90秒限时)</h2><p>测试视觉-运动协调加工速度。请根据上方对应规则，用最快速度为中间符号选择正确数字。</p></div>
+        <div class="timer-board" id="dsst-timer">⏳ 剩余时间: 90 秒</div>
+        <div class="dsst-key" id="dsst-key"></div>
+        <div class="stim-large" id="dsst-target" style="margin: 30px 0;">★</div>
+        <div class="grid-layout" id="dsst-controls" style="grid-template-columns: repeat(5, 1fr);">
+            <button class="btn-large" onclick="recordDSST(1)">1</button>
+            <button class="btn-large" onclick="recordDSST(2)">2</button>
+            <button class="btn-large" onclick="recordDSST(3)">3</button>
+            <button class="btn-large" onclick="recordDSST(4)">4</button>
+            <button class="btn-large" onclick="recordDSST(5)">5</button>
         </div>
     </div>
 
     <div class="container hidden" id="pattern-area">
-        <div class="module-header"><h2>Pattern 加工速度</h2><p>测试视觉信息提取与比对速度。请以最快速度判断两个图案是否【完全相同】。</p></div>
+        <div class="module-header"><h2>Pattern 加工速度 (90秒限时)</h2><p>测试初级视觉信息提取速度。请以最快速度判断两个图案是否【完全相同】。</p></div>
+        <div class="timer-board" id="pattern-timer">⏳ 剩余时间: 90 秒</div>
         <div class="pattern-box" id="pattern-stim">
             <div class="pattern-item" id="pat-left">A</div>
             <div class="pattern-item" id="pat-right">A</div>
@@ -140,7 +156,7 @@
     </div>
 
     <script>
-        // DOM 视窗路由控制
+        // DOM 视窗路由
         function show(id) {
             ['menu','corsi-area','stroop-area','tmt-area','dsst-area','flanker-area','dccs-area','pattern-area'].forEach(d => {
                 const el = document.getElementById(d); if(el) el.classList.add('hidden');
@@ -148,270 +164,299 @@
             document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
         }
 
-        /* ===================================================================== */
-        /* 1. Corsi 空间记忆跨度 (Spatial Working Memory)
-           【临床靶向】: 评估顶叶后部与背外侧前额叶(dlPFC)介导的视空间工作记忆。
-           【工程更新】: 引入 async/await 时序锁，彻底修复抢答与掉帧导致的信度污染。
-        /* ===================================================================== */
+        // 通用打乱数组算法 (Fisher-Yates)
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        /* ================= 1. Corsi 空间工作记忆 (原样保留高精度时序锁) ================= */
         let corsiData = { module: "COG_Corsi", max_span: 0, trials: [] };
-        let c_seq = [], c_userSeq = [], c_span = 3, c_fails = 0;
-        let c_isClickable = false; // 状态锁：刺激呈现期严禁点击
+        let c_seq = [], c_userSeq = [], c_span = 3, c_fails = 0, c_isClickable = false;
 
         function startCorsi() {
             c_span = 3; c_fails = 0; corsiData.trials = []; corsiData.max_span = 0;
-            const grid = document.getElementById('corsi-grid'); 
-            grid.innerHTML = '';
+            const grid = document.getElementById('corsi-grid'); grid.innerHTML = '';
             for(let i=0; i<9; i++) { 
-                let box = document.createElement('div'); 
-                box.className = 'corsi-block'; 
-                box.id = 'cb-'+i; 
-                box.onclick = () => userClickCorsi(i); 
-                grid.appendChild(box); 
+                let box = document.createElement('div'); box.className = 'corsi-block'; 
+                box.id = 'cb-'+i; box.onclick = () => userClickCorsi(i); grid.appendChild(box); 
             }
-            show('corsi-area'); 
-            setTimeout(playCorsiSeq, 800);
+            show('corsi-area'); setTimeout(playCorsiSeq, 800);
         }
 
         async function playCorsiSeq() {
             c_isClickable = false; 
             document.getElementById('corsi-level').innerText = `当前广度: ${c_span}`; 
-            document.getElementById('corsi-msg').innerText = "👀 请观察闪烁顺序...";
-            document.getElementById('corsi-msg').style.color = "var(--slate)";
-            
-            c_seq = []; c_userSeq = []; 
-            let prevBlock = -1;
+            document.getElementById('corsi-msg').innerText = "👀 请观察闪烁顺序..."; document.getElementById('corsi-msg').style.color = "var(--slate)";
+            c_seq = []; c_userSeq = []; let prevBlock = -1;
 
-            // 生成序列，确保没有连续相邻的重复点，降低视觉辨识噪音
             for(let i=0; i<c_span; i++) {
                 let nextBlock;
-                do {
-                    nextBlock = Math.floor(Math.random() * 9);
-                } while (nextBlock === prevBlock); 
-                c_seq.push(nextBlock);
-                prevBlock = nextBlock;
+                do { nextBlock = Math.floor(Math.random() * 9); } while (nextBlock === prevBlock); 
+                c_seq.push(nextBlock); prevBlock = nextBlock;
             }
 
-            // 使用 async/await 确保时间轴(ITI与呈现时间)的绝对精确
             for(let i=0; i<c_span; i++) {
-                await new Promise(r => setTimeout(r, 400)); // 刺激间隔 ISI: 400ms
-                const box = document.getElementById('cb-'+c_seq[i]);
-                box.classList.add('active');
-                await new Promise(r => setTimeout(r, 600)); // 刺激呈现时长: 600ms
+                await new Promise(r => setTimeout(r, 400)); 
+                const box = document.getElementById('cb-'+c_seq[i]); box.classList.add('active');
+                await new Promise(r => setTimeout(r, 600)); 
                 box.classList.remove('active');
             }
 
-            document.getElementById('corsi-msg').innerText = "👆 现在请按原顺序点击";
-            document.getElementById('corsi-msg').style.color = "var(--blue)";
-            c_isClickable = true; // 解锁点击
+            document.getElementById('corsi-msg').innerText = "👆 现在请按原顺序点击"; document.getElementById('corsi-msg').style.color = "var(--blue)";
+            c_isClickable = true;
         }
 
         function userClickCorsi(idx) {
-            // 防抢答机制：锁定期或已达到当前跨度最大值时，拦截无效点击
             if(!c_isClickable || c_userSeq.length >= c_span) return; 
-
-            const box = document.getElementById('cb-'+idx); 
-            box.classList.add('active'); 
-            setTimeout(() => box.classList.remove('active'), 200); 
-            
+            const box = document.getElementById('cb-'+idx); box.classList.add('active'); setTimeout(() => box.classList.remove('active'), 200); 
             c_userSeq.push(idx);
 
             if(c_userSeq.length === c_span) {
-                c_isClickable = false; // 答完立即锁住
+                c_isClickable = false; 
                 let isC = JSON.stringify(c_seq) === JSON.stringify(c_userSeq); 
                 corsiData.trials.push({ span: c_span, correct: isC });
                 
                 if(isC) { 
-                    corsiData.max_span = c_span; 
-                    c_span++; 
-                    c_fails = 0; 
-                    document.getElementById('corsi-msg').innerText = "✅ 正确！难度增加..."; 
-                    document.getElementById('corsi-msg').style.color = "var(--green)";
+                    corsiData.max_span = c_span; c_span++; c_fails = 0; 
+                    document.getElementById('corsi-msg').innerText = "✅ 正确！难度增加..."; document.getElementById('corsi-msg').style.color = "var(--green)";
                 } else { 
-                    c_fails++; 
-                    document.getElementById('corsi-msg').innerText = "❌ 错误！"; 
-                    document.getElementById('corsi-msg').style.color = "var(--red)";
+                    c_fails++; document.getElementById('corsi-msg').innerText = "❌ 错误！"; document.getElementById('corsi-msg').style.color = "var(--red)";
                 }
                 
-                // 终止条件：连续错误2次(代表到达能力边界)，或完成最高跨度9
                 if(c_fails >= 2 || c_span > 9) { 
-                    setTimeout(() => { 
-                        CAS_Storage.saveModuleData('COG_Corsi', corsiData); 
-                        alert(`记忆广度测试结束。\n您的最大记忆跨度为: ${corsiData.max_span}`); 
-                        show('menu'); 
-                    }, 1000); 
-                } else { 
-                    setTimeout(playCorsiSeq, 1500); 
-                }
+                    setTimeout(() => { CAS_Storage.saveModuleData('COG_Corsi', corsiData); alert(`记忆广度测验结束。\n最大跨度: ${corsiData.max_span}`); show('menu'); }, 1000); 
+                } else { setTimeout(playCorsiSeq, 1500); }
             }
         }
 
-        /* ===================================================================== */
-        /* 2. Stroop 执行抑制控制 (Executive Inhibition)
-           【临床靶向】: 评估前扣带回(ACC)主导的冲突检测与优势反应抑制。
-        /* ===================================================================== */
-        const stroopStims = [ {w:'红', c:'blue'}, {w:'绿', c:'red'}, {w:'蓝', c:'green'}, {w:'红', c:'red'}, {w:'蓝', c:'blue'} ];
-        let stroopData = { module: "COG_Stroop", records: [] }; let s_trial=0, s_onset=0, s_curr=null;
-        
-        function startStroop() { s_trial = 0; stroopData.records = []; show('stroop-area'); nextStroop(); }
-        function nextStroop() {
-            if(s_trial >= 10) { CAS_Storage.saveModuleData('COG_Stroop', stroopData); alert("Stroop 测验完成！"); show('menu'); return; }
-            document.getElementById('stroop-controls').classList.add('hidden'); 
-            document.getElementById('stroop-word').innerText = "+"; 
-            document.getElementById('stroop-word').style.color = "#cbd5e1";
-            setTimeout(() => { 
-                s_curr = stroopStims[Math.floor(Math.random() * stroopStims.length)]; 
-                document.getElementById('stroop-word').innerText = s_curr.w; 
-                document.getElementById('stroop-word').style.color = s_curr.c; 
-                document.getElementById('stroop-controls').classList.remove('hidden'); 
-                s_onset = performance.now(); // 记录刺激呈现的确切高精度时间戳
-            }, 600);
-        }
-        function recordStroop(c) { 
-            stroopData.records.push({ correct: c === s_curr.c, rt: Math.round(performance.now() - s_onset) }); 
-            s_trial++; 
-            nextStroop(); 
-        }
-
-        /* ===================================================================== */
-        /* 3. TMT-B 连线测试 (Trail Making Test - Part B)
-           【临床靶向】: 评估执行控制网络(ECN)，特别是任务集切换(Set-shifting)与认知柔性。
-        /* ===================================================================== */
-        const tmtSeq = ['1','A','2','B','3','C','4','D']; 
+        /* ================= 2. TMT-B (25 节点临床标准版) ================= */
+        // 序列: 1 到 13，A 到 L
+        const tmtSeq = ['1','A','2','B','3','C','4','D','5','E','6','F','7','G','8','H','9','I','10','J','11','K','12','L','13']; 
         let tmtData = { module: "COG_TMT_B", total_time_ms: 0, errors: 0 }; 
-        let t_idx=0, t_onset=0;
+        let t_idx = 0, t_onset = 0, tmtTimerInterval = null;
         
+        // 预设 25 个防重叠打散的伪随机坐标 (百分比表示)
+        const tmtCoords = [
+            {x:5,y:5}, {x:25,y:8}, {x:50,y:5}, {x:75,y:10}, {x:90,y:8},
+            {x:12,y:25}, {x:35,y:28}, {x:60,y:22}, {x:85,y:26}, {x:5,y:45},
+            {x:25,y:48}, {x:48,y:40}, {x:70,y:45}, {x:92,y:42}, {x:15,y:65},
+            {x:38,y:60}, {x:58,y:68}, {x:80,y:62}, {x:8,y:85}, {x:28,y:82},
+            {x:52,y:88}, {x:75,y:85}, {x:92,y:80}, {x:45,y:15}, {x:65,y:55}
+        ];
+
         function startTMT() {
             t_idx=0; tmtData.errors=0; show('tmt-area'); document.getElementById('tmt-target').innerText = tmtSeq[0];
             const board = document.getElementById('tmt-board'); board.innerHTML='';
-            // 每次生成随机但相对均匀的二维坐标分布
-            const pos = [{x:10,y:10},{x:70,y:20},{x:20,y:70},{x:80,y:70},{x:40,y:40},{x:15,y:45},{x:85,y:40},{x:50,y:80}].sort(() => Math.random() - 0.5);
+            
+            let pos = shuffle([...tmtCoords]); // 每次打乱这25个绝对防重叠的坐标
+            
             tmtSeq.forEach((item, i) => { 
                 let n = document.createElement('div'); n.className='tmt-node'; n.innerText=item; 
                 n.style.left=pos[i].x+'%'; n.style.top=pos[i].y+'%'; 
                 n.onclick=()=>clickTMT(n,item); board.appendChild(n); 
             }); 
+            
             t_onset = performance.now();
+            tmtTimerInterval = setInterval(() => {
+                document.getElementById('tmt-timer').innerText = ((performance.now() - t_onset) / 1000).toFixed(1) + 's';
+            }, 100);
         }
         function clickTMT(n, item) {
             if(n.classList.contains('clicked')) return;
             if(item === tmtSeq[t_idx]) { 
                 n.classList.add('clicked'); t_idx++; 
                 if(t_idx >= tmtSeq.length) { 
+                    clearInterval(tmtTimerInterval);
                     tmtData.total_time_ms = Math.round(performance.now()-t_onset); 
                     CAS_Storage.saveModuleData('COG_TMT_B', tmtData); 
-                    alert("TMT-B 测验完成！"); show('menu'); 
+                    alert(`TMT-B 测验完成！\n\n总耗时: ${(tmtData.total_time_ms/1000).toFixed(1)} 秒\n错误次数: ${tmtData.errors}`); show('menu'); 
                 } else { 
                     document.getElementById('tmt-target').innerText = tmtSeq[t_idx]; 
                 } 
             } else { 
-                // 错误点击不计入进度，但增加惩罚计次，UI 给予红色震动反馈
                 n.classList.add('error'); tmtData.errors++; 
                 setTimeout(() => n.classList.remove('error'), 400); 
             }
         }
 
-        /* ===================================================================== */
-        /* 4. DSST 数字符号转换 (Digit Symbol Substitution Test)
-           【临床靶向】: 评估视觉扫描、工作记忆更新与视觉-运动协调加工速度。
-        /* ===================================================================== */
-        const dsstSymbols = ['★','▲','●','◆']; 
-        let dsstData = { module: "COG_DSST", records: [] }; let ds_trial=0, ds_onset=0, ds_currIdx=0;
-        
-        function startDSST() { 
-            ds_trial=0; dsstData.records=[]; show('dsst-area'); 
-            const keyBoard=document.getElementById('dsst-key'); keyBoard.innerHTML=''; 
-            dsstSymbols.forEach((sym, i) => { keyBoard.innerHTML += `<div class="dsst-pair">${sym}<span>${i+1}</span></div>`; }); 
-            nextDSST(); 
-        }
-        function nextDSST() { 
-            if(ds_trial >= 10) { CAS_Storage.saveModuleData('COG_DSST', dsstData); alert("DSST 测验完成！"); show('menu'); return; } 
-            ds_currIdx = Math.floor(Math.random() * 4); 
-            document.getElementById('dsst-target').innerText = dsstSymbols[ds_currIdx]; 
-            ds_onset = performance.now(); 
-        }
-        function recordDSST(num) { 
-            dsstData.records.push({ correct: num === (ds_currIdx+1), rt: Math.round(performance.now() - ds_onset) }); 
-            ds_trial++; nextDSST(); 
+        /* ================= 3. Stroop (30 试次，7:3 冲突设计) ================= */
+        const TOTAL_STROOP = 30;
+        let stroopData = { module: "COG_Stroop", records: [] }; let s_trial=0, s_onset=0, s_curr=null;
+        let stroopSequence = [];
+
+        function generateStroopSequence() {
+            // 生成 21个相容(Congruent)，9个不相容(Incongruent)
+            let seq = [];
+            const colors = ['red', 'green', 'blue'];
+            const wMap = { 'red': '红', 'green': '绿', 'blue': '蓝' };
+            for(let i=0; i<21; i++) { let c = colors[i%3]; seq.push({w: wMap[c], c: c, type: 'congruent'}); }
+            for(let i=0; i<9; i++) { 
+                let c = colors[i%3]; let wColor = colors[(i+1)%3];
+                seq.push({w: wMap[wColor], c: c, type: 'incongruent'}); 
+            }
+            return shuffle(seq);
         }
 
-        /* ===================================================================== */
-        /* 5. Flanker 侧抑制注意力 (Eriksen Flanker Task)
-           【临床靶向】: 评估选择性注意(Selective Attention)过滤噪音与冲突解决的能力。
-        /* ===================================================================== */
-        const flStims = [{s:'<<<<<',a:'left'},{s:'>>>>>',a:'right'},{s:'<<><<',a:'right'},{s:'>><>>',a:'left'}]; 
-        let flData = { module: "COG_Flanker", records: [] }; let fl_trial=0, fl_onset=0, fl_curr=null;
+        function startStroop() { s_trial = 0; stroopData.records = []; stroopSequence = generateStroopSequence(); show('stroop-area'); nextStroop(); }
         
-        function startFlanker() { fl_trial=0; flData.records=[]; show('flanker-area'); nextFlanker(); }
+        function nextStroop() {
+            if(s_trial >= TOTAL_STROOP) { CAS_Storage.saveModuleData('COG_Stroop', stroopData); alert("Stroop 测验完成！"); show('menu'); return; }
+            document.getElementById('stroop-counter').innerText = `进度: ${s_trial + 1} / ${TOTAL_STROOP}`;
+            document.getElementById('stroop-controls').classList.add('hidden'); 
+            document.getElementById('stroop-word').innerText = "+"; document.getElementById('stroop-word').style.color = "#cbd5e1";
+            
+            setTimeout(() => { 
+                s_curr = stroopSequence[s_trial]; 
+                document.getElementById('stroop-word').innerText = s_curr.w; document.getElementById('stroop-word').style.color = s_curr.c; 
+                document.getElementById('stroop-controls').classList.remove('hidden'); 
+                s_onset = performance.now(); 
+            }, 500);
+        }
+        function recordStroop(c) { 
+            stroopData.records.push({ trial_type: s_curr.type, correct: c === s_curr.c, rt: Math.round(performance.now() - s_onset) }); 
+            s_trial++; nextStroop(); 
+        }
+
+        /* ================= 4. Flanker (30 试次，7:3 冲突设计) ================= */
+        const TOTAL_FLANKER = 30;
+        let flData = { module: "COG_Flanker", records: [] }; let fl_trial=0, fl_onset=0, fl_curr=null;
+        let flankerSequence = [];
+
+        function generateFlankerSequence() {
+            let seq = [];
+            for(let i=0; i<11; i++) seq.push({s:'<<<<<',a:'left', type:'congruent'});
+            for(let i=0; i<10; i++) seq.push({s:'>>>>>',a:'right', type:'congruent'});
+            for(let i=0; i<5; i++) seq.push({s:'<<><<',a:'right', type:'incongruent'});
+            for(let i=0; i<4; i++) seq.push({s:'>><>>',a:'left', type:'incongruent'});
+            return shuffle(seq);
+        }
+
+        function startFlanker() { fl_trial=0; flData.records=[]; flankerSequence = generateFlankerSequence(); show('flanker-area'); nextFlanker(); }
+        
         function nextFlanker() { 
-            if(fl_trial >= 10) { CAS_Storage.saveModuleData('COG_Flanker', flData); alert("Flanker 测验完成！"); show('menu'); return; } 
+            if(fl_trial >= TOTAL_FLANKER) { CAS_Storage.saveModuleData('COG_Flanker', flData); alert("Flanker 测验完成！"); show('menu'); return; } 
+            document.getElementById('flanker-counter').innerText = `进度: ${fl_trial + 1} / ${TOTAL_FLANKER}`;
             document.getElementById('flanker-controls').classList.add('hidden'); 
             document.getElementById('flanker-stim').innerText = "+"; 
+            
             setTimeout(() => { 
-                fl_curr = flStims[Math.floor(Math.random() * 4)]; 
+                fl_curr = flankerSequence[fl_trial]; 
                 document.getElementById('flanker-stim').innerText = fl_curr.s; 
                 document.getElementById('flanker-controls').classList.remove('hidden'); 
                 fl_onset = performance.now(); 
-            }, 600); 
+            }, 500); 
         }
         function recordFlanker(ans) { 
-            flData.records.push({ correct: ans === fl_curr.a, rt: Math.round(performance.now()-fl_onset) }); 
+            flData.records.push({ trial_type: fl_curr.type, correct: ans === fl_curr.a, rt: Math.round(performance.now()-fl_onset) }); 
             fl_trial++; nextFlanker(); 
         }
 
-        /* ===================================================================== */
-        /* 6. DCCS 维度变化卡片分类 (Dimensional Change Card Sort)
-           【临床靶向】: 评估执行功能中的认知柔性，受试者需在颜色和形状两个维度间动态切换。
-        /* ===================================================================== */
+        /* ================= 5. DCCS (30 试次，计算切换损耗) ================= */
+        const TOTAL_DCCS = 30;
         const dccsT = [{e:'🔴🐰',c:'red',s:'rb'},{e:'🔵🐰',c:'blue',s:'rb'},{e:'🔴⛵',c:'red',s:'bt'},{e:'🔵⛵',c:'blue',s:'bt'}]; 
-        let dccsData = { module: "COG_DCCS", records: [] }; let d_trial=0, d_onset=0, d_rule='', d_curr=null;
+        let dccsData = { module: "COG_DCCS", records: [] }; let d_trial=0, d_onset=0, d_rule='', d_curr=null, prev_rule='';
         
-        function startDCCS() { d_trial=0; dccsData.records=[]; show('dccs-area'); nextDCCS(); }
+        function startDCCS() { d_trial=0; dccsData.records=[]; prev_rule=''; show('dccs-area'); nextDCCS(); }
+        
         function nextDCCS() { 
-            if(d_trial >= 10) { CAS_Storage.saveModuleData('COG_DCCS', dccsData); alert("DCCS 测验完成！"); show('menu'); return; } 
-            // 随机切换维度规则：颜色或形状
-            d_rule = Math.random() > 0.5 ? 'color' : 'shape'; 
+            if(d_trial >= TOTAL_DCCS) { CAS_Storage.saveModuleData('COG_DCCS', dccsData); alert("DCCS 测验完成！"); show('menu'); return; } 
+            document.getElementById('dccs-counter').innerText = `进度: ${d_trial + 1} / ${TOTAL_DCCS}`;
+            
+            // 确保有一定概率发生规则 Switch
+            if (d_trial === 0) d_rule = Math.random() > 0.5 ? 'color' : 'shape';
+            else d_rule = Math.random() > 0.65 ? (prev_rule === 'color' ? 'shape' : 'color') : prev_rule;
+
             document.getElementById('dccs-rule').innerText = d_rule === 'color' ? "按【颜色】匹配" : "按【形状】匹配"; 
             d_curr = dccsT[Math.floor(Math.random() * 4)]; 
             document.getElementById('dccs-target').innerText = d_curr.e; 
-            document.getElementById('dccs-opt1').innerText = '🔴⛵'; 
-            document.getElementById('dccs-opt2').innerText = '🔵🐰'; 
             d_onset = performance.now(); 
         }
         function recordDCCS(opt) { 
             const sel = opt===0 ? {c:'red',s:'bt'} : {c:'blue',s:'rb'}; 
             let isC = (d_rule==='color' && d_curr.c===sel.c) || (d_rule==='shape' && d_curr.s===sel.s); 
-            dccsData.records.push({ correct: isC, rt: Math.round(performance.now()-d_onset) }); 
-            d_trial++; nextDCCS(); 
+            dccsData.records.push({ rule_type: d_rule === prev_rule ? 'repeat' : 'switch', correct: isC, rt: Math.round(performance.now()-d_onset) }); 
+            prev_rule = d_rule; d_trial++; nextDCCS(); 
         }
 
-        /* ===================================================================== */
-        /* 7. Pattern 模式比较加工速度 (Pattern Comparison Processing Speed)
-           【临床靶向】: 评估初级视觉皮层与联合皮层对视觉信息的快速特征提取与辨析能力。
-        /* ===================================================================== */
-        const patStims = ['A','B','M','W','p','q','🐶','🐱']; 
-        let patData = { module: "COG_Pattern", records: [] }; let p_trial=0, p_onset=0, p_same=false;
+        /* ================= 6. DSST (90 秒限时高压范式) ================= */
+        const DSST_TIME_LIMIT = 90; 
+        const dsstSymbols = ['★','▲','●','◆','♣']; // 增加到5个符号，提升视觉搜索负荷
+        let dsstData = { module: "COG_DSST", correct_count: 0, errors: 0, records: [] }; 
+        let ds_onset=0, ds_currIdx=0, ds_timer = null, ds_timeLeft = DSST_TIME_LIMIT;
         
-        function startPattern() { p_trial=0; patData.records=[]; show('pattern-area'); nextPattern(); }
+        function startDSST() { 
+            dsstData = { module: "COG_DSST", correct_count: 0, errors: 0, records: [] }; 
+            ds_timeLeft = DSST_TIME_LIMIT; show('dsst-area'); 
+            const keyBoard=document.getElementById('dsst-key'); keyBoard.innerHTML=''; 
+            dsstSymbols.forEach((sym, i) => { keyBoard.innerHTML += `<div class="dsst-pair">${sym}<span>${i+1}</span></div>`; }); 
+            
+            document.getElementById('dsst-timer').innerText = `⏳ 剩余时间: ${ds_timeLeft} 秒`;
+            ds_timer = setInterval(() => {
+                ds_timeLeft--; document.getElementById('dsst-timer').innerText = `⏳ 剩余时间: ${ds_timeLeft} 秒`;
+                if(ds_timeLeft <= 0) finishDSST();
+            }, 1000);
+            nextDSST(); 
+        }
+        function nextDSST() { 
+            ds_currIdx = Math.floor(Math.random() * 5); 
+            document.getElementById('dsst-target').innerText = dsstSymbols[ds_currIdx]; 
+            ds_onset = performance.now(); 
+        }
+        function recordDSST(num) { 
+            let isC = num === (ds_currIdx+1);
+            if(isC) dsstData.correct_count++; else dsstData.errors++;
+            dsstData.records.push({ correct: isC, rt: Math.round(performance.now() - ds_onset) }); 
+            nextDSST(); 
+        }
+        function finishDSST() {
+            clearInterval(ds_timer); CAS_Storage.saveModuleData('COG_DSST', dsstData); 
+            alert(`DSST 限时测验结束！\n\n90秒内正确转换: ${dsstData.correct_count} 个`); show('menu'); 
+        }
+
+        /* ================= 7. Pattern (90 秒限时高压范式) ================= */
+        const PATTERN_TIME_LIMIT = 90;
+        const patStims = ['A','B','M','W','p','q','🐶','🐱','⭕','❌','♠','♣']; 
+        let patData = { module: "COG_Pattern", correct_count: 0, errors: 0, records: [] }; 
+        let p_onset=0, p_same=false, p_timer = null, p_timeLeft = PATTERN_TIME_LIMIT;
+        
+        function startPattern() { 
+            patData = { module: "COG_Pattern", correct_count: 0, errors: 0, records: [] }; 
+            p_timeLeft = PATTERN_TIME_LIMIT; show('pattern-area'); 
+            
+            document.getElementById('pattern-timer').innerText = `⏳ 剩余时间: ${p_timeLeft} 秒`;
+            p_timer = setInterval(() => {
+                p_timeLeft--; document.getElementById('pattern-timer').innerText = `⏳ 剩余时间: ${p_timeLeft} 秒`;
+                if(p_timeLeft <= 0) finishPattern();
+            }, 1000);
+            nextPattern(); 
+        }
         function nextPattern() { 
-            if(p_trial >= 10) { CAS_Storage.saveModuleData('COG_Pattern', patData); alert("Pattern 测验完成！"); show('menu'); return; } 
             document.getElementById('pattern-controls').classList.add('hidden'); 
-            document.getElementById('pat-left').innerText = ""; 
-            document.getElementById('pat-right').innerText = ""; 
+            document.getElementById('pat-left').innerText = ""; document.getElementById('pat-right').innerText = ""; 
             setTimeout(() => { 
                 let i1 = patStims[Math.floor(Math.random() * patStims.length)]; 
                 p_same = Math.random() > 0.5; 
                 let i2 = p_same ? i1 : patStims[Math.floor(Math.random() * patStims.length)]; 
                 while(!p_same && i1===i2) i2 = patStims[Math.floor(Math.random() * patStims.length)]; 
                 
-                document.getElementById('pat-left').innerText = i1; 
-                document.getElementById('pat-right').innerText = i2; 
+                document.getElementById('pat-left').innerText = i1; document.getElementById('pat-right').innerText = i2; 
                 document.getElementById('pattern-controls').classList.remove('hidden'); 
                 p_onset = performance.now(); 
-            }, 500); 
+            }, 300); // 减少刷新间隔，施加高压
         }
         function recordPattern(ans) { 
-            patData.records.push({ correct: ans === p_same, rt: Math.round(performance.now()-p_onset) }); 
-            p_trial++; nextPattern(); 
+            let isC = ans === p_same;
+            if(isC) patData.correct_count++; else patData.errors++;
+            patData.records.push({ correct: isC, rt: Math.round(performance.now()-p_onset) }); 
+            nextPattern(); 
+        }
+        function finishPattern() {
+            clearInterval(p_timer); CAS_Storage.saveModuleData('COG_Pattern', patData); 
+            alert(`Pattern 限时测验结束！\n\n90秒内正确判断: ${patData.correct_count} 个`); show('menu'); 
         }
     </script>
 </body>
