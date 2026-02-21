@@ -3,295 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-VBM | 语音生物标志物提取</title>
+    <title>NeuroMap-VBM | 语音生物标记与声学特征提取 (科研完全体 v4.0)</title>
     <style>
-        /* ==================== 1. 科技温情风 UI (Warm-Tech UI) ==================== */
-        :root { 
-            --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; 
-            --green: #10b981; --red: #f43f5e; --purple: #8b5cf6; --slate: #64748b; 
-        }
-        body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --cyan: #06b6d4; --teal: #0d9488; --red: #f43f5e; --green: #10b981; --slate: #64748b; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); user-select: none; }
+        .container { max-width: 900px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        .module-header { border-left: 6px solid var(--purple); padding-left: 15px; margin-bottom: 20px; }
+        .module-header { border-left: 6px solid var(--cyan); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
-        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.5; }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        /* ==================== 2. 视觉刺激呈现区 ==================== */
-        .stimulus-box { width: 100%; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 25px; box-sizing: border-box;}
-        .stimulus-img { max-width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .stimulus-placeholder { font-size: 16px; color: var(--slate); padding: 40px; background: #e2e8f0; border-radius: 12px; font-weight: bold; }
-
-        /* ==================== 3. 实时波形引擎视窗 ==================== */
-        .visualizer-wrapper { background: #0f172a; border-radius: 16px; padding: 20px; margin-bottom: 25px; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-        canvas { width: 100%; height: 120px; display: block; }
+        .sys-btn { width: 100%; padding: 20px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.2s; display: flex; align-items: center; gap: 12px; justify-content: center; }
         
-        /* 状态与仪表盘 */
-        .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-        .dash-card { background: var(--light-blue); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #c7d2fe; transition: 0.3s;}
-        .dash-card span { display: block; font-size: 12px; color: var(--blue); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        .dash-card strong { font-size: 24px; color: var(--primary); font-family: monospace; }
-
-        /* API 请求加载状态 */
-        #api-loading { color: var(--amber); font-size: 13px; font-weight: bold; margin-bottom: 20px; display: none; text-align: center; }
-
-        /* ==================== 4. 交互控制按钮 ==================== */
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-record { background: var(--green); color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2); }
-        .btn-record:hover { background: #059669; }
-        .btn-stop { background: var(--red); color: white; opacity: 0.5; cursor: not-allowed; }
-        .btn-stop.active { opacity: 1; cursor: pointer; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2); }
-        .btn-stop.active:hover { background: #e11d48; }
+        /* 刺激呈现区 (偷饼图) */
+        .stimulus-workspace { width: 100%; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; padding: 20px; box-sizing: border-box; margin-bottom: 20px; text-align: center;}
+        .img-placeholder { width: 100%; height: 350px; background: #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--slate); font-weight: bold; font-size: 18px; flex-direction: column; gap: 10px; border: 2px solid #cbd5e1; overflow: hidden;}
         
-        .recording-pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        /* 声纹示波器画布 */
+        .audio-visualizer { width: 100%; height: 120px; background: #0f172a; border-radius: 16px; margin-bottom: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); overflow: hidden; position: relative;}
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        /* 状态与控制区 */
+        .controls-board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .btn-record { background: var(--cyan); color: white; box-shadow: 0 8px 20px rgba(6, 182, 212, 0.2); }
+        .btn-record:hover { background: #0891b2; transform: translateY(-2px); }
+        .btn-stop { background: var(--red); color: white; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2); }
+        .btn-stop:hover { background: #e11d48; transform: translateY(-2px); }
+        .btn-stop:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none;}
+
+        .timer-display { font-size: 40px; font-weight: bold; color: var(--primary); font-family: monospace; text-align: center; margin: 10px 0; }
+        .timer-alert { color: var(--red); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* 特征面板 */
+        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px; }
+        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; }
+        .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
+        .metric-card strong { font-size: 24px; color: var(--cyan); font-family: monospace; }
+        
+        .download-box { background: #f0fdf4; border: 2px dashed #86efac; padding: 20px; border-radius: 16px; text-align: center; margin-top: 20px; }
+        .btn-download { background: var(--green); color: white; padding: 15px 30px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s;}
+        .btn-download:hover { background: #059669; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--purple); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--cyan); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
-    <div class="container">
+    <div class="container" id="main-area">
         <div class="module-header">
-            <h2>🎙️ 声学与副语言特征分析 (Voice Biomarkers)</h2>
-            <p>基于《波士顿失语症诊断测验》(BDAE) 中的“偷饼图”自发语言范式。<br>
-               <strong>临床靶向：</strong>早期 AD/MCI 的词汇检索困难 (表现为停顿增加)、早期 PD 的音调扰动与发声迟缓。</p>
+            <h2>🎙️ 语音生物标记与声学特征 (VBM)</h2>
+            <p><strong>临床靶向：</strong>评估语义流畅性与发音运动控制。<br>
+            *基于“波士顿偷饼图”范式，前端提取静默停顿比(Silence Ratio)，捕捉阿尔茨海默病(AD)早期的找词困难与空洞言语(Empty Speech)。</p>
         </div>
 
-        <div class="stimulus-box">
-            <img class="stimulus-img" id="cookie-img" src="stimuli/cookie_theft.jpg" alt="偷饼图" onerror="this.style.display='none'; document.getElementById('placeholder').style.display='block';">
-            <div class="stimulus-placeholder hidden" id="placeholder">
-                [图片缺失] 请确保 stimuli/cookie_theft.jpg 文件存在<br>
-                <span style="font-weight:normal; font-size:14px; margin-top:10px; display:block; color:var(--blue);">
-                    主试指导语: "请您尽可能详细地描述这张图片里正在发生什么。"
-                </span>
+        <div class="stimulus-workspace">
+            <h3 style="margin-top:0; color:var(--primary);">经典图片描述任务 (Picture Description)</h3>
+            <p style="color:var(--slate); font-size:14px; text-align:left;"><strong>指导语：</strong>“请仔细看这幅图，告诉我图里面正在发生什么事情。请尽可能说得详细一些。时间为 60 秒。”</p>
+            
+            <div class="img-placeholder">
+                <div>🍪 波士顿“偷饼图”标准刺激源</div>
+                <div style="font-size: 12px; font-weight:normal;">[请在此处加载 Cookie Theft 图库]</div>
             </div>
         </div>
 
-        <div class="visualizer-wrapper">
+        <div class="audio-visualizer">
             <canvas id="oscilloscope"></canvas>
-            <div style="position:absolute; top:15px; left:20px; color:#10b981; font-family:monospace; font-weight:bold; font-size:12px; letter-spacing:1px;" id="audio-status">ENGINE: STANDBY</div>
         </div>
 
-        <div class="dashboard">
-            <div class="dash-card"><span>总时长 (Duration)</span><strong id="val-time">0.0s</strong></div>
-            <div class="dash-card"><span>发音时长 (Phonation)</span><strong id="val-speak">0.0s</strong></div>
-            <div class="dash-card" id="card-pause"><span>停顿比 (Pause Ratio)</span><strong id="val-pause">0.0%</strong></div>
-        </div>
-        
-        <div id="api-loading">⏳ 正在向 Python 后端服务器提取高阶声学特征...</div>
+        <div class="timer-display" id="time-display">01:00</div>
 
-        <div class="controls">
-            <button class="btn btn-record" id="btn-start" onclick="startRecording()">🎤 开始录音 (Start)</button>
-            <button class="btn btn-stop" id="btn-stop" onclick="stopRecording()" disabled>⏹ 结束并提取 (Stop)</button>
+        <div class="controls-board">
+            <button class="sys-btn btn-record" id="btn-record" onclick="startRecording()">🎙️ 开始录音与特征提取</button>
+            <button class="sys-btn btn-stop" id="btn-stop" onclick="stopRecording()" disabled>⏹️ 停止测试</button>
         </div>
+
+        <div class="metrics-board" id="metrics-board" style="opacity: 0.3; pointer-events: none;">
+            <div class="metric-card"><span>总时长 (Total Time)</span><strong id="m-total">0.0 s</strong></div>
+            <div class="metric-card"><span>发声时长 (Phonation)</span><strong id="m-voice">0.0 s</strong></div>
+            <div class="metric-card"><span>静默停顿比 (Silence Ratio)</span><strong id="m-ratio" style="color:var(--red);">0.0 %</strong></div>
+        </div>
+
+        <div id="download-area" class="download-box hidden">
+            <h3 style="color:#166534; margin-top:0;">✅ 原始无损音频已就绪</h3>
+            <p style="font-size:14px; color:#15803d; margin-bottom:20px;">由于音频文件体积较大，系统已将特征入库，请点击下方按钮将原声音频保存至本地，用于后续的 Python openSMILE 高维声学提取。</p>
+            <button class="btn-download" id="btn-download-audio">⬇️ 下载 WAV 音频文件</button>
+        </div>
+
     </div>
 
     <script>
-        /* ==================== 1. 全局变量与音频上下文 ==================== */
-        let audioContext, analyser, microphone;
-        let mediaRecorder, audioChunks = [];
+        const TIME_LIMIT = 60; // 标准图片描述时间为 1分钟
+        let timeLeft = TIME_LIMIT;
+        let recordingInterval = null;
+        
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob = null;
+        let audioUrl = null;
+
+        // Web Audio API 变量
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let canvasContext;
         let animationId;
-        
-        // 临床特征测算变量 (基于前端性能高精度时间戳)
-        let startTime = 0, totalTimeMs = 0, speakingTimeMs = 0;
-        
-        // VAD (Voice Activity Detection) 能量阈值
-        // 范围 0-255，根据门诊/社区实际底噪调整。低于此阈值判定为“无声停顿(Silent Pause)”
-        const VOLUME_THRESHOLD = 5; 
 
-        // Canvas 初始化配置
+        // 简易前端 VAD (Voice Activity Detection) 统计
+        let totalFrames = 0;
+        let silentFrames = 0;
+        let silenceThreshold = 10; // 音量振幅阈值 (0-255)
+
         const canvas = document.getElementById('oscilloscope');
-        const ctx = canvas.getContext('2d');
-        let dataArray, bufferLength;
-
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth - 40;
-            canvas.height = 120;
-            drawStandby();
-        }
-        window.onresize = resizeCanvas;
+        canvasContext = canvas.getContext('2d');
         
-        // 待机状态下的静态横线
-        function drawStandby() {
-            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.lineWidth = 2; ctx.strokeStyle = '#334155'; ctx.beginPath();
-            ctx.moveTo(0, canvas.height / 2); ctx.lineTo(canvas.width, canvas.height / 2); ctx.stroke();
+        // 自适应 Canvas 大小
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
         }
+        window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        /* ==================== 2. 录音与实时 VAD 引擎 ==================== */
+        // 绘制默认静态线
+        function drawStaticLine() {
+            canvasContext.fillStyle = '#0f172a';
+            canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+            canvasContext.lineWidth = 2;
+            canvasContext.strokeStyle = '#334155';
+            canvasContext.beginPath();
+            canvasContext.moveTo(0, canvas.height / 2);
+            canvasContext.lineTo(canvas.width, canvas.height / 2);
+            canvasContext.stroke();
+        }
+        drawStaticLine();
+
         async function startRecording() {
             try {
-                // 请求麦克风权限，开启回声消除，关闭降噪以保留原始发音微颤特征
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false } });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 
-                // 初始化 Web Audio API 
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048; // 采样窗口大小
-                bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-                
-                microphone = audioContext.createMediaStreamSource(stream);
-                microphone.connect(analyser);
-
-                // 配置 MediaRecorder 以提取纯正的音频 Blob
-                // WebM 格式在现代浏览器中支持度极高
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                // 1. 初始化 MediaRecorder
+                mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.start();
 
-                // 切换 UI 状态为录音模式
-                document.getElementById('btn-start').classList.add('recording-pulse');
-                document.getElementById('btn-start').disabled = true;
-                document.getElementById('btn-start').innerText = "录音中... 请描述图片";
+                // 2. 初始化 Web Audio API 频域分析
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
                 
-                const btnStop = document.getElementById('btn-stop');
-                btnStop.disabled = false; btnStop.classList.add('active');
-                document.getElementById('audio-status').innerText = `ENGINE: RECORDING | SR: ${audioContext.sampleRate}Hz`;
-
-                // 重置时间轴
-                startTime = performance.now();
-                totalTimeMs = 0; speakingTimeMs = 0;
-
-                // 启动帧渲染循环
-                drawWaveform();
-
-            } catch (err) {
-                alert("无法访问麦克风，请检查设备并赋予浏览器权限。\n错误信息: " + err);
-            }
-        }
-
-        // 高频波形渲染与实时“发音/停顿”切分逻辑
-        function drawWaveform() {
-            animationId = requestAnimationFrame(drawWaveform);
-            analyser.getByteTimeDomainData(dataArray);
-
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.lineWidth = 2; ctx.strokeStyle = '#10b981'; ctx.beginPath();
-
-            const sliceWidth = canvas.width * 1.0 / bufferLength;
-            let x = 0;
-            let currentVolume = 0; 
-
-            for (let i = 0; i < bufferLength; i++) {
-                // 128 是静音基准线。计算绝对偏离值作为瞬时声学能量
-                const v = dataArray[i] / 128.0;
-                const y = v * canvas.height / 2;
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                x += sliceWidth;
+                analyser.fftSize = 2048;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
                 
-                currentVolume += Math.abs(dataArray[i] - 128);
-            }
-            ctx.lineTo(canvas.width, canvas.height / 2); ctx.stroke();
-            currentVolume = currentVolume / bufferLength;
+                microphone.connect(analyser);
 
-            // 测算时长流逝
-            const now = performance.now();
-            const deltaMs = now - startTime;
-            startTime = now;
-            totalTimeMs += deltaMs;
-            
-            // 如果瞬时能量越过阈值，判定处于“发音期”
-            if (currentVolume > VOLUME_THRESHOLD) {
-                speakingTimeMs += deltaMs;
-                ctx.strokeStyle = '#8b5cf6'; // 发音时波形变紫
-                ctx.stroke();
-            }
+                // 重置统计参数
+                totalFrames = 0;
+                silentFrames = 0;
+                timeLeft = TIME_LIMIT;
+                document.getElementById('metrics-board').style.opacity = '0.3';
+                document.getElementById('download-area').classList.add('hidden');
 
-            // 更新仪表盘 UI
-            const totalSec = (totalTimeMs / 1000).toFixed(1);
-            const speakSec = (speakingTimeMs / 1000).toFixed(1);
-            const pauseRatio = ((totalTimeMs - speakingTimeMs) / totalTimeMs * 100).toFixed(1);
+                // 3. UI 状态切换
+                document.getElementById('btn-record').disabled = true;
+                document.getElementById('btn-record').innerText = "🔴 采集中...";
+                document.getElementById('btn-stop').disabled = false;
 
-            document.getElementById('val-time').innerText = totalSec + 's';
-            document.getElementById('val-speak').innerText = speakSec + 's';
-            
-            // 临床预警逻辑：对于超过 5 秒的自发言语，若停顿比 > 40%，背景标红提示找词困难可能
-            const pauseEl = document.getElementById('val-pause');
-            const cardPause = document.getElementById('card-pause');
-            pauseEl.innerText = pauseRatio + '%';
-            
-            if(pauseRatio > 40 && totalSec > 5) { 
-                cardPause.style.background = '#fff1f2'; cardPause.style.borderColor = 'var(--red)'; pauseEl.style.color = 'var(--red)';
-            } else { 
-                cardPause.style.background = 'var(--light-blue)'; cardPause.style.borderColor = '#c7d2fe'; pauseEl.style.color = 'var(--primary)'; 
-            }
-        }
+                // 4. 实时示波器与 VAD 计算引擎
+                function drawOscilloscope() {
+                    animationId = requestAnimationFrame(drawOscilloscope);
+                    analyser.getByteTimeDomainData(dataArray);
 
-        /* ==================== 3. 停止、保存与后端 API 集成 ==================== */
-        function stopRecording() {
-            mediaRecorder.stop();
-            cancelAnimationFrame(animationId);
-            microphone.disconnect();
-            audioContext.close();
+                    canvasContext.fillStyle = '#0f172a';
+                    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+                    canvasContext.lineWidth = 2;
+                    canvasContext.strokeStyle = '#06b6d4'; // 声纹颜色
+                    canvasContext.beginPath();
 
-            // 恢复初始 UI 状态
-            const btnStart = document.getElementById('btn-start');
-            btnStart.classList.remove('recording-pulse'); btnStart.disabled = false; btnStart.innerHTML = "🎤 重新录制 (Restart)";
-            
-            const btnStop = document.getElementById('btn-stop');
-            btnStop.disabled = true; btnStop.classList.remove('active');
-            document.getElementById('audio-status').innerText = "ENGINE: STOPPED";
-            drawStandby();
+                    let sliceWidth = canvas.width * 1.0 / bufferLength;
+                    let x = 0;
+                    let currentVolumeSum = 0;
 
-            // 当音频数据打包完成时触发
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); 
-                const loadingText = document.getElementById('api-loading');
-                loadingText.style.display = 'block';
+                    for (let i = 0; i < bufferLength; i++) {
+                        let v = dataArray[i] / 128.0;
+                        let y = v * canvas.height / 2;
+                        
+                        // 计算瞬时振幅 (偏移128的绝对值)
+                        let amplitude = Math.abs(dataArray[i] - 128);
+                        currentVolumeSum += amplitude;
 
-                // 构建要存入 CAS_Storage 的基础特征包 (含前端计算的行为学特征)
-                let vbmData = {
-                    module: "Voice_Biomarkers",
-                    duration_sec: parseFloat(document.getElementById('val-time').innerText),
-                    phonation_sec: parseFloat(document.getElementById('val-speak').innerText),
-                    pause_ratio: parseFloat(document.getElementById('val-pause').innerText),
-                    advanced_features: null // 预留给后端的深层声学特征 (MFCCs, F0 等)
-                };
-
-                // 🚀 调用 Python 后端接口提取高阶特征 (优雅降级架构)
-                try {
-                    const formData = new FormData();
-                    formData.append('audio', audioBlob, 'cas_recording.webm');
-                    
-                    // 实际部署时，将 localhost 替换为您的云服务器 API 地址
-                    const response = await fetch('http://localhost:5000/extract_features', {
-                        method: 'POST', body: formData
-                    });
-
-                    if (response.ok) {
-                        const apiResult = await response.json();
-                        // 提取成功，将后端特征写入数据包
-                        vbmData.advanced_features = apiResult.features; 
-                        console.log("后端提取成功:", apiResult.features);
-                    } else {
-                        console.warn("后端返回异常状态:", response.status);
+                        if (i === 0) canvasContext.moveTo(x, y);
+                        else canvasContext.lineTo(x, y);
+                        x += sliceWidth;
                     }
-                } catch (error) {
-                    // 【优雅降级】如果 Python 服务器未启动或处于断网环境，不打断主试流程
-                    console.warn("未能连接到 Python 后端特征提取引擎。本次仅保存前端 VAD 计算出的停顿流利性特征。", error);
+
+                    canvasContext.lineTo(canvas.width, canvas.height / 2);
+                    canvasContext.stroke();
+
+                    // VAD: 判断当前帧是否处于静默
+                    totalFrames++;
+                    let avgVolume = currentVolumeSum / bufferLength;
+                    if(avgVolume < silenceThreshold) {
+                        silentFrames++;
+                    }
+                }
+                drawOscilloscope();
+
+                // 5. 倒计时引擎
+                recordingInterval = setInterval(() => {
+                    timeLeft--;
+                    let sec = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+                    const display = document.getElementById('time-display');
+                    display.innerText = `00:${sec}`;
+                    
+                    if(timeLeft <= 10) display.classList.add('timer-alert');
+                    if(timeLeft <= 0) stopRecording();
+                }, 1000);
+
+            } catch(err) {
+                alert("⚠️ 无法调用麦克风！请确保浏览器拥有麦克风权限且处于 HTTPS 环境。");
+                console.error(err);
+            }
+        }
+
+        function stopRecording() {
+            clearInterval(recordingInterval);
+            cancelAnimationFrame(animationId);
+            drawStaticLine();
+
+            document.getElementById('time-display').classList.remove('timer-alert');
+            document.getElementById('btn-record').disabled = false;
+            document.getElementById('btn-record').innerText = "🔄 重新测试";
+            document.getElementById('btn-stop').disabled = true;
+
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                
+                // 停止所有音频轨道释放麦克风
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                
+                if (audioContext && audioContext.state !== 'closed') {
+                    audioContext.close();
                 }
 
-                loadingText.style.display = 'none';
+                // 计算并保存特征
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    calculateMetricsAndSave();
+                    setupDownloadButton();
+                };
+            }
+        }
 
-                // 将结构化数据保存至本地总档案
-                CAS_Storage.saveModuleData('Voice_Biomarkers', vbmData);
-                
-                let successMsg = `语音表型采集完成！\n\n- 总时长: ${vbmData.duration_sec} s\n- 词间停顿比: ${vbmData.pause_ratio} %\n`;
-                if(vbmData.advanced_features) {
-                    successMsg += `\n✅ 已成功从服务器拉取高阶 MFCCs 与声学微扰 (Jitter) 特征并封装入库。`;
-                } else {
-                    successMsg += `\n⚠️ 后端服务器未响应或处于离线模式，本次仅保存前端行为学特征。`;
+        function calculateMetricsAndSave() {
+            // 计算时间与停顿比
+            const actualDurationSec = TIME_LIMIT - timeLeft;
+            const ratio = totalFrames > 0 ? (silentFrames / totalFrames) : 0;
+            const silenceRatioPercent = (ratio * 100).toFixed(1);
+            const phonationSec = (actualDurationSec * (1 - ratio)).toFixed(1);
+
+            // 更新 UI 面板
+            document.getElementById('metrics-board').style.opacity = '1';
+            document.getElementById('m-total').innerText = actualDurationSec + ' s';
+            document.getElementById('m-voice').innerText = phonationSec + ' s';
+            document.getElementById('m-ratio').innerText = silenceRatioPercent + ' %';
+            
+            // 高危预警颜色
+            if(silenceRatioPercent > 40) document.getElementById('m-ratio').style.color = 'var(--red)';
+            else document.getElementById('m-ratio').style.color = 'var(--teal)';
+
+            // 存入底层引擎 (仅存特征，由于 Blob 太大不进 LocalStorage)
+            let vbmData = {
+                module: "Voice_Biomarkers",
+                summary: {
+                    total_duration_sec: actualDurationSec,
+                    phonation_time_sec: parseFloat(phonationSec),
+                    silence_ratio_percent: parseFloat(silenceRatioPercent)
                 }
-                
-                alert(successMsg);
-                setTimeout(() => { location.href = 'index.html'; }, 800);
+            };
+            CAS_Storage.saveModuleData('Voice_Biomarkers', vbmData);
+            
+            let msg = `✅ VBM 声学基本特征已提取入库！\n\n- 总说话时长: ${actualDurationSec} 秒\n- 有效发声时长: ${phonationSec} 秒\n- 静默停顿比: ${silenceRatioPercent}%\n\n`;
+            if(silenceRatioPercent > 45) {
+                msg += "⚠️ 临床提示：静默停顿比例过高。受试者在描述图片时可能存在严重的【找词困难】或言语发起障碍，这是失语症或痴呆早期的敏感标志。";
+            }
+            alert(msg);
+        }
+
+        function setupDownloadButton() {
+            const dlArea = document.getElementById('download-area');
+            const dlBtn = document.getElementById('btn-download-audio');
+            dlArea.classList.remove('hidden');
+            
+            dlBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = audioUrl;
+                // 命名规范：包含时间戳，方便对接 BIDS 格式
+                a.download = `CAS_VBM_CookieTheft_${new Date().getTime()}.wav`;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                }, 100);
             };
         }
     </script>
