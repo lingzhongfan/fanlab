@@ -1,8 +1,7 @@
 // 文件名: cas-storage.js
 /**
- * CAS 4.0 Clinical Data Engine
- * NeuroMap (The Neuro-Behavioral Multimodal Assessment Platform) 核心存储引擎
- * 负责全模态数据的持久化、硬件校准与 BIDS 格式导出
+ * CAS 4.0 Clinical Data Engine (Full Integration)
+ * 负责全模态数据的持久化、硬件校准、EMA 日志与 BIDS 格式导出
  */
 const CAS_Storage = {
     SESSION_KEY: 'cas_clinical_session_v4',
@@ -19,11 +18,12 @@ const CAS_Storage = {
                     user_agent: navigator.userAgent,
                     screen_width: window.screen.width,
                     screen_height: window.screen.height,
-                    device_pixel_ratio: window.devicePixelRatio
+                    device_pixel_ratio: window.devicePixelRatio,
+                    platform: navigator.platform
                 },
-                demographics: {},
-                ema_fatigue_logs: [], // 生态瞬时疲劳评估
-                modules: {}
+                demographics: {}, // 受试者基线资料
+                ema_fatigue_logs: [], // 生态瞬时疲劳评估日志
+                modules: {} // 存放 13 个子模块的高频时序数据
             };
             localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
         } else {
@@ -41,7 +41,7 @@ const CAS_Storage = {
         };
         session.last_update = new Date().toISOString();
         localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
-        console.log(`[CAS_Storage] 模块 ${moduleId} 数据已安全入库。`);
+        console.log(`[CAS_Storage] 模块 [${moduleId}] 临床特征已安全入库。`);
     },
 
     // 3. 记录生态瞬时疲劳度 (EMA)
@@ -64,7 +64,7 @@ const CAS_Storage = {
     clearSession: function() {
         if (confirm("⚠️ 临床高危操作：您确定要清空当前受试者的所有测试数据吗？此操作不可逆！")) {
             localStorage.removeItem(this.SESSION_KEY);
-            alert("数据已清空。");
+            alert("临床数据已彻底销毁。");
             location.reload();
         }
     },
@@ -75,11 +75,14 @@ const CAS_Storage = {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(session, null, 2));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        // 命名规范：CAS_SubjectID_Timestamp.json
-        const subId = session.demographics.subject_id || "Anonymous";
-        downloadAnchorNode.setAttribute("download", `CAS_Data_Sub-${subId}_${session.session_id}.json`);
+        
+        // 遵循 BIDS 命名规范：CAS_Data_Sub-[ID]_[Timestamp].json
+        const subId = (session.demographics && session.demographics.subject_id) ? session.demographics.subject_id : "Anonymous";
+        const timeTag = new Date().toISOString().replace(/[:.]/g, '-');
+        downloadAnchorNode.setAttribute("download", `CAS_Data_Sub-${subId}_${timeTag}.json`);
+        
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        document.body.removeChild(downloadAnchorNode);
     }
 };
