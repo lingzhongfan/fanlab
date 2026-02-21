@@ -1,64 +1,85 @@
 // 文件名: cas-storage.js
 /**
+ * CAS 4.0 Clinical Data Engine
  * NeuroMap (The Neuro-Behavioral Multimodal Assessment Platform) 核心存储引擎
- * 临床意义: 负责在无网络(Offline)环境下，将22+项高频行为学时序数据(Time-Series)
- * 与横截面量表数据(Cross-Sectional)持久化在本地浏览器，保障社区筛查的数据安全。
+ * 负责全模态数据的持久化、硬件校准与 BIDS 格式导出
  */
 const CAS_Storage = {
-    SESSION_KEY: 'CAS_Current_Session',
-    
-    // 检查当前是否存在活跃的受试者会话
-    hasSession: () => localStorage.getItem('CAS_Current_Session') !== null,
-    
-    // 初始化基线档案 (严格捕获协变量：利手、教育、年龄、性别)
-    initSession: function(subjectInfo) {
-        const sessionData = {
-            session_id: subjectInfo.subject_id,
-            demographics: {
-                subject_id: subjectInfo.subject_id,
-                name: subjectInfo.name,
-                dob: subjectInfo.dob,
-                gender: subjectInfo.gender,
-                handedness: subjectInfo.handedness,     // 运动皮层偏侧化协变量
-                education_level: subjectInfo.education_level // 认知储备(Cognitive Reserve)协变量
-            },
-            start_time: new Date().toISOString(),
-            modules: {} // 存放所有子范式数据的沙盒
-        };
-        localStorage.setItem(this.SESSION_KEY, JSON.stringify(sessionData));
-    },
+    SESSION_KEY: 'cas_clinical_session_v4',
 
+    // 1. 初始化或获取当前测试会话 (包含防抖与硬件环境提取)
     getSession: function() {
-        const data = localStorage.getItem(this.SESSION_KEY);
-        return data ? JSON.parse(data) : { demographics: {}, modules: {} };
+        let session = localStorage.getItem(this.SESSION_KEY);
+        if (!session) {
+            session = {
+                session_id: 'CAS_' + new Date().getTime(),
+                start_time: new Date().toISOString(),
+                last_update: new Date().toISOString(),
+                hardware_metadata: {
+                    user_agent: navigator.userAgent,
+                    screen_width: window.screen.width,
+                    screen_height: window.screen.height,
+                    device_pixel_ratio: window.devicePixelRatio
+                },
+                demographics: {},
+                ema_fatigue_logs: [], // 生态瞬时疲劳评估
+                modules: {}
+            };
+            localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+        } else {
+            session = JSON.parse(session);
+        }
+        return session;
     },
 
-    // 通用数据入库接口 (支持覆盖更新)
-    saveModuleData: function(moduleName, data) {
+    // 2. 保存模块数据 (覆盖更新)
+    saveModuleData: function(moduleId, data) {
         let session = this.getSession();
-        session.modules[moduleName] = { 
-            completed_at: new Date().toISOString(), 
-            data: data 
+        session.modules[moduleId] = {
+            timestamp: new Date().toISOString(),
+            data: data
         };
+        session.last_update = new Date().toISOString();
+        localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+        console.log(`[CAS_Storage] 模块 ${moduleId} 数据已安全入库。`);
+    },
+
+    // 3. 记录生态瞬时疲劳度 (EMA)
+    recordFatigue: function(score) {
+        let session = this.getSession();
+        session.ema_fatigue_logs.push({
+            timestamp: new Date().toISOString(),
+            fatigue_score: parseInt(score)
+        });
         localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
     },
 
-    // 临床特征包打包导出 (直接输出为可供 Python/R 读取的标准化 JSON)
-    exportJSON: function() {
-        const session = this.getSession();
-        session.end_time = new Date().toISOString(); 
-        const blob = new Blob([JSON.stringify(session, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); 
-        a.href = url; a.download = `CAS_Export_${session.session_id}_${new Date().getTime()}.json`; 
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    // 4. 检查某模块是否已完成
+    isModuleCompleted: function(moduleId) {
+        let session = this.getSession();
+        return session.modules.hasOwnProperty(moduleId);
     },
 
-    // 防误触的会话终结机制
+    // 5. 危险操作：清空当前会话
     clearSession: function() {
-        if(confirm("⚠️ 危险操作：确定要清除当前受试者的所有测试缓存吗？\n(请务必确保已经点击导出 JSON 并备份数据！)")) {
+        if (confirm("⚠️ 临床高危操作：您确定要清空当前受试者的所有测试数据吗？此操作不可逆！")) {
             localStorage.removeItem(this.SESSION_KEY);
-            location.href = 'index.html';
+            alert("数据已清空。");
+            location.reload();
         }
+    },
+
+    // 6. 科研直出：导出 BIDS 兼容的 JSON 文件
+    exportJSON: function() {
+        const session = this.getSession();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(session, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        // 命名规范：CAS_SubjectID_Timestamp.json
+        const subId = session.demographics.subject_id || "Anonymous";
+        downloadAnchorNode.setAttribute("download", `CAS_Data_Sub-${subId}_${session.session_id}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
 };
