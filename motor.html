@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-MOT | 锥体外系与精细运动评估 (科研完全体 v4.1)</title>
+    <title>NeuroMap-MOT | 锥体外系与精细运动评估 (科研防重置完全体 v4.2)</title>
     <style>
         :root { --primary: #1e293b; --blue: #4f46e5; --orange: #f59e0b; --amber: #fbbf24; --red: #f43f5e; --green: #10b981; --slate: #64748b; --bg: #fcfcfd; }
+        
         /* 彻底阻断触控设备的默认手势，保证敲击测试的纯净度 */
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); touch-action: none; overscroll-behavior: none; user-select: none; -webkit-user-select: none; }
         .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
@@ -41,7 +42,7 @@
 
     <div class="container" id="menu">
         <div class="module-header">
-            <h2>🎯 运动共济与锥体外系网络 (Clinical V4.1)</h2>
+            <h2>🎯 运动共济与锥体外系网络 (MOT)</h2>
             <p>基于微观动力学提取，靶向基底节多巴胺能衰退引起的运动迟缓、僵直与易疲劳性。</p>
         </div>
         <button class="sys-btn btn-menu" onclick="startAFT()">👇 1. AFT 交替手指敲击 (15秒高频负荷)</button>
@@ -56,8 +57,8 @@
         <div class="timer-board" id="aft-timer">15.0 s</div>
         
         <div class="tap-workspace">
-            <div class="tap-btn" id="btn-left">左 (食指)</div>
-            <div class="tap-btn" id="btn-right">右 (中指)</div>
+            <div class="tap-btn" id="btn-left" onmousedown="recordTap(0, event)" ontouchstart="recordTap(0, event)">左 (食指)</div>
+            <div class="tap-btn" id="btn-right" onmousedown="recordTap(1, event)" ontouchstart="recordTap(1, event)">右 (中指)</div>
         </div>
         <button class="sys-btn" id="btn-aft-start" onclick="initAFT()" style="background:var(--primary); color:white; justify-content:center;">开始测试</button>
     </div>
@@ -68,33 +69,32 @@
             <p>请将手指悬停在屏幕上方。当屏幕变成<strong>绿色</strong>时，请以最快速度点击屏幕任何位置。提前抢答将被记录。</p>
         </div>
         
-        <div class="srt-workspace" id="srt-box">
+        <div class="srt-workspace" id="srt-box" onmousedown="handleSRTTap(event)" ontouchstart="handleSRTTap(event)">
             <div class="trial-counter" id="srt-counter"></div>
             <div class="srt-text" id="srt-msg">点击此处开始</div>
         </div>
     </div>
 
     <script>
+        // ================= 全局路由控制 =================
         function show(id) {
-            ['menu', 'aft-area', 'srt-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('aft-area').classList.add('hidden');
+            document.getElementById('srt-area').classList.add('hidden');
+            
             document.getElementById(id).classList.remove('hidden');
             window.scrollTo(0,0);
         }
 
-        /* ===================================================================== */
-        /* 1. AFT 逻辑：追踪每一次合法交替敲击的毫秒级时间戳，计算变异系数与疲劳指数
-        /* ===================================================================== */
+        // ================= 1. AFT 核心逻辑 =================
         const AFT_DURATION_MS = 15000;
         let aftData = { module: "MOT_AFT", timestamps: [], summary: {} };
         let aftInterval = null;
         let aftActive = false;
-        let lastTapSide = null; // 记录上一侧，强制要求交替 (0=左, 1=右)
+        let lastTapSide = null;
         let aftStartTime = 0;
+        let lastEventTime = 0; // 防手抖/重复触发锁
 
-        const btnLeft = document.getElementById('btn-left');
-        const btnRight = document.getElementById('btn-right');
-
-        // 修复点 1：补齐界面路由函数 startAFT
         function startAFT() {
             document.getElementById('aft-timer').innerText = "15.0 s";
             document.getElementById('aft-timer').style.color = "var(--primary)";
@@ -103,7 +103,6 @@
             show('aft-area');
         }
 
-        // 初始化 AFT 倒计时引擎
         function initAFT() {
             aftData.timestamps = [];
             lastTapSide = null;
@@ -112,7 +111,7 @@
             aftActive = true;
             aftStartTime = performance.now();
 
-            // 修复点 2：基于绝对时间戳计算剩余时间，彻底杜绝浮点数精度溢出
+            // 使用绝对时间戳进行倒计时，彻底规避浮点数误差
             aftInterval = setInterval(() => {
                 const elapsed = performance.now() - aftStartTime;
                 const timeLeft = Math.max(0, (AFT_DURATION_MS - elapsed) / 1000);
@@ -122,51 +121,57 @@
                 if (timeLeft <= 0) {
                     endAFT();
                 }
-            }, 50); // 50ms 刷新率保证视觉平滑
+            }, 50); 
         }
 
-        function recordTap(side) {
+        function recordTap(side, e) {
+            if (e) e.preventDefault(); // 阻止浏览器默认选中或拖拽
+            
+            const now = performance.now();
+            // 如果两个事件(比如touch和mouse)在20毫秒内连续触发，视为同一次点击 (防抖锁)
+            if (now - lastEventTime < 20) return;
+            lastEventTime = now;
+
             if (!aftActive) return;
-            // 核心机制：强制交替。如果连续敲击同一侧，不计入有效时间戳
+            
+            // 强制交替机制：同侧连击无效
             if (side === lastTapSide) return; 
 
-            const t = performance.now() - aftStartTime;
+            const t = now - aftStartTime;
             aftData.timestamps.push(t);
             lastTapSide = side;
 
-            // 视觉反馈动效
-            const targetBtn = side === 0 ? btnLeft : btnRight;
+            // 视觉动效反馈
+            const targetBtn = side === 0 ? document.getElementById('btn-left') : document.getElementById('btn-right');
             targetBtn.classList.add('active-sim');
             setTimeout(() => targetBtn.classList.remove('active-sim'), 50);
         }
 
-        // Pointer 事件无视浏览器的 300ms 触摸延迟，并兼容鼠标与触屏
-        btnLeft.addEventListener('pointerdown', (e) => { e.preventDefault(); recordTap(0); });
-        btnRight.addEventListener('pointerdown', (e) => { e.preventDefault(); recordTap(1); });
-
         function endAFT() {
             clearInterval(aftInterval);
             aftActive = false;
-            document.getElementById('aft-timer').innerText = "时间到！";
+            document.getElementById('aft-timer').innerText = "测试结束";
             document.getElementById('aft-timer').style.color = "var(--red)";
 
             const n = aftData.timestamps.length;
             if (n < 5) {
-                alert("⚠️ 有效交替敲击次数过少，测试数据无效。请确保使用双指交替敲击屏幕！");
+                alert("⚠️ 有效交替敲击次数过少，数据无效。请确保使用双指交替敲击屏幕！");
                 document.getElementById('btn-aft-start').style.display = 'flex';
                 document.getElementById('btn-aft-start').innerText = "重新测试";
                 return;
             }
 
-            // 计算指标
+            // 计算相邻敲击的间隔 (ITI)
             let itis = [];
-            for (let i = 1; i < n; i++) itis.push(aftData.timestamps[i] - aftData.timestamps[i-1]);
+            for (let i = 1; i < n; i++) {
+                itis.push(aftData.timestamps[i] - aftData.timestamps[i-1]);
+            }
             
             const meanITI = itis.reduce((a,b)=>a+b,0) / itis.length;
             const variance = itis.reduce((a,b)=>a+Math.pow(b-meanITI, 2), 0) / itis.length;
-            const cv = (Math.sqrt(variance) / meanITI) * 100; // 敲击节律的变异系数
+            const cv = (Math.sqrt(variance) / meanITI) * 100;
 
-            // 疲劳指数：前 5 秒的频率 vs 后 5 秒的频率
+            // 疲劳衰竭指数计算
             const first5sCount = aftData.timestamps.filter(t => t <= 5000).length;
             const last5sCount = aftData.timestamps.filter(t => t >= 10000).length;
             const fatigueIndex = first5sCount > 0 ? ((first5sCount - last5sCount) / first5sCount) * 100 : 0;
@@ -175,50 +180,53 @@
                 total_taps: n,
                 mean_iti_ms: Math.round(meanITI),
                 iti_cv_percent: parseFloat(cv.toFixed(2)),
-                fatigue_index_percent: parseFloat(fatigueIndex.toFixed(2)) // 负数代表后期加速，正数代表后期衰退
+                fatigue_index_percent: parseFloat(fatigueIndex.toFixed(2))
             };
 
             CAS_Storage.saveModuleData('MOT_AFT', aftData);
-            alert(`✅ AFT 临床动力学已入库！\n\n- 交替总次数: ${n} 次\n- 平均敲击间隔 (ITI): ${Math.round(meanITI)} ms\n- 节律变异系数 (CV): ${cv.toFixed(1)}%\n- 运动疲劳衰减指数: ${fatigueIndex.toFixed(1)}%\n\n*临床提示：CV异常增高提示节律失调(如小脑或基底节病变)；高疲劳指数提示典型的帕金森“剂末现象”或运动衰减。`);
+            alert(`✅ AFT 临床动力学已入库！\n\n- 交替总次数: ${n} 次\n- 平均敲击间隔 (ITI): ${Math.round(meanITI)} ms\n- 节律变异系数 (CV): ${cv.toFixed(1)}%\n- 运动衰减指数: ${fatigueIndex.toFixed(1)}%\n\n*临床提示：CV异常增高提示节律失调；高疲劳指数提示典型的基底节剂末衰竭。`);
             show('menu');
         }
 
-        /* ===================================================================== */
-        /* 2. SRT 逻辑：剥离选择负荷的纯运动起动测验 (含抢答惩罚)
-        /* ===================================================================== */
+        // ================= 2. SRT 核心逻辑 =================
         const TOTAL_SRT_TRIALS = 10;
         let srtData = { module: "MOT_SRT", records: [], summary: {} };
         let srtTrial = 0;
-        let srtState = 'init'; // init -> waiting -> go -> done
+        let srtState = 'init';
         let srtTimeout = null;
         let srtOnset = 0;
-
-        const srtBox = document.getElementById('srt-box');
-        const srtMsg = document.getElementById('srt-msg');
+        let srtLastEventTime = 0;
 
         function startSRT() {
             srtData.records = [];
             srtTrial = 0;
             srtState = 'init';
-            srtMsg.innerText = "点击此处开始";
-            srtBox.className = 'srt-workspace';
+            document.getElementById('srt-msg').innerText = "点击此处开始";
+            document.getElementById('srt-box').className = 'srt-workspace';
             document.getElementById('srt-counter').innerText = "";
             show('srt-area');
         }
 
-        srtBox.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
+        function handleSRTTap(e) {
+            if (e) e.preventDefault();
+            const now = performance.now();
+            if (now - srtLastEventTime < 20) return;
+            srtLastEventTime = now;
+
+            const srtBox = document.getElementById('srt-box');
+            const srtMsg = document.getElementById('srt-msg');
+
             if (srtState === 'init') {
                 runSRTTrial();
             } else if (srtState === 'waiting') {
-                // 抢答惩罚 (False Start)
+                // 抢答阻断
                 clearTimeout(srtTimeout);
                 srtData.records.push({ type: 'false_start', rt: null });
                 srtBox.className = 'srt-workspace';
                 srtMsg.innerText = "⚠️ 抢答了！\n请等屏幕变绿再点。\n(点击此处继续)";
                 srtState = 'init';
             } else if (srtState === 'go') {
-                // 合法反应
+                // 成功起动
                 const rt = performance.now() - srtOnset;
                 srtData.records.push({ type: 'valid', rt: Math.round(rt) });
                 srtTrial++;
@@ -232,20 +240,20 @@
                     else runSRTTrial();
                 }, 1000);
             }
-        });
+        }
 
         function runSRTTrial() {
             srtState = 'waiting';
-            srtBox.className = 'srt-workspace waiting';
-            srtMsg.innerText = "准备...";
+            document.getElementById('srt-box').className = 'srt-workspace waiting';
+            document.getElementById('srt-msg').innerText = "准备...";
             document.getElementById('srt-counter').innerText = `进度: ${srtTrial + 1} / ${TOTAL_SRT_TRIALS}`;
 
-            // 随机等待 2000ms 到 5000ms，防止受试者建立时间节律预期
+            // 随机等待引擎 (2s - 5s 动态范围)
             const delay = 2000 + Math.random() * 3000;
             srtTimeout = setTimeout(() => {
                 srtState = 'go';
-                srtBox.className = 'srt-workspace go';
-                srtMsg.innerText = "点！";
+                document.getElementById('srt-box').className = 'srt-workspace go';
+                document.getElementById('srt-msg').innerText = "点！";
                 srtOnset = performance.now();
             }, delay);
         }
