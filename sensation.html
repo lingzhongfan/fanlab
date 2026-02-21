@@ -3,207 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-SEN | 感觉与知觉传导</title>
+    <title>NeuroMap-SEN | 感知觉与持续警觉性评估 (科研完全体 v4.0)</title>
     <style>
-        /* 科技温情风 UI */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --yellow: #eab308; --slate: #64748b; }
-        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; touch-action: manipulation; user-select: none; }
-        .container { max-width: 750px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        :root { --primary: #1e293b; --blue: #4f46e5; --yellow: #eab308; --amber: #d97706; --red: #f43f5e; --green: #10b981; --slate: #64748b; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); user-select: none; }
+        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
         .hidden { display: none !important; }
         
-        .module-header { border-left: 6px solid var(--yellow); padding-left: 15px; margin-bottom: 30px; }
+        .module-header { border-left: 6px solid var(--yellow); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
-        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; }
+        .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        .sys-btn { width: 100%; padding: 18px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
-        .btn-menu { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
-        .btn-menu:hover { background: var(--yellow); color: white; transform: translateX(5px); box-shadow: 0 8px 15px rgba(234, 179, 8, 0.2); }
+        .sys-btn { width: 100%; padding: 20px; margin-bottom: 12px; border: none; border-radius: 16px; cursor: pointer; font-weight: bold; font-size: 18px; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .btn-menu { background: #fefce8; color: #854d0e; border: 1px solid #fef08a; }
+        .btn-menu:hover { background: var(--yellow); color: white; transform: translateX(5px); }
 
-        /* RT与反应测试通用全屏刺激区 */
-        .rt-workspace { width: 100%; height: 350px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; transition: background 0.1s; margin-bottom: 20px; color: var(--slate); }
-        
-        /* Choice RT / Go-NoGo 控制台 */
-        .btn-large { padding: 30px; font-size: 24px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; color: var(--primary); cursor: pointer; font-weight: bold; width: 100%; transition: 0.1s;}
-        .btn-large:active { background: var(--blue); color: white; border-color: var(--blue); transform: scale(0.96); }
+        /* PVT 工作区 */
+        .pvt-workspace { width: 100%; height: 350px; background: #0f172a; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: crosshair; }
+        .pvt-target { font-size: 80px; font-weight: bold; color: var(--red); font-family: monospace; display: none; text-shadow: 0 0 20px rgba(244, 63, 94, 0.8); }
+        .pvt-instruction { color: #94a3b8; position: absolute; bottom: 30px; font-size: 14px; }
+        .trial-counter { position: absolute; top: 20px; right: 20px; font-size: 14px; color: #475569; font-weight: bold; }
 
-        /* Visual Search 特征扫描区 */
-        #search-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 30px 0; }
-        .search-item { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; border-radius: 12px; transition: 0.1s; border: 1px solid transparent; }
-        .search-item:active { background: var(--light-blue); border-color: var(--blue); }
+        /* Time Reproduction 工作区 */
+        .time-workspace { text-align: center; padding: 40px 20px; background: #f8fafc; border-radius: 20px; border: 2px dashed #cbd5e1; }
+        .time-btn { width: 200px; height: 200px; border-radius: 50%; background: white; border: 8px solid var(--blue); margin: 30px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: var(--blue); cursor: pointer; transition: 0.1s; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2); touch-action: none; }
+        .time-btn:active, .time-btn.pressing { background: var(--blue); color: white; transform: scale(0.95); box-shadow: inset 0 10px 20px rgba(0,0,0,0.2); }
+        .target-time-disp { font-size: 40px; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--yellow); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--amber); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
     <div class="container" id="menu">
         <div class="module-header">
-            <h2>⚡ 感觉与知觉传导 (CAS-SEN)</h2>
-            <p>提取纯粹的感觉传导时间、底层决策开销与自下而上的注意力扫描。</p>
+            <h2>👁️ 感知觉与警觉网络 (Clinical V4.0)</h2>
+            <p>基于去甲肾上腺素(LC-NE)通路的持续专注力底座，以及小脑内部时钟节律测算。</p>
         </div>
-        <button class="sys-btn btn-menu" onclick="startSRT()">⏱️ 1. 简单反应时 (Simple RT - 传导基线)</button>
-        <button class="sys-btn btn-menu" onclick="startCRT()">⚖️ 2. 选择反应时 (Choice RT - 决策开销)</button>
-        <button class="sys-btn btn-menu" onclick="startGNG()">🛑 3. Go/No-Go 测试 (底层感觉抑制)</button>
-        <button class="sys-btn btn-menu" onclick="startSearch()">🔍 4. 视觉特征搜索 (Visual Search - 顶叶网络)</button>
+        <button class="sys-btn btn-menu" onclick="startPVT()">⏱️ 1. PVT 精神运动警觉性测验 (20次持续警戒)</button>
+        <button class="sys-btn btn-menu" onclick="startTimeRep()">⏳ 2. Time Rep 内部时间复制测验 (3秒感知差)</button>
     </div>
 
-    <div class="container hidden" id="srt-area">
-        <div class="module-header"><h2>简单反应时 (SRT)</h2><p>临床意义: 获取纯粹的神经传导延迟。请在方块变黄时立刻点击。</p></div>
-        <div class="rt-workspace" id="srt-box" onmousedown="clickSRT()">等待变黄...</div>
-        <p style="text-align:center; color:var(--slate);" id="srt-msg">测试进行中 (0/10)</p>
-    </div>
-
-    <div class="container hidden" id="crt-area">
-        <div class="module-header"><h2>选择反应时 (CRT)</h2><p>临床计算: CRT耗时减去SRT耗时，即为纯粹的认知决策加工时间。</p></div>
-        <div class="rt-workspace" id="crt-stim" style="font-size: 80px; background:white;">+</div>
-        <div style="display:flex; gap:15px;" id="crt-controls" class="hidden">
-            <button class="btn-large" onclick="recordCRT('L')">左边 (L)</button>
-            <button class="btn-large" onclick="recordCRT('R')">右边 (R)</button>
+    <div class="container hidden" id="pvt-area">
+        <div class="module-header">
+            <h2>PVT 持续警觉网络</h2>
+            <p>这是衡量大脑疲劳与睡眠剥夺的黄金标准。请紧盯黑色区域，当看到红色毫秒计数器出现时，立刻点击屏幕打断它。</p>
+        </div>
+        <div class="pvt-workspace" id="pvt-box">
+            <div class="trial-counter" id="pvt-counter"></div>
+            <div class="pvt-target" id="pvt-counter-text">000</div>
+            <div class="pvt-instruction" id="pvt-msg">点击黑框任意区域开始测试</div>
         </div>
     </div>
 
-    <div class="container hidden" id="gng-area">
-        <div class="module-header"><h2>Go / No-Go (感觉抑制控制)</h2><p>规则: 看到绿色圆圈请点击，看到红色交叉【绝对不要】点击。</p></div>
-        <div class="rt-workspace" id="gng-stim" onclick="clickGNG()" style="font-size:100px; background:white;">+</div>
-    </div>
-
-    <div class="container hidden" id="search-area">
-        <div class="module-header"><h2>视觉特征搜索 (Visual Search)</h2><p>临床意义: 评估顶叶控制的视觉扫描范围。请在众多 'O' 中找出唯一的 'Q'。</p></div>
-        <div id="search-board"></div>
+    <div class="container hidden" id="time-area">
+        <div class="module-header">
+            <h2>内部时间复制 (Internal Clock)</h2>
+            <p>评估小脑与基底节构成的时间感知回路。请在心中默数，长按按钮以完美重现目标时间。</p>
+        </div>
+        <div class="time-workspace">
+            <div style="font-size: 16px; color: var(--slate); font-weight:bold;">请尝试长按下方按钮，使其持续时间恰好为：</div>
+            <div class="target-time-disp">3.00 秒</div>
+            <div class="time-btn" id="time-btn">按住我</div>
+            <div style="color: var(--slate); margin-top: 15px; font-size:14px;" id="time-msg">剩余 5 次机会</div>
+        </div>
     </div>
 
     <script>
         function show(id) {
-            ['menu', 'srt-area', 'crt-area', 'gng-area', 'search-area'].forEach(d => {
-                const el = document.getElementById(d); if(el) el.classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0,0);
+            ['menu', 'pvt-area', 'time-area'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0,0);
         }
 
-        /* ==================== 1. SRT 逻辑 ==================== */
-        let srtData = { module: "SEN_SRT", records: [] };
-        let srt_trial = 0, srt_onset = 0, srt_timeout = null, srt_active = false;
+        /* ===================================================================== */
+        /* 1. PVT 逻辑：高精度的 setTimeout 随机间隔，实时渲染反应时间递增动画
+        /* ===================================================================== */
+        const TOTAL_PVT_TRIALS = 20; // 临床为了节省时间，精简至20次。标准完整版通常为10分钟。
+        let pvtData = { module: "SEN_PVT", records: [], summary: {} };
+        let pvtTrial = 0;
+        let pvtState = 'init'; // init -> ISI -> running -> feedback
+        let pvtOnset = 0;
+        let pvtTimeout = null;
+        let pvtRAF = null; // requestAnimationFrame 用于渲染计数器
 
-        function startSRT() { srt_trial = 0; srtData.records = []; show('srt-area'); nextSRT(); }
-        
-        function nextSRT() {
-            if (srt_trial >= 10) { CAS_Storage.saveModuleData('SEN_SRT', srtData); alert("SRT 测试完成"); show('menu'); return; }
-            document.getElementById('srt-msg').innerText = `测试进行中 (${srt_trial}/10)`;
-            const box = document.getElementById('srt-box');
-            box.style.background = '#f8fafc'; box.innerText = "等待变黄..."; srt_active = false;
-            
-            // 随机前冲时间 (Fore-period) 1000 - 3000ms，防止受试者预判节奏
-            const delay = Math.random() * 2000 + 1000;
-            srt_timeout = setTimeout(() => {
-                box.style.background = 'var(--yellow)'; box.style.color = 'white'; box.innerText = "点击！";
-                srt_onset = performance.now(); srt_active = true;
+        const pvtBox = document.getElementById('pvt-box');
+        const pvtTarget = document.getElementById('pvt-counter-text');
+        const pvtMsg = document.getElementById('pvt-msg');
+
+        function startPVT() {
+            pvtData.records = []; pvtTrial = 0; pvtState = 'init';
+            pvtMsg.innerText = "点击黑框任意区域开始测试";
+            pvtTarget.style.display = 'none';
+            document.getElementById('pvt-counter').innerText = "";
+            show('pvt-area');
+        }
+
+        // 核心渲染循环，模拟 PVT 经典的毫秒数字飙升效果
+        function updatePVTCounter() {
+            if (pvtState !== 'running') return;
+            const currentRT = performance.now() - pvtOnset;
+            pvtTarget.innerText = Math.round(currentRT).toString().padStart(3, '0');
+            pvtRAF = requestAnimationFrame(updatePVTCounter);
+        }
+
+        pvtBox.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            if (pvtState === 'init') {
+                runPVTTrial();
+            } else if (pvtState === 'ISI') {
+                // False Start (抢答)
+                clearTimeout(pvtTimeout);
+                pvtData.records.push({ rt: null, is_false_start: true, is_lapse: false });
+                pvtMsg.innerText = "⚠️ 抢答！必须等数字出现。\n(点击继续)";
+                pvtState = 'init';
+            } else if (pvtState === 'running') {
+                // 合法反应
+                cancelAnimationFrame(pvtRAF);
+                const rt = Math.round(performance.now() - pvtOnset);
+                const isLapse = rt > 500; // 核心指标：反应时超过 500ms 定义为注意力衰退 (Lapse)
+                
+                pvtData.records.push({ rt: rt, is_false_start: false, is_lapse: isLapse });
+                pvtTrial++;
+                
+                pvtTarget.style.color = isLapse ? "var(--amber)" : "var(--green)"; // 发生 Lapse 给黄灯警告
+                pvtMsg.innerText = isLapse ? "注意力轻微游离" : "";
+                
+                pvtState = 'feedback';
+                
+                setTimeout(() => {
+                    if (pvtTrial >= TOTAL_PVT_TRIALS) finishPVT();
+                    else runPVTTrial();
+                }, 1000); // 1秒反馈时间
+            }
+        });
+
+        function runPVTTrial() {
+            pvtState = 'ISI';
+            pvtTarget.style.display = 'none';
+            pvtTarget.style.color = 'var(--red)';
+            pvtMsg.innerText = "注视屏幕中等待...";
+            document.getElementById('pvt-counter').innerText = `警戒次数: ${pvtTrial + 1} / ${TOTAL_PVT_TRIALS}`;
+
+            // ISI: 随机 2 - 10 秒（模拟不可预期的事件发生）
+            const delay = 2000 + Math.random() * 8000;
+            pvtTimeout = setTimeout(() => {
+                pvtState = 'running';
+                pvtOnset = performance.now();
+                pvtTarget.style.display = 'block';
+                pvtRAF = requestAnimationFrame(updatePVTCounter);
             }, delay);
         }
 
-        function clickSRT() {
-            if (!srt_active) {
-                // 提前抢答记为过失 (Anticipation Error)
-                clearTimeout(srt_timeout); alert("请不要提前点击！"); nextSRT(); return;
-            }
-            const rt = Math.round(performance.now() - srt_onset);
-            srtData.records.push({ trial: srt_trial+1, rt_ms: rt });
-            srt_trial++; nextSRT();
+        function finishPVT() {
+            const validRTs = pvtData.records.filter(r => !r.is_false_start).map(r => r.rt);
+            const lapses = pvtData.records.filter(r => r.is_lapse).length;
+            const falseStarts = pvtData.records.filter(r => r.is_false_start).length;
+            
+            const meanRT = validRTs.length > 0 ? validRTs.reduce((a,b)=>a+b,0) / validRTs.length : 0;
+
+            pvtData.summary = {
+                mean_rt_ms: Math.round(meanRT),
+                lapses: lapses,
+                false_starts: falseStarts
+            };
+
+            CAS_Storage.saveModuleData('SEN_PVT', pvtData);
+            alert(`✅ PVT 持续警觉性评估完成！\n\n- 平均警觉反应时: ${Math.round(meanRT)} ms\n- 游离失误 (Lapses >500ms): ${lapses} 次\n- 冲动抢答: ${falseStarts} 次\n\n*临床提示: Lapses 数量是衡量睡眠质量、疲劳驾驶或神经衰弱的黄金敏感指标。`);
+            show('menu');
         }
 
-        /* ==================== 2. CRT 逻辑 ==================== */
-        let crtData = { module: "SEN_CRT", records: [] };
-        let crt_trial = 0, crt_onset = 0, crt_target = '';
-
-        function startCRT() { crt_trial = 0; crtData.records = []; show('crt-area'); nextCRT(); }
+        /* ===================================================================== */
+        /* 2. Time Reproduction 逻辑：屏蔽视觉，考察内部时钟 (Internal Clock)
+        /* ===================================================================== */
+        const TARGET_TIME_MS = 3000;
+        const TOTAL_TIME_TRIALS = 5;
+        let trData = { module: "SEN_TimeRep", records: [], summary: {} };
+        let trOnset = 0;
+        let trTrial = 0;
         
-        function nextCRT() {
-            if (crt_trial >= 10) { CAS_Storage.saveModuleData('SEN_CRT', crtData); alert("CRT 测试完成"); show('menu'); return; }
-            document.getElementById('crt-controls').classList.add('hidden');
-            document.getElementById('crt-stim').innerText = "+";
+        const timeBtn = document.getElementById('time-btn');
+        const timeMsg = document.getElementById('time-msg');
+
+        function startTimeRep() {
+            trData.records = []; trTrial = 0;
+            timeBtn.innerText = "按住我";
+            timeMsg.innerText = `剩余 ${TOTAL_TIME_TRIALS} 次机会`;
+            show('time-area');
+        }
+
+        timeBtn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            timeBtn.classList.add('pressing');
+            timeBtn.innerText = "...";
+            trOnset = performance.now();
+        });
+
+        timeBtn.addEventListener('pointerup', (e) => {
+            e.preventDefault();
+            if(!timeBtn.classList.contains('pressing')) return;
+            timeBtn.classList.remove('pressing');
             
+            const duration = performance.now() - trOnset;
+            const errorAbs = Math.abs(duration - TARGET_TIME_MS);
+            
+            trData.records.push({
+                reproduced_ms: Math.round(duration),
+                error_ms: Math.round(errorAbs)
+            });
+
+            trTrial++;
+            timeBtn.innerText = (duration / 1000).toFixed(2) + "s"; // 给予这一次的反馈
+            timeMsg.innerText = `剩余 ${TOTAL_TIME_TRIALS - trTrial} 次机会`;
+
             setTimeout(() => {
-                crt_target = Math.random() > 0.5 ? 'L' : 'R';
-                document.getElementById('crt-stim').innerText = crt_target === 'L' ? '⬅️' : '➡️';
-                document.getElementById('crt-controls').classList.remove('hidden');
-                crt_onset = performance.now();
-            }, Math.random() * 1000 + 500);
-        }
+                if (trTrial >= TOTAL_TIME_TRIALS) finishTimeRep();
+                else timeBtn.innerText = "按住我";
+            }, 1000);
+        });
 
-        function recordCRT(choice) {
-            crtData.records.push({ trial: crt_trial+1, correct: choice === crt_target, rt_ms: Math.round(performance.now() - crt_onset) });
-            crt_trial++; nextCRT();
-        }
-
-        /* ==================== 3. Go/No-Go 逻辑 ==================== */
-        let gngData = { module: "SEN_GoNoGo", records: [] };
-        let gng_trial = 0, gng_onset = 0, gng_isGo = true, gng_stimTimeout = null;
-
-        function startGNG() { gng_trial = 0; gngData.records = []; show('gng-area'); nextGNG(); }
-        
-        function nextGNG() {
-            if (gng_trial >= 15) { CAS_Storage.saveModuleData('SEN_GoNoGo', gngData); alert("Go/No-Go 测试完成"); show('menu'); return; }
-            const box = document.getElementById('gng-stim'); box.innerText = "+";
-            
-            setTimeout(() => {
-                // 70% Go (刺激建立优势反应), 30% No-Go (考察突然的抑制能力)
-                gng_isGo = Math.random() < 0.7; 
-                box.innerText = gng_isGo ? '🟢' : '❌';
-                gng_onset = performance.now();
-                
-                // 刺激仅呈现 800ms，超时未点击进入下一次判定
-                gng_stimTimeout = setTimeout(() => {
-                    // 如果超时未点击，对于 Go 是漏报 (Miss)，对于 No-Go 是正确拒绝 (Correct Rejection)
-                    gngData.records.push({ trial: gng_trial+1, type: gng_isGo?'Go':'NoGo', action: 'none', correct: !gng_isGo });
-                    gng_trial++; nextGNG();
-                }, 800);
-            }, Math.random() * 1000 + 500);
-        }
-
-        function clickGNG() {
-            if (document.getElementById('gng-stim').innerText === "+") return; // 忽略在注视点阶段的点击
-            clearTimeout(gng_stimTimeout);
-            const rt = Math.round(performance.now() - gng_onset);
-            // 对于 Go 是命中 (Hit)，对于 No-Go 是虚报/抑制失败 (False Alarm)
-            gngData.records.push({ trial: gng_trial+1, type: gng_isGo?'Go':'NoGo', action: 'clicked', correct: gng_isGo, rt_ms: rt });
-            
-            // 错误反馈
-            if (!gng_isGo) { document.getElementById('gng-stim').innerText = "⚠️"; }
-            
-            setTimeout(() => { gng_trial++; nextGNG(); }, 300);
-        }
-
-        /* ==================== 4. Visual Search 逻辑 ==================== */
-        let vsData = { module: "SEN_VisualSearch", records: [] };
-        let vs_trial = 0, vs_onset = 0;
-
-        function startSearch() { vs_trial = 0; vsData.records = []; show('search-area'); nextSearch(); }
-        
-        function nextSearch() {
-            if (vs_trial >= 5) { CAS_Storage.saveModuleData('SEN_VisualSearch', vsData); alert("视觉搜索测试完成"); show('menu'); return; }
-            const board = document.getElementById('search-board'); board.innerHTML = '';
-            
-            const totalItems = 24; // 6x4 网格
-            const targetIdx = Math.floor(Math.random() * totalItems); // 随机埋点 Q
-            
-            for (let i = 0; i < totalItems; i++) {
-                let node = document.createElement('div'); node.className = 'search-item';
-                let isTarget = i === targetIdx;
-                node.innerText = isTarget ? 'Q' : 'O';
-                node.style.color = isTarget ? 'var(--blue)' : 'var(--slate)'; // 微微改变颜色增加难度
-                
-                node.onclick = () => {
-                    const rt = Math.round(performance.now() - vs_onset);
-                    if (isTarget) {
-                        vsData.records.push({ trial: vs_trial+1, target_pos: i, rt_ms: rt });
-                        vs_trial++; nextSearch();
-                    } else {
-                        node.style.background = 'var(--red)'; node.style.color = 'white';
-                        setTimeout(() => { node.style.background = 'transparent'; node.style.color = 'var(--slate)'; }, 200);
-                    }
-                };
-                board.appendChild(node);
+        // 处理手势滑出按钮的边缘情况
+        timeBtn.addEventListener('pointerout', (e) => {
+            if(timeBtn.classList.contains('pressing')) {
+                // 模拟 pointerup 处理
+                const ev = new PointerEvent('pointerup');
+                timeBtn.dispatchEvent(ev);
             }
-            vs_onset = performance.now();
+        });
+
+        function finishTimeRep() {
+            const errors = trData.records.map(r => r.error_ms);
+            const meanError = errors.reduce((a,b)=>a+b,0) / errors.length;
+            
+            // 韦伯分数 (Weber Fraction) = 误差均值 / 目标时间，用于标准化衡量时间感知漂移
+            const weberFraction = meanError / TARGET_TIME_MS;
+
+            trData.summary = {
+                target_time_ms: TARGET_TIME_MS,
+                mean_absolute_error_ms: Math.round(meanError),
+                weber_fraction: parseFloat(weberFraction.toFixed(3))
+            };
+
+            CAS_Storage.saveModuleData('SEN_TimeRep', trData);
+            alert(`✅ 内部时间节律评估完成！\n\n- 目标时间: 3.00 秒\n- 平均绝对误差: ${Math.round(meanError)} ms\n- 节律偏离指数: ${weberFraction.toFixed(3)}\n\n*临床提示: 小脑或纹状体萎缩会导致时间估算过快或过慢，误差显著增大。`);
+            show('menu');
         }
     </script>
 </body>
