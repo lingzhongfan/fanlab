@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-MOT | 锥体外系与精细运动评估 (科研完全体 v4.0)</title>
+    <title>NeuroMap-MOT | 锥体外系与精细运动评估 (科研完全体 v4.1)</title>
     <style>
         :root { --primary: #1e293b; --blue: #4f46e5; --orange: #f59e0b; --amber: #fbbf24; --red: #f43f5e; --green: #10b981; --slate: #64748b; --bg: #fcfcfd; }
         /* 彻底阻断触控设备的默认手势，保证敲击测试的纯净度 */
@@ -22,14 +22,14 @@
         /* AFT 交替敲击测试专属 UI */
         .timer-board { font-size: 40px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; font-family: monospace; }
         .tap-workspace { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; height: 300px;}
-        .tap-btn { flex: 1; border-radius: 24px; border: 4px solid var(--slate); background: #f8fafc; font-size: 24px; font-weight: bold; color: var(--slate); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; box-shadow: 0 10px 0 #cbd5e1; touch-action: manipulation; }
+        .tap-btn { flex: 1; border-radius: 24px; border: 4px solid var(--slate); background: #f8fafc; font-size: 24px; font-weight: bold; color: var(--slate); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; box-shadow: 0 10px 0 #cbd5e1; touch-action: none; }
         .tap-btn:active, .tap-btn.active-sim { transform: translateY(10px); box-shadow: 0 0 0 #cbd5e1; background: #fef3c7; border-color: var(--orange); color: var(--orange); }
 
         /* SRT 简单反应时专属 UI */
-        .srt-workspace { width: 100%; height: 350px; border-radius: 24px; background: #f8fafc; border: 4px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.1s; position: relative; }
+        .srt-workspace { width: 100%; height: 350px; border-radius: 24px; background: #f8fafc; border: 4px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.1s; position: relative; touch-action: none;}
         .srt-workspace.waiting { background: var(--red); border-color: #be123c; }
         .srt-workspace.go { background: var(--green); border-color: #047857; }
-        .srt-text { font-size: 32px; font-weight: bold; color: var(--primary); pointer-events: none;}
+        .srt-text { font-size: 32px; font-weight: bold; color: var(--primary); pointer-events: none; text-align: center; white-space: pre-wrap;}
         .srt-workspace.waiting .srt-text, .srt-workspace.go .srt-text { color: white; }
 
         .trial-counter { position: absolute; top: 20px; right: 20px; font-size: 14px; color: var(--slate); font-weight: bold; }
@@ -41,7 +41,7 @@
 
     <div class="container" id="menu">
         <div class="module-header">
-            <h2>🎯 运动共济与锥体外系网络 (Clinical V4.0)</h2>
+            <h2>🎯 运动共济与锥体外系网络 (Clinical V4.1)</h2>
             <p>基于微观动力学提取，靶向基底节多巴胺能衰退引起的运动迟缓、僵直与易疲劳性。</p>
         </div>
         <button class="sys-btn btn-menu" onclick="startAFT()">👇 1. AFT 交替手指敲击 (15秒高频负荷)</button>
@@ -84,35 +84,45 @@
         /* ===================================================================== */
         /* 1. AFT 逻辑：追踪每一次合法交替敲击的毫秒级时间戳，计算变异系数与疲劳指数
         /* ===================================================================== */
+        const AFT_DURATION_MS = 15000;
         let aftData = { module: "MOT_AFT", timestamps: [], summary: {} };
-        let aftTimeLeft = 15.0;
         let aftInterval = null;
         let aftActive = false;
         let lastTapSide = null; // 记录上一侧，强制要求交替 (0=左, 1=右)
-        let tapOnset = 0;
+        let aftStartTime = 0;
 
         const btnLeft = document.getElementById('btn-left');
         const btnRight = document.getElementById('btn-right');
 
-        function initAFT() {
-            aftData.timestamps = [];
-            aftTimeLeft = 15.0;
-            lastTapSide = null;
+        // 修复点 1：补齐界面路由函数 startAFT
+        function startAFT() {
             document.getElementById('aft-timer').innerText = "15.0 s";
             document.getElementById('aft-timer').style.color = "var(--primary)";
-            
-            document.getElementById('btn-aft-start').style.display = 'none';
-            aftActive = true;
-            tapOnset = performance.now();
+            document.getElementById('btn-aft-start').style.display = 'flex';
+            document.getElementById('btn-aft-start').innerText = "开始测试";
+            show('aft-area');
+        }
 
+        // 初始化 AFT 倒计时引擎
+        function initAFT() {
+            aftData.timestamps = [];
+            lastTapSide = null;
+            document.getElementById('btn-aft-start').style.display = 'none';
+            document.getElementById('aft-timer').style.color = "var(--primary)";
+            aftActive = true;
+            aftStartTime = performance.now();
+
+            // 修复点 2：基于绝对时间戳计算剩余时间，彻底杜绝浮点数精度溢出
             aftInterval = setInterval(() => {
-                aftTimeLeft -= 0.1;
-                document.getElementById('aft-timer').innerText = aftTimeLeft.toFixed(1) + ' s';
+                const elapsed = performance.now() - aftStartTime;
+                const timeLeft = Math.max(0, (AFT_DURATION_MS - elapsed) / 1000);
                 
-                if (aftTimeLeft <= 0) {
+                document.getElementById('aft-timer').innerText = timeLeft.toFixed(1) + ' s';
+                
+                if (timeLeft <= 0) {
                     endAFT();
                 }
-            }, 100);
+            }, 50); // 50ms 刷新率保证视觉平滑
         }
 
         function recordTap(side) {
@@ -120,7 +130,7 @@
             // 核心机制：强制交替。如果连续敲击同一侧，不计入有效时间戳
             if (side === lastTapSide) return; 
 
-            const t = performance.now() - tapOnset;
+            const t = performance.now() - aftStartTime;
             aftData.timestamps.push(t);
             lastTapSide = side;
 
@@ -130,7 +140,7 @@
             setTimeout(() => targetBtn.classList.remove('active-sim'), 50);
         }
 
-        // Pointer 事件无视浏览器的 300ms 触摸延迟
+        // Pointer 事件无视浏览器的 300ms 触摸延迟，并兼容鼠标与触屏
         btnLeft.addEventListener('pointerdown', (e) => { e.preventDefault(); recordTap(0); });
         btnRight.addEventListener('pointerdown', (e) => { e.preventDefault(); recordTap(1); });
 
@@ -142,7 +152,7 @@
 
             const n = aftData.timestamps.length;
             if (n < 5) {
-                alert("有效敲击次数过少，测试数据无效。请重试并确保交替敲击。");
+                alert("⚠️ 有效交替敲击次数过少，测试数据无效。请确保使用双指交替敲击屏幕！");
                 document.getElementById('btn-aft-start').style.display = 'flex';
                 document.getElementById('btn-aft-start').innerText = "重新测试";
                 return;
@@ -205,7 +215,7 @@
                 clearTimeout(srtTimeout);
                 srtData.records.push({ type: 'false_start', rt: null });
                 srtBox.className = 'srt-workspace';
-                srtMsg.innerText = "⚠️ 抢答了！\n请等屏幕变绿再点。\n(点击继续)";
+                srtMsg.innerText = "⚠️ 抢答了！\n请等屏幕变绿再点。\n(点击此处继续)";
                 srtState = 'init';
             } else if (srtState === 'go') {
                 // 合法反应
