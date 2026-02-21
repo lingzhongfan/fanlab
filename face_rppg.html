@@ -3,172 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeuroMap-PHY | 面部影像与微表情记录</title>
+    <title>NeuroMap-PHY | 影像血流与生理计算 (科研完全体 v4.0)</title>
     <style>
-        /* 科技温情风 UI */
-        :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --pink: #ec4899; --slate: #64748b; }
-        body { font-family: -apple-system, sans-serif; background: #fcfcfd; margin: 0; padding: 20px; color: #334155; }
-        .container { max-width: 800px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        /* ==================== UI 与色彩规范 ==================== */
+        :root { --primary: #1e293b; --blue: #4f46e5; --rose: #e11d48; --red: #f43f5e; --pink: #fdf2f8; --slate: #64748b; --green: #10b981; --bg: #fcfcfd; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); user-select: none; }
+        .container { max-width: 900px; margin: 0 auto 30px; background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+        .hidden { display: none !important; }
         
-        .module-header { border-left: 6px solid var(--pink); padding-left: 15px; margin-bottom: 25px; }
+        .module-header { border-left: 6px solid var(--rose); padding-left: 15px; margin-bottom: 25px; }
         .module-header h2 { margin: 0; font-size: 22px; color: var(--primary); }
         .module-header p { margin: 5px 0 0 0; color: var(--slate); font-size: 14px; line-height: 1.6; }
 
-        .instruction-box { background: #fdf2f8; border: 2px dashed #fbcfe8; padding: 20px; border-radius: 16px; margin-bottom: 25px; font-size: 15px; color: #9d174d; }
+        /* 临床指导语区块 */
+        .instruction-box { background: var(--pink); border: 2px dashed #fda4af; padding: 25px; border-radius: 16px; margin-bottom: 25px; }
+        .instruction-box p { margin: 0 0 10px 0; color: #be123c; font-weight: bold; font-size: 16px; }
+        .instruction-box ul { margin: 0; padding-left: 20px; color: #9f1239; font-size: 15px; line-height: 1.5; }
 
-        /* 摄像头视窗区 */
-        .video-workspace { position: relative; width: 100%; height: 400px; background: #0f172a; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px solid #cbd5e1; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);}
+        /* 视频与 ROI 提取区 */
+        .camera-workspace { display: flex; gap: 20px; margin-bottom: 20px; }
+        .video-container { position: relative; width: 320px; height: 240px; background: #0f172a; border-radius: 16px; overflow: hidden; border: 4px solid #cbd5e1; box-shadow: 0 10px 20px rgba(0,0,0,0.1);}
+        video { display: block; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* 镜像翻转 */ }
+        canvas.overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; transform: scaleX(-1); }
+
+        /* 实时状态与波形图 */
+        .signal-board { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .timer-display { font-size: 40px; font-weight: bold; color: var(--primary); font-family: monospace; text-align: center; background: #f8fafc; border-radius: 16px; border: 2px solid #e2e8f0; padding: 10px; }
+        .timer-alert { color: var(--red); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         
-        /* 镜像显示的视频流，符合人类照镜子的习惯 */
-        #cam-preview { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.8; }
-        
-        /* 录制时覆盖在画面上的静息注视点 */
-        .fixation-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; background: rgba(0,0,0,0.4); display: none; }
-        .crosshair { font-size: 80px; color: white; font-weight: bold; opacity: 0.8; margin-bottom: 20px;}
-        .timer-text { font-family: monospace; font-size: 30px; color: var(--green); font-weight: bold; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 8px;}
+        .ppg-visualizer { width: 100%; height: 130px; background: #0f172a; border-radius: 16px; position: relative; overflow: hidden; border: 2px solid #cbd5e1;}
+        .ppg-visualizer canvas { width: 100%; height: 100%; display: block; }
+        .sensor-badge { position: absolute; top: 10px; left: 10px; background: rgba(225,29,72,0.2); border: 1px solid rgba(225,29,72,0.5); color: #fda4af; font-size: 12px; padding: 4px 8px; border-radius: 6px; font-family: monospace; z-index: 10;}
 
         /* 控制按钮 */
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-start { background: var(--blue); color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2); }
-        .btn-start:hover { background: #4338ca; }
-        .btn-stop { background: var(--red); color: white; opacity: 0.5; cursor: not-allowed; }
-        .btn-stop.active { opacity: 1; cursor: pointer; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2); }
-        
-        /* 人脸框辅助对齐 UI */
-        .face-guide { position: absolute; width: 200px; height: 280px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; top: 50px; pointer-events: none; }
+        .controls-board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .sys-btn { padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-record { background: var(--rose); color: white; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.2); }
+        .btn-record:hover { background: #be123c; transform: translateY(-2px); }
+        .btn-record:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; transform: none; }
+        .btn-stop { background: var(--slate); color: white; }
+        .btn-stop:hover { background: #475569; transform: translateY(-2px); }
+        .btn-stop:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; transform: none;}
+
+        /* 特征计算面板 */
+        .metrics-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .metric-card { background: white; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; }
+        .metric-card span { display: block; font-size: 12px; color: var(--slate); font-weight: bold; margin-bottom: 5px; }
+        .metric-card strong { font-size: 28px; color: var(--rose); font-family: monospace; }
+
+        /* 下载区 */
+        .download-box { background: #f0fdf4; border: 2px dashed #86efac; padding: 25px; border-radius: 16px; text-align: center; margin-top: 30px; }
+        .btn-download { background: var(--green); color: white; padding: 18px 30px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; transition: 0.2s; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);}
+        .btn-download:hover { background: #059669; transform: translateY(-2px); }
     </style>
     <script src="cas-storage.js"></script>
 </head>
 <body>
-    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--pink); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
+    <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--rose); font-weight:bold; cursor:pointer; font-size:16px; margin-bottom:20px;">← 返回控制台</button>
 
     <div class="container">
         <div class="module-header">
-            <h2>🎥 影像表型与 rPPG 提取 (静息态)</h2>
-            <p><strong>临床靶向：</strong>捕捉微表情延迟 (情感淡漠) 与面部血流变异 (自主神经 HRV)。<br>
-            系统将录取一段 60 秒的高清静息态视频，供后端抽取生理指标。</p>
+            <h2>🎥 面部影像血流计算 (Face rPPG)</h2>
+            <p><strong>临床靶向：</strong>评估静息状态下的自主神经系统 (ANS) 功能与迷走神经张力。<br>
+            *通过前置摄像头捕捉面部额头区域 (ROI) 的绿光通道变异，提取心率 (HR) 与心率变异性 (RMSSD)。</p>
         </div>
-        
 
         <div class="instruction-box">
-            <strong>📋 主试指导语：</strong>“请您坐正，脸部对准屏幕中央的虚线框。点击开始后，请放松，自然呼吸，并全程盯着屏幕中央的十字光标，尽量不要说话或大幅晃动头部。”
+            <p>⚠️ 临床标准操作规程 (SOP)：</p>
+            <ul>
+                <li><strong>光源要求：</strong>请确保受试者面部光线充足且均匀，避免逆光或强烈的侧影。</li>
+                <li><strong>姿势要求：</strong>请受试者保持正脸面对镜头，将【额头区域】对准画面中的绿色方框，测试期间（60秒）<strong>尽量不要说话或晃动头部</strong>。</li>
+                <li><strong>数据隐私：</strong>本模块仅在前端逐帧提取 RGB 像素矩阵均值，<strong>绝对不会录制或上传任何面部照片/视频流</strong>，符合临床伦理要求。</li>
+            </ul>
         </div>
 
-        <div class="video-workspace">
-            <video id="cam-preview" autoplay muted playsinline></video>
-            <div class="face-guide" id="face-guide"></div>
+        <div class="camera-workspace">
+            <div class="video-container">
+                <video id="video-feed" autoplay playsinline muted></video>
+                <canvas id="overlay-canvas" class="overlay"></canvas>
+            </div>
             
-            <div class="fixation-overlay" id="fixation-overlay">
-                <div class="crosshair">+</div>
-                <div class="timer-text" id="record-timer">00:00</div>
+            <div class="signal-board">
+                <div class="timer-display" id="time-display">01:00</div>
+                <div class="ppg-visualizer">
+                    <div class="sensor-badge">BVP (Blood Volume Pulse)</div>
+                    <canvas id="ppg-canvas"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn btn-start" id="btn-start" onclick="startCameraAndRecord()">📷 开启相机并录制</button>
-            <button class="btn btn-stop" id="btn-stop" onclick="stopRecording()" disabled>⏹ 提前结束</button>
+        <div class="controls-board">
+            <button class="sys-btn btn-record" id="btn-record" onclick="initCamera()">📹 步骤1: 开启摄像头预览对焦</button>
+            <button class="sys-btn btn-stop" id="btn-stop" onclick="startRPPGTest()" disabled>▶ 步骤2: 启动 60秒 生理采集</button>
+        </div>
+
+        <div class="metrics-board" style="opacity: 0.3; pointer-events: none;" id="metrics-board">
+            <div class="metric-card"><span>实时心率估计 (HR)</span><strong id="m-hr">-- bpm</strong></div>
+            <div class="metric-card"><span>心率变异性 (RMSSD)</span><strong id="m-rmssd">-- ms</strong></div>
+            <div class="metric-card"><span>有效采集帧数 (FPS)</span><strong id="m-fps">--</strong></div>
+        </div>
+
+        <div id="download-area" class="download-box hidden">
+            <h3 style="color:#166534; margin-top:0;">✅ rPPG 原始时序信号提取完成</h3>
+            <p style="font-size:14px; color:#15803d; margin-bottom:20px;">摘要指标已存入系统主库。为确保达到顶级医疗级测算精度，系统已将视频每帧的绝对时间戳与 R, G, B 均值封存。请下载 CSV，并交付后端使用 PyVHR (ICA/EVM) 等开源算法库进行去噪和 RR 间期提取。</p>
+            <button class="btn-download" id="btn-download-csv">⬇️ 导出完整高频 RGB 时序数据 (CSV)</button>
         </div>
     </div>
 
     <script>
-        let mediaRecorder;
-        let recordedChunks = [];
-        let stream;
-        let timerInterval;
-        let elapsedSeconds = 0;
-        const RECORD_LIMIT_SEC = 60; // 临床标准 60 秒静息态
+        const TEST_DURATION = 60; // 临床规范通常需要 1 分钟以计算短时 HRV
+        let timeLeft = TEST_DURATION;
+        let testInterval = null;
+        let isTesting = false;
 
-        async function startCameraAndRecord() {
+        // 核心数据结构
+        let rawRgbData = []; 
+        let testOnset = 0;
+        let framesCount = 0;
+
+        // 视频与 Canvas 元素
+        const video = document.getElementById('video-feed');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+        const overlayCtx = overlayCanvas.getContext('2d', { willReadFrequently: true });
+        
+        const ppgCanvas = document.getElementById('ppg-canvas');
+        const ppgCtx = ppgCanvas.getContext('2d');
+        
+        let videoStream = null;
+        let extractionLoopId = null;
+
+        // ROI (Region of Interest) 参数设置：针对额头中心区域
+        const ROI_WIDTH = 60;
+        const ROI_HEIGHT = 40;
+
+        // 实时波形绘制用数组
+        const signalBuffer = new Array(200).fill(0);
+        let lastPeakTime = 0;
+        let rrIntervals = [];
+
+        // ================= 1. 摄像头初始化与 ROI 绘制 =================
+        async function initCamera() {
             try {
-                // 请求前置摄像头，限制帧率为 30fps 以保证 rPPG 频域分析的稳定性
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", frameRate: { ideal: 30, max: 30 }, width: { ideal: 1280 }, height: { ideal: 720 } },
-                    audio: false // 纯影像分析不需要音频，减小体积
-                });
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 320, height: 240 } });
+                video.srcObject = videoStream;
                 
-                const videoElement = document.getElementById('cam-preview');
-                videoElement.srcObject = stream;
-                
-                // 给受试者 3 秒时间对齐人脸框
-                document.getElementById('btn-start').innerText = "请对齐人脸 (3s后自动录像)...";
-                document.getElementById('btn-start').disabled = true;
-
-                setTimeout(() => {
-                    startRecordingEngine();
-                }, 3000);
-
+                video.onloadedmetadata = () => {
+                    video.play();
+                    overlayCanvas.width = video.videoWidth;
+                    overlayCanvas.height = video.videoHeight;
+                    ppgCanvas.width = ppgCanvas.parentElement.clientWidth;
+                    ppgCanvas.height = ppgCanvas.parentElement.clientHeight;
+                    
+                    document.getElementById('btn-record').disabled = true;
+                    document.getElementById('btn-record').innerText = "✅ 摄像头已就绪";
+                    document.getElementById('btn-stop').disabled = false;
+                    document.getElementById('btn-stop').style.background = 'var(--green)';
+                    document.getElementById('btn-stop').innerText = "▶ 步骤2: 启动 60秒 生理采集";
+                    
+                    // 开始渲染预览框
+                    drawOverlay();
+                };
             } catch (err) {
-                alert("无法访问摄像头，请检查浏览器权限。\n错误: " + err);
+                alert("⚠️ 无法调用摄像头！请确保浏览器拥有权限，或当前处于 HTTPS 加密环境。");
+                console.error(err);
             }
         }
 
-        function startRecordingEngine() {
-            // UI 切换：隐藏人脸辅助框，显示黑屏十字注视点
-            document.getElementById('face-guide').style.display = 'none';
-            document.getElementById('fixation-overlay').style.display = 'flex';
+        function drawOverlay() {
+            if (!isTesting) {
+                extractionLoopId = requestAnimationFrame(drawOverlay);
+            }
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             
-            document.getElementById('btn-start').innerText = "🔴 录像中...";
-            const btnStop = document.getElementById('btn-stop');
-            btnStop.disabled = false; btnStop.classList.add('active');
+            // 绘制绿色的额头对准框
+            const startX = (overlayCanvas.width - ROI_WIDTH) / 2;
+            const startY = overlayCanvas.height * 0.2; // 靠上大约 20% 的位置，通常是额头
+            
+            overlayCtx.strokeStyle = 'rgba(16, 185, 129, 0.8)'; // Green
+            overlayCtx.lineWidth = 3;
+            overlayCtx.setLineDash([5, 5]);
+            overlayCtx.strokeRect(startX, startY, ROI_WIDTH, ROI_HEIGHT);
+            
+            // 绘制瞄准十字
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(startX + ROI_WIDTH/2, startY - 10);
+            overlayCtx.lineTo(startX + ROI_WIDTH/2, startY + ROI_HEIGHT + 10);
+            overlayCtx.moveTo(startX - 10, startY + ROI_HEIGHT/2);
+            overlayCtx.lineTo(startX + ROI_WIDTH + 10, startY + ROI_HEIGHT/2);
+            overlayCtx.stroke();
+            overlayCtx.setLineDash([]);
+        }
 
-            recordedChunks = [];
-            // 使用极高兼容性的 webm 格式打包视频流
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        // ================= 2. 核心提取循环 (rPPG Pipeline) =================
+        function startRPPGTest() {
+            cancelAnimationFrame(extractionLoopId); // 停止单纯的预览
             
-            mediaRecorder.ondataavailable = function(e) {
-                if (e.data.size > 0) recordedChunks.push(e.data);
-            };
+            rawRgbData = [];
+            rrIntervals = [];
+            timeLeft = TEST_DURATION;
+            framesCount = 0;
+            isTesting = true;
+            testOnset = performance.now();
 
-            mediaRecorder.start();
-            
-            // 计时器
-            elapsedSeconds = 0;
-            timerInterval = setInterval(() => {
-                elapsedSeconds++;
-                const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-                const secs = String(elapsedSeconds % 60).padStart(2, '0');
-                document.getElementById('record-timer').innerText = `${mins}:${secs}`;
+            document.getElementById('btn-stop').disabled = true;
+            document.getElementById('btn-stop').style.background = 'var(--slate)';
+            document.getElementById('btn-stop').innerText = "采集中...";
+            document.getElementById('metrics-board').style.opacity = '1';
+
+            // 启动倒计时
+            testInterval = setInterval(() => {
+                timeLeft--;
+                let sec = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+                document.getElementById('time-display').innerText = `00:${sec}`;
                 
-                // 达到 60 秒自动停止
-                if (elapsedSeconds >= RECORD_LIMIT_SEC) {
-                    stopRecording();
+                if (timeLeft <= 10) document.getElementById('time-display').classList.add('timer-alert');
+                
+                if (timeLeft <= 0) {
+                    stopRPPGTest();
                 }
             }, 1000);
+
+            // 启动视频流像素抓取与波形渲染
+            extractFrame();
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                mediaRecorder.stop();
-            }
-            clearInterval(timerInterval);
+        function extractFrame() {
+            if (!isTesting) return;
             
-            // 关闭摄像头硬件
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+            const now = performance.now();
+            const relTimeMs = now - testOnset;
+
+            // 1. 将当前视频帧画到隐形/重叠的 Canvas 上
+            overlayCtx.drawImage(video, 0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            // 2. 提取 ROI 区域的图像矩阵数据
+            const startX = (overlayCanvas.width - ROI_WIDTH) / 2;
+            const startY = overlayCanvas.height * 0.2;
+            const frameData = overlayCtx.getImageData(startX, startY, ROI_WIDTH, ROI_HEIGHT);
+            const data = frameData.data;
+
+            // 3. 计算 ROI 区域 RGB 平均值
+            let sumR = 0, sumG = 0, sumB = 0;
+            const pixelCount = ROI_WIDTH * ROI_HEIGHT;
+            for (let i = 0; i < data.length; i += 4) {
+                sumR += data[i];     // Red
+                sumG += data[i + 1]; // Green (包含最多脉搏血流信息)
+                sumB += data[i + 2]; // Blue
+            }
+            const avgR = sumR / pixelCount;
+            const avgG = sumG / pixelCount;
+            const avgB = sumB / pixelCount;
+
+            // 存入原始数据库供后续导出
+            rawRgbData.push({ t: Math.round(relTimeMs), r: avgR.toFixed(3), g: avgG.toFixed(3), b: avgB.toFixed(3) });
+            framesCount++;
+
+            // ================= 前端模拟信号处理与特征提取 =================
+            // 将 Green 通道推入缓冲，并进行极简的去趋势滤波 (Detrending)
+            signalBuffer.push(avgG);
+            signalBuffer.shift();
+
+            // 计算均值基线
+            const meanG = signalBuffer.reduce((a,b)=>a+b,0) / signalBuffer.length;
+            
+            // 提取 AC 交流分量 (即脉搏波动)
+            const acSignal = signalBuffer.map(val => val - meanG);
+
+            // 前端波形绘制
+            drawPPGWaveform(acSignal);
+
+            // 极简峰值检测 (评估前端实时心率，临床以导出数据后端处理为准)
+            const latestVal = acSignal[acSignal.length - 1];
+            const prevVal = acSignal[acSignal.length - 2];
+            const prevPrevVal = acSignal[acSignal.length - 3];
+            
+            // 寻找局部最大值，并限制不合理的极短心跳（防噪音阈值）
+            if (prevVal > latestVal && prevVal > prevPrevVal && prevVal > 0.5) {
+                if (lastPeakTime !== 0) {
+                    const rr = now - lastPeakTime;
+                    if (rr > 400 && rr < 1500) { // 心率在 40 - 150 bpm 之间算有效
+                        rrIntervals.push(rr);
+                        if(rrIntervals.length > 20) rrIntervals.shift(); // 维持一个滑动窗口
+                        updateLiveMetrics();
+                    }
+                }
+                lastPeakTime = now;
             }
 
-            document.getElementById('fixation-overlay').style.display = 'none';
-            document.getElementById('btn-start').innerText = "✅ 录制完成";
-            document.getElementById('btn-stop').disabled = true;
-            document.getElementById('btn-stop').classList.remove('active');
+            // 重新画回瞄准框
+            drawOverlay();
 
-            mediaRecorder.onstop = () => {
-                const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
-                
-                // 1. 保存元数据到 CAS 结构中
-                const physioData = {
-                    module: "PHY_Face_rPPG",
-                    duration_sec: elapsedSeconds,
-                    video_size_mb: (videoBlob.size / (1024 * 1024)).toFixed(2),
-                    backend_processed: false
-                };
-                CAS_Storage.saveModuleData('PHY_Face_rPPG', physioData);
+            // 请求下一帧
+            extractionLoopId = requestAnimationFrame(extractFrame);
+        }
 
-                // 2. 模拟后端发送机制
-                alert(`影像采集完成！\n\n- 时长: ${elapsedSeconds}s\n- 数据包体积: ${physioData.video_size_mb} MB\n\n*后台逻辑提示: 视频流 Blob 已在内存中就绪。您可通过 REST API 将其发送至装有 OpenFace 和 PyVHR 的 Python 服务器，以提取 FACS 动作单元（AUs）和 HRV 心率变异性。`);
+        function drawPPGWaveform(acSignal) {
+            ppgCtx.fillStyle = '#0f172a';
+            ppgCtx.fillRect(0, 0, ppgCanvas.width, ppgCanvas.height);
+            
+            ppgCtx.strokeStyle = '#e11d48'; // 脉搏红
+            ppgCtx.lineWidth = 2;
+            ppgCtx.beginPath();
+            
+            const sliceWidth = ppgCanvas.width / acSignal.length;
+            let drawX = 0;
+            
+            // 寻找最大振幅用于动态缩放 (自动增益)
+            const maxAmp = Math.max(...acSignal.map(Math.abs)) || 1;
+
+            for(let i=0; i<acSignal.length; i++) {
+                // 动态缩放并居中
+                let normalizedY = (acSignal[i] / maxAmp) * (ppgCanvas.height * 0.4); 
+                let drawY = (ppgCanvas.height / 2) - normalizedY;
                 
-                setTimeout(() => { location.href = 'index.html'; }, 1000);
+                if (i === 0) ppgCtx.moveTo(drawX, drawY);
+                else ppgCtx.lineTo(drawX, drawY);
+                drawX += sliceWidth;
+            }
+            ppgCtx.stroke();
+        }
+
+        function updateLiveMetrics() {
+            if (rrIntervals.length < 5) return; // 数据太少不计算
+
+            // 计算平均心率 HR = 60000 / avg(RR)
+            const meanRR = rrIntervals.reduce((a,b)=>a+b,0) / rrIntervals.length;
+            const hr = 60000 / meanRR;
+
+            // 计算 RMSSD: 连续相邻 RR 间期差值的平方和的均方根
+            let sumSqDiff = 0;
+            for(let i=1; i<rrIntervals.length; i++) {
+                sumSqDiff += Math.pow(rrIntervals[i] - rrIntervals[i-1], 2);
+            }
+            const rmssd = Math.sqrt(sumSqDiff / (rrIntervals.length - 1));
+
+            document.getElementById('m-hr').innerText = Math.round(hr) + ' bpm';
+            document.getElementById('m-rmssd').innerText = Math.round(rmssd) + ' ms';
+        }
+
+        // ================= 3. 结束采集与特征持久化 =================
+        function stopRPPGTest() {
+            clearInterval(testInterval);
+            cancelAnimationFrame(extractionLoopId);
+            isTesting = false;
+
+            // 关闭摄像头释放资源
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+
+            document.getElementById('time-display').classList.remove('timer-alert');
+            document.getElementById('btn-stop').innerText = "测试完成";
+            
+            // 计算整体前端拟合参数
+            let finalHR = parseInt(document.getElementById('m-hr').innerText) || 0;
+            let finalRMSSD = parseInt(document.getElementById('m-rmssd').innerText) || 0;
+            let avgFps = (framesCount / TEST_DURATION).toFixed(1);
+
+            document.getElementById('m-fps').innerText = avgFps;
+
+            let rppgSummary = {
+                module: "PHY_Face_rPPG",
+                summary: {
+                    estimated_hr_bpm: finalHR,
+                    estimated_rmssd_ms: finalRMSSD,
+                    avg_fps: parseFloat(avgFps),
+                    duration_sec: TEST_DURATION
+                }
+            };
+            CAS_Storage.saveModuleData('PHY_Face_rPPG', rppgSummary);
+
+            // 准备 CSV 下载
+            setupCSVDownload();
+
+            alert(`✅ rPPG 生理特征记录完成！\n\n- 有效采集帧数: ${framesCount} 帧 (${avgFps} fps)\n- 实时拟合心率: ${finalHR} bpm\n- 拟合 RMSSD: ${finalRMSSD} ms\n\n*请务必下载并保存 CSV 源文件，供后端科研组调用。`);
+        }
+
+        function setupCSVDownload() {
+            const dlArea = document.getElementById('download-area');
+            const dlBtn = document.getElementById('btn-download-csv');
+            dlArea.classList.remove('hidden');
+
+            dlBtn.onclick = () => {
+                let csvContent = "data:text/csv;charset=utf-8,Time_ms,Red_Avg,Green_Avg,Blue_Avg\n";
+                rawRgbData.forEach(row => {
+                    csvContent += `${row.t},${row.r},${row.g},${row.b}\n`;
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const a = document.createElement("a");
+                a.setAttribute("href", encodedUri);
+                a.setAttribute("download", `CAS_rPPG_RGB_TimeSeries_${new Date().getTime()}.csv`);
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             };
         }
     </script>
