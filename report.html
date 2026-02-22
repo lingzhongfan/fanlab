@@ -5,6 +5,17 @@
     <title>NeuroMap 1.0 - 神经行为多模态评估图谱与计算精神病学风险报告</title>
     <style>
         :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --purple: #8b5cf6; --teal: #0d9488; --slate: #64748b; }
+        
+        /* 强制打印时保留背景色与渐变色，这对可视化图表打印极其重要 */
+        @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { background: white; padding: 0; }
+            .input-panel, .btn-group, button { display: none !important; }
+            .container { box-shadow: none; padding: 0; border: none; max-width: 100%; }
+            .results-box { break-inside: avoid; }
+            .viz-card { break-inside: avoid; }
+        }
+
         body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; padding: 30px; color: #334155; line-height: 1.6; margin: 0;}
         .container { max-width: 1050px; margin: auto; background: white; padding: 45px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
         h2 { color: var(--blue); border-bottom: 3px solid var(--light-blue); padding-bottom: 15px; margin-top: 0; display: flex; align-items: center; gap: 10px;}
@@ -22,7 +33,7 @@
         .info-item span { display: block; font-size: 13.5px; color: var(--slate); font-weight: bold;}
         .info-item strong { font-size: 18px; color: var(--primary); }
 
-        /* 六大基带雷达 */
+        /* 模块 1：六大基带雷达 */
         .chart-container { background: white; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 1px solid #e2e8f0; }
         .bar-row { display: flex; align-items: center; margin-bottom: 15px; }
         .bar-label { width: 150px; font-weight: bold; color: var(--slate); font-size: 14.5px; }
@@ -34,7 +45,7 @@
         .fill-mot { background: linear-gradient(90deg, #fcd34d, #f59e0b); } .fill-sen { background: linear-gradient(90deg, #fef08a, #eab308); }
         .fill-lan { background: linear-gradient(90deg, #c084fc, #9333ea); } .fill-lif { background: linear-gradient(90deg, #2dd4bf, #0d9488); }
 
-        /* 计算精神病学风险图谱 */
+        /* 模块 2：计算精神病学风险图谱 */
         .risk-container { background: #fffbeb; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 2px dashed #fcd34d; }
         .risk-header { font-size: 18px; font-weight: bold; color: #b45309; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;}
         .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;}
@@ -46,7 +57,25 @@
         
         .risk-low { background: var(--green); } .risk-med { background: var(--amber); } .risk-high { background: var(--red); }
 
-        /* 临床报告明细与模块得分 UI */
+        /* ================= 新增模块 3：生物标志物可视化面板 ================= */
+        .viz-box { background: white; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 1px solid #e2e8f0; }
+        .viz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .viz-card { background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .viz-title { font-size: 14px; font-weight: bold; color: var(--slate); margin-bottom: 15px; width: 100%; text-align: left; }
+        
+        /* 可视化组件：环形图 (Donut) */
+        .viz-donut { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 10px; }
+        .viz-donut-inner { width: 75px; height: 75px; background: #f8fafc; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: var(--primary); z-index: 2; }
+        .viz-donut-inner span { font-size: 11px; color: var(--slate); font-weight: normal; }
+        
+        /* 可视化组件：渐变阈值标尺 (Gauge) */
+        .viz-gauge-container { width: 100%; margin-top: 10px; margin-bottom: 15px; position: relative; }
+        .viz-gauge-track { width: 100%; height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--green) 0%, var(--amber) 50%, var(--red) 100%); }
+        .viz-gauge-marker { position: absolute; top: -5px; width: 4px; height: 24px; background: var(--primary); border-radius: 2px; box-shadow: 0 0 5px rgba(0,0,0,0.3); transition: left 1s; }
+        .viz-gauge-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--slate); margin-top: 5px; font-weight: bold;}
+        .viz-value-text { font-size: 22px; font-weight: bold; color: var(--primary); font-family: monospace; }
+
+        /* 模块 4：临床报告明细与模块得分 UI */
         .results-box { background: #f8fafc; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 2px dashed #cbd5e1; }
         .domain-section { margin-bottom: 25px; }
         .domain-title { font-size: 16px; font-weight: bold; color: white; background: var(--primary); padding: 8px 15px; border-radius: 8px; display: inline-block; margin-bottom: 12px;}
@@ -54,21 +83,13 @@
         .item-text-group { display: flex; flex-direction: column; gap: 4px; }
         .alert-badge { color: white; background: var(--red); font-size: 12px; padding: 3px 8px; border-radius: 12px; font-weight: bold;}
         .warning-badge { color: white; background: var(--amber); font-size: 12px; padding: 3px 8px; border-radius: 12px; font-weight: bold;}
-        
-        /* 模块独立得分徽章 */
         .module-score { padding: 6px 12px; border-radius: 10px; font-weight: bold; font-size: 15px; border: 1px solid; display: flex; align-items: center; gap: 5px; min-width: 80px; justify-content: center;}
 
-        /* 打印与导出控制 */
+        /* 底部操作区 */
         .btn-group { display: flex; gap: 20px; }
         .btn { flex: 1; padding: 20px; border: none; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; }
         .btn-export { background: var(--green); color: white; }
         .btn-print { background: var(--slate); color: white; }
-        
-        @media print {
-            body { background: white; padding: 0; }
-            .input-panel, .btn-group, button { display: none !important; }
-            .container { box-shadow: none; padding: 0; border: none; }
-        }
     </style>
     <script src="cas-storage.js"></script>
 </head>
@@ -142,6 +163,12 @@
             </div>
         </div>
 
+        <div class="viz-box" id="viz-panel" style="display:none;">
+            <h3 style="margin-top:0; color:var(--primary); border-bottom: 2px solid #e2e8f0; padding-bottom:10px;">🔬 核心数字生物标志物 (可视化解析)</h3>
+            <div class="viz-grid" id="viz-content">
+                </div>
+        </div>
+
         <div class="results-box">
             <h3 style="margin-top:0; color:var(--primary);">📋 原始特征明细与模块单项得分 (0-100)</h3>
             <div id="results-content"><p style="color:var(--slate);">请启动多模态解析引擎获取底层数据明细...</p></div>
@@ -154,7 +181,6 @@
     </div>
 
     <script>
-        // ================= 离线 JSON 导入监听 =================
         let importedSessionData = null;
         document.getElementById('json-file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -162,24 +188,18 @@
             document.getElementById('btn-file-label').innerText = "✅ " + file.name;
             const reader = new FileReader();
             reader.onload = function(event) {
-                try { 
-                    importedSessionData = JSON.parse(event.target.result); 
-                } catch(err) { 
-                    alert("⚠️ JSON 档案解析失败！请确保文件格式正确。"); 
-                }
+                try { importedSessionData = JSON.parse(event.target.result); } 
+                catch(err) { alert("⚠️ JSON 档案解析失败！请确保文件格式正确。"); }
             };
             reader.readAsText(file);
         });
 
-        // ================= 核心分析引擎 =================
         function generateReport() {
-            // 1. 获取目标数据源
             const mode = document.getElementById('data-source-select').value;
             let session = (mode === 'file') ? importedSessionData : CAS_Storage.getSession();
-            
             if (!session) return alert("⚠️ 无有效数据可供解析！");
 
-            // 2. 基线信息与传统量表回填
+            // 回填基线信息
             if(session.demographics) {
                 document.getElementById('r-id').innerText = session.demographics.subject_id || '-';
                 const age = session.demographics.dob ? (new Date().getFullYear() - parseInt(session.demographics.dob.split('-')[0])) : '-';
@@ -191,12 +211,12 @@
             let htmlMap = { COG:'', EMO:'', MOT:'', SEN:'', LAN:'', LIF:'', PHY:'' };
             let chartScores = { COG: 100, EMO: 100, MOT: 100, SEN: 100, LAN: 100, LIF: 100 };
             
-            // --- 疾病风险引擎初始化 ---
+            // 风险与可视化追踪池
             let riskScores = { AD: 0, MDD: 0, PD: 0, ATT: 0 };
             let activeRiskModules = { AD: 0, MDD: 0, PD: 0, ATT: 0 }; 
             let clinicalFlags = []; 
+            let vizHtml = ''; // 用于收集可视化卡片的 HTML
 
-            // UI 渲染器 (新增模块单项独立计分显示机制)
             const buildItem = (label, value, alertHtml = '', singleScore = null) => {
                 let scoreBadge = '';
                 if (singleScore !== null) {
@@ -204,70 +224,77 @@
                     let sBg = singleScore >= 80 ? '#ecfdf5' : (singleScore >= 60 ? '#fffbeb' : '#fff1f2');
                     scoreBadge = `<div class="module-score" style="color:${sColor}; background:${sBg}; border-color:${sColor}80;">${singleScore} 分</div>`;
                 }
-                return `
-                <div class="result-item">
-                    <div class="item-text-group">
-                        <span style="color:var(--slate); font-size:13px; font-weight:bold;">${label}</span>
-                        <strong style="color:var(--primary); font-size:16px;">${value} ${alertHtml}</strong>
+                return `<div class="result-item"><div class="item-text-group"><span style="color:var(--slate); font-size:13px; font-weight:bold;">${label}</span><strong style="color:var(--primary); font-size:16px;">${value} ${alertHtml}</strong></div>${scoreBadge}</div>`;
+            };
+            const alertTag = (text, type='danger') => `<span class="${type==='warning'?'warning-badge':'alert-badge'}">${text}</span>`;
+
+            // ===== 辅助函数：生成环形图 (Donut) HTML =====
+            const createDonut = (title, percent, color, label) => `
+                <div class="viz-card">
+                    <div class="viz-title">${title}</div>
+                    <div class="viz-donut" style="background: conic-gradient(${color} 0% ${percent}%, #e2e8f0 ${percent}% 100%);">
+                        <div class="viz-donut-inner">${percent}%<span>${label}</span></div>
                     </div>
-                    ${scoreBadge}
+                </div>`;
+
+            // ===== 辅助函数：生成渐变标尺 (Gauge) HTML =====
+            const createGauge = (title, value, min, max, unit, invertColor = false) => {
+                // 计算指针的百分比位置
+                let pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+                // 如果是逆向指标（数值越低越好，如CV变异性），反转标尺渐变方向
+                let bgGradient = invertColor ? `linear-gradient(90deg, var(--green) 0%, var(--amber) 50%, var(--red) 100%)` : `linear-gradient(90deg, var(--red) 0%, var(--amber) 50%, var(--green) 100%)`;
+                return `
+                <div class="viz-card" style="justify-content:center;">
+                    <div class="viz-title">${title}</div>
+                    <div class="viz-value-text">${value} <span style="font-size:12px;color:var(--slate);">${unit}</span></div>
+                    <div class="viz-gauge-container">
+                        <div class="viz-gauge-track" style="background: ${bgGradient};"></div>
+                        <div class="viz-gauge-marker" style="left: calc(${pct}% - 2px);"></div>
+                    </div>
+                    <div class="viz-gauge-labels"><span>优 (${min})</span><span>高危 (${max})</span></div>
                 </div>`;
             };
 
-            const alertTag = (text, type='danger') => `<span class="${type==='warning'?'warning-badge':'alert-badge'}">${text}</span>`;
-
             try {
-                // ================= 3. 解析全部 13 个模块，执行常模折算与疾病映射 =================
-                
-                // 【COG / SEN 认知与警觉维度】
+                // ================= 解析与常模折算 =================
                 if(mods['COG_Corsi']) {
                     const span = mods['COG_Corsi'].data.max_span;
-                    const modScore = Math.min(100, Math.round((span / 7) * 100)); // 常模：空间记忆容量7即满分
+                    const modScore = Math.min(100, Math.round((span / 7) * 100)); 
                     htmlMap.COG += buildItem('🧩 Corsi 空间极限广度:', `${span}`, '', modScore);
                     if(span < 4) { chartScores.COG -= 15; riskScores.AD += 25; clinicalFlags.push('空间工作记忆衰退'); }
                     activeRiskModules.AD += 25;
-                }
-                if(mods['COG_DSST']) {
-                    const count = mods['COG_DSST'].data.correct_count;
-                    const modScore = Math.min(100, Math.round((count / 50) * 100)); // 常模：90秒完成50个满分
-                    htmlMap.COG += buildItem('🔢 DSST 限时加工速度:', `${count} 个`, '', modScore);
-                    if(count < 25) { chartScores.COG -= 15; }
+                    vizHtml += createGauge('🧩 Corsi 空间工作记忆广度', span, 0, 7, '个', false);
                 }
                 if(mods['COG_Stroop']) {
                     const stp = mods['COG_Stroop'].data.records;
                     const stpAcc = stp.length ? Math.round((stp.filter(r=>r.correct).length/stp.length)*100) : 0;
                     htmlMap.COG += buildItem('🚥 Stroop 侧抑制网络 (准确率):', `${stpAcc}%`, '', stpAcc);
                     if(stpAcc < 80) chartScores.COG -= 10;
+                    vizHtml += createDonut('🚥 Stroop 侧抑制准确率', stpAcc, 'var(--blue)', 'ACC');
                 }
                 if(mods['COG_TMT_B']) {
                     const tmt = mods['COG_TMT_B'].data;
-                    const modScore = Math.max(0, Math.min(100, Math.round(100 - (tmt.total_time_ms - 60000) / 1000))); // 常模：60s内满分
+                    const modScore = Math.max(0, Math.min(100, Math.round(100 - (tmt.total_time_ms - 60000) / 1000)));
                     const alertHtml = tmt.total_time_ms > 100000 ? alertTag('执行网络迟缓') : '';
                     htmlMap.COG += buildItem('🔗 TMT-B 执行任务切换耗时:', `${(tmt.total_time_ms/1000).toFixed(1)} s`, alertHtml, modScore);
-                    if(tmt.total_time_ms > 100000) { chartScores.COG -= 20; riskScores.AD += 25; riskScores.ATT += 20; clinicalFlags.push('执行网络迟缓'); }
+                    if(tmt.total_time_ms > 100000) { chartScores.COG -= 20; riskScores.AD += 25; riskScores.ATT += 20; }
                     activeRiskModules.AD += 25; activeRiskModules.ATT += 20;
                 }
                 if(mods['SEN_PVT']) {
                     const lapses = mods['SEN_PVT'].data.summary.lapses;
-                    const modScore = Math.max(0, 100 - lapses * 10); // 漏报一次扣10分
+                    const modScore = Math.max(0, 100 - lapses * 10);
                     const alertHtml = lapses > 3 ? alertTag('蓝斑警觉失误', 'warning') : '';
                     htmlMap.SEN += buildItem('⏱️ PVT 蓝斑警觉 Lapses:', `${lapses} 次`, alertHtml, modScore);
-                    if(lapses > 3) { chartScores.SEN -= (lapses*5); riskScores.ATT += 40; clinicalFlags.push('蓝斑警觉网络失误'); }
+                    if(lapses > 3) { chartScores.SEN -= (lapses*5); riskScores.ATT += 40; clinicalFlags.push('蓝斑网络失误'); }
                     activeRiskModules.ATT += 40;
+                    vizHtml += createGauge('⏱️ PVT 注意力脱节 (Lapses)', lapses, 0, 10, '次', true);
                 }
-                if(mods['SEN_TimeRep']) {
-                    const tr = mods['SEN_TimeRep'].data.summary.mean_absolute_error_ms;
-                    const modScore = Math.max(0, 100 - Math.round(tr / 10)); // 误差越小分数越高
-                    htmlMap.SEN += buildItem('⏳ TimeRep 内部时间绝对误差:', `${tr} ms`, '', modScore);
-                }
-
-                // 【LAN 语言网络维度】
                 if(mods['Language_VFT']) {
                     const words = mods['Language_VFT'].data.summary.total_valid_words;
-                    const modScore = Math.min(100, Math.round((words / 20) * 100)); // 常模：1分钟20词满分
+                    const modScore = Math.min(100, Math.round((words / 20) * 100));
                     const alertHtml = words < 12 ? alertTag('语义提取障碍') : '';
                     htmlMap.LAN += buildItem('🗣️ VFT 类别词汇流畅性:', `${words} 词`, alertHtml, modScore);
-                    if(words < 12) { chartScores.LAN -= 30; riskScores.AD += 30; clinicalFlags.push('语义网络提取阻滞'); }
+                    if(words < 12) { chartScores.LAN -= 30; riskScores.AD += 30; }
                     activeRiskModules.AD += 30;
                 }
                 if(mods['Voice_Biomarkers']) {
@@ -275,30 +302,25 @@
                     const modScore = Math.max(0, 100 - Math.round(ratio * 2)); 
                     const alertHtml = ratio > 40 ? alertTag('找词困难/空洞言语') : '';
                     htmlMap.LAN += buildItem('🎙️ VBM 找词空洞/静默比:', `${ratio}%`, alertHtml, modScore);
-                    if(ratio > 35) { chartScores.LAN -= 20; riskScores.MDD += 20; riskScores.AD += 15; clinicalFlags.push('言语动力缺乏/空洞'); }
+                    if(ratio > 35) { chartScores.LAN -= 20; riskScores.MDD += 20; riskScores.AD += 15; }
                     activeRiskModules.MDD += 20; activeRiskModules.AD += 15;
+                    vizHtml += createDonut('🎙️ 语音停顿空白比 (迟滞)', ratio, 'var(--purple)', 'Silence');
                 }
-
-                // 【MOT 动力学与运动维度】
                 if(mods['MOT_AFT']) {
                     const fatigue = mods['MOT_AFT'].data.summary.fatigue_index_percent;
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, fatigue) * 3));
                     const alertHtml = fatigue > 20 ? alertTag('剂末衰竭严重') : '';
                     htmlMap.MOT += buildItem('👇 AFT 交替敲击剂末衰减:', `${fatigue}%`, alertHtml, modScore);
-                    if(fatigue > 15) { chartScores.MOT -= 15; riskScores.PD += 40; clinicalFlags.push('基底节运动衰竭'); }
+                    if(fatigue > 15) { chartScores.MOT -= 15; riskScores.PD += 40; clinicalFlags.push('基底节衰竭'); }
                     activeRiskModules.PD += 40;
-                }
-                if(mods['MOT_SRT']) {
-                    const srt = mods['MOT_SRT'].data.summary.mean_rt_ms;
-                    const modScore = Math.max(0, Math.min(100, Math.round(100 - (srt - 200) * 0.2)));
-                    htmlMap.MOT += buildItem('⚡ SRT 简单运动反应时:', `${srt} ms`, '', modScore);
+                    vizHtml += createGauge('👇 AFT 运动疲劳衰减指数', fatigue, 0, 30, '%', true);
                 }
                 if(mods['MOT_Keystroke']) {
                     const cv = mods['MOT_Keystroke'].data.summary.dwell_cv;
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, cv - 10) * 4));
                     const alertHtml = cv > 25 ? alertTag('Dwell变异(肌强直)') : '';
                     htmlMap.MOT += buildItem('⌨️ 按键滞留时间肌强直 CV:', `${cv}%`, alertHtml, modScore);
-                    if(cv > 20) { chartScores.MOT -= 15; riskScores.PD += 35; clinicalFlags.push('隐匿性手指肌强直'); }
+                    if(cv > 20) { chartScores.MOT -= 15; riskScores.PD += 35; }
                     activeRiskModules.PD += 35;
                 }
                 if(mods['MOT_DualTaskGait']) {
@@ -306,106 +328,72 @@
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, gaitCV - 2) * 15));
                     const alertHtml = gaitCV > 5.0 ? alertTag('高危跌倒步频') : '';
                     htmlMap.MOT += buildItem('🚶‍♂️ IMU 双重任务步态变异:', `${gaitCV}%`, alertHtml, modScore);
-                    if(gaitCV > 4.0) { chartScores.MOT -= 20; riskScores.PD += 25; clinicalFlags.push('步态失衡/跌倒高危'); }
+                    if(gaitCV > 4.0) { chartScores.MOT -= 20; riskScores.PD += 25; }
                     activeRiskModules.PD += 25;
+                    vizHtml += createGauge('🚶‍♂️ 步态稳定性 (变异系数CV)', gaitCV, 0, 10, '%', true);
                 }
                 if(mods['MOT_dCDT']) {
                     const inair = mods['MOT_dCDT'].data.summary.in_air_sec;
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, inair - 1) * 15));
                     const alertHtml = inair > 6.0 ? alertTag('空中思维悬停过长', 'warning') : '';
                     htmlMap.MOT += buildItem('✍️ dCDT 画钟空中悬停时间:', `${inair} s`, alertHtml, modScore);
-                    if(inair > 5.0) { chartScores.MOT -= 15; riskScores.AD += 20; clinicalFlags.push('视空间解构迟疑'); }
+                    if(inair > 5.0) { chartScores.MOT -= 15; riskScores.AD += 20; }
                     activeRiskModules.AD += 20;
-                }
-
-                // 【EMO & PHY 情感与生理维度】
-                if(mods['AEMO_IAT']) {
-                    const bias = mods['AEMO_IAT'].data.implicit_bias_ms;
-                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, bias) / 3));
-                    const alertHtml = bias > 150 ? alertTag('内隐抑郁偏置') : '';
-                    htmlMap.EMO += buildItem('⚡ IAT 内隐负性联想阻力:', `${bias} ms`, alertHtml, modScore);
-                    if(bias > 100) { chartScores.EMO -= 15; riskScores.MDD += 30; clinicalFlags.push('严重内隐负性偏置'); }
-                    activeRiskModules.MDD += 30;
-                }
-                if(mods['AEMO_ERT']) {
-                    const ert = mods['AEMO_ERT'].data.regulation_capacity;
-                    const modScore = Math.max(0, Math.min(100, Math.round(ert * 5))); // 调节量度转换
-                    const alertHtml = ert <= 0 ? alertTag('前额叶抑制失败') : '';
-                    htmlMap.EMO += buildItem('🖼️ ERT 前额叶调节差值:', `${ert}`, alertHtml, modScore);
-                    if(ert < 5) { chartScores.EMO -= 20; riskScores.MDD += 25; clinicalFlags.push('情绪下调抑制失败'); }
-                    activeRiskModules.MDD += 25;
-                }
-                if(mods['Emotion_FER']) {
-                    const acc = mods['Emotion_FER'].data.summary.overall_accuracy_percent;
-                    htmlMap.EMO += buildItem('😃 FER 面孔情绪识别准确率:', `${acc}%`, '', acc);
                 }
                 if(mods['PHY_Face_rPPG']) {
                     const rmssd = mods['PHY_Face_rPPG'].data.summary.estimated_rmssd_ms || 0;
                     const hr = mods['PHY_Face_rPPG'].data.summary.estimated_hr_bpm || '-';
-                    const modScore = Math.min(100, Math.round((rmssd / 40) * 100)); // 常模心率变异率
+                    const modScore = Math.min(100, Math.round((rmssd / 40) * 100)); 
                     const alertHtml = (rmssd < 20 && rmssd > 0) ? alertTag('迷走张力抑制') : '';
                     htmlMap.PHY += buildItem('🎥 rPPG 拟合心率/RMSSD:', `${hr} bpm / ${rmssd} ms`, alertHtml, modScore);
-                    if(rmssd < 20 && rmssd > 0) { chartScores.PHY -= 20; riskScores.MDD += 25; clinicalFlags.push('自主神经/迷走深度抑制'); }
+                    if(rmssd < 20 && rmssd > 0) { chartScores.PHY -= 20; riskScores.MDD += 25; }
                     activeRiskModules.MDD += 25;
+                    vizHtml += createGauge('🎥 rPPG 迷走张力 (RMSSD)', rmssd, 0, 60, 'ms', false); // RMSSD越高越好，不反转
                 }
-                
-                // 【LIF 节律与生活维度】
                 if(mods['LIF_Lifestyle']) {
                     const lif = mods['LIF_Lifestyle'].data.summary.avg_decision_hesitation_ms;
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, lif - 2000) / 80));
-                    const alertHtml = lif > 5000 ? alertTag('隐性决策迟疑', 'warning') : '';
-                    htmlMap.LIF += buildItem('🥗 LIF 日常功能决策迟疑:', `${lif} ms`, alertHtml, modScore);
-                    if(lif > 5000) { chartScores.LIF -= 15; riskScores.AD += 15; clinicalFlags.push('隐匿性生活能力衰退');}
+                    htmlMap.LIF += buildItem('🥗 LIF 日常功能决策迟疑:', `${lif} ms`, '', modScore);
+                    if(lif > 5000) { chartScores.LIF -= 15; riskScores.AD += 15; }
                     activeRiskModules.AD += 15;
                 }
+            } catch(e) { console.error(e); }
 
-            } catch(e) { 
-                console.error("模块解析出现异常:", e); 
+            // ================= 渲染可视化面板 =================
+            if (vizHtml !== '') {
+                document.getElementById('viz-panel').style.display = 'block';
+                document.getElementById('viz-content').innerHTML = vizHtml;
             }
 
-            // ================= 4. 渲染明细库与图表 =================
-            
-            // 拼接原始结果文本库
+            // ================= 渲染明细库 =================
             let out = '';
             for(let key of ['COG','MOT','EMO','SEN','LAN','LIF','PHY']) {
                 if(htmlMap[key]) {
-                    let domainName = '';
-                    if(key==='COG') domainName='🧠 认知执行与警觉网络';
-                    else if(key==='MOT') domainName='🎯 运动共济与微观动力学';
-                    else if(key==='EMO') domainName='❤️ 情绪调节与计算精神病学';
-                    else if(key==='SEN') domainName='⚡ 感觉知觉底座';
-                    else if(key==='LAN') domainName='💬 语言与语音声学';
-                    else if(key==='LIF') domainName='🌙 临床生活节律';
-                    else if(key==='PHY') domainName='🎥 生理影像与血流动力学';
-                    out += `<div class="domain-section"><div class="domain-title">${domainName}</div>${htmlMap[key]}</div>`;
+                    let mapName = {COG:'🧠 认知执行', MOT:'🎯 运动动力学', EMO:'❤️ 情绪社会', SEN:'⚡ 感觉知觉', LAN:'💬 语言声学', LIF:'🌙 生活节律', PHY:'🎥 生理血流'};
+                    out += `<div class="domain-section"><div class="domain-title">${mapName[key]}</div>${htmlMap[key]}</div>`;
                 }
             }
-            document.getElementById('results-content').innerHTML = out || '<p style="color:var(--slate);">档案中未读取到有效的模块分析数据。</p>';
+            document.getElementById('results-content').innerHTML = out || '<p style="color:var(--slate);">未读取到有效数据。</p>';
 
-            // 渲染六大基带雷达条动画
+            // 渲染基带雷达条
             setTimeout(() => { 
                 for(let key in chartScores) {
                     let score = Math.max(0, Math.round(chartScores[key]));
-                    if(!htmlMap[key]) score = 0; // 若该维度无数据，置零
+                    if(!htmlMap[key]) score = 0; 
                     document.getElementById(`bar-${key.toLowerCase()}`).style.width = score + '%';
                     document.getElementById(`val-${key.toLowerCase()}`).innerText = score;
                 }
             }, 300);
 
-            // ================= 5. 计算精神病学：渲染联合风险雷达 =================
+            // ================= 渲染计算精神病学风险 =================
             document.getElementById('risk-panel').style.display = 'block';
-            
-            // 动态权重归一化函数：基于实际完成的靶向模块折算风险百分比
             const setRiskBar = (id, score, maxPotential) => {
                 let pct = maxPotential > 0 ? Math.min(100, Math.round((score / maxPotential) * 100)) : 0;
                 let bar = document.getElementById(`risk-bar-${id}`);
-                
                 bar.style.width = pct + '%';
                 bar.className = 'risk-bar-fill ' + (pct < 30 ? 'risk-low' : (pct < 60 ? 'risk-med' : 'risk-high'));
-                
-                let valNode = document.getElementById(`risk-val-${id}`);
-                valNode.innerText = maxPotential > 0 ? `${pct}%` : '未测靶向模块';
-                valNode.style.color = (pct >= 60) ? 'var(--red)' : '';
+                document.getElementById(`risk-val-${id}`).innerText = maxPotential > 0 ? `${pct}%` : '未测靶向';
+                document.getElementById(`risk-val-${id}`).style.color = (pct >= 60) ? 'var(--red)' : '';
                 return pct;
             };
 
@@ -416,34 +404,20 @@
                 ATT: setRiskBar('att', riskScores.ATT, activeRiskModules.ATT)
             };
 
-            // ================= 6. 将计算风险标签写回底层 JSON =================
-            if (mode !== 'file') {
-                // 将带有 AI 初筛预警的数据进行本地化持久保存
-                CAS_Storage.saveRiskProfile(finalRisks, clinicalFlags);
-            } else {
-                // 如果是读取外部 JSON 预览，仅在内存中更新，以供“导出”时使用
-                session.computational_risk_profile = { 
-                    generated_at: new Date().toISOString(), 
-                    risk_scores: finalRisks, 
-                    clinical_flags: clinicalFlags 
-                };
-                
-                // 覆盖 exportJSON 临时逻辑，直接下载补全了风险标签的 JSON
+            // 保存底层数据
+            if (mode !== 'file') CAS_Storage.saveRiskProfile(finalRisks, clinicalFlags);
+            else {
+                session.computational_risk_profile = { generated_at: new Date().toISOString(), risk_scores: finalRisks, clinical_flags: clinicalFlags };
                 window.temporarySessionExport = function() {
-                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(session, null, 2));
-                    const downloadAnchorNode = document.createElement('a');
-                    downloadAnchorNode.setAttribute("href", dataStr);
-                    const subId = (session.demographics && session.demographics.subject_id) ? session.demographics.subject_id : "Anonymous";
-                    downloadAnchorNode.setAttribute("download", `CAS_Data_Sub-${subId}_RiskUpdated_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
-                    document.body.appendChild(downloadAnchorNode);
-                    downloadAnchorNode.click();
-                    document.body.removeChild(downloadAnchorNode);
+                    const a = document.createElement('a');
+                    a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(session, null, 2));
+                    a.download = `CAS_Data_${session.demographics.subject_id||'Sub'}_${new Date().getTime()}.json`;
+                    a.click();
                 };
                 document.querySelector('.btn-export').setAttribute('onclick', 'window.temporarySessionExport()');
             }
             
-            // 视窗滚动反馈
-            document.querySelector('.chart-container').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.viz-box').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
