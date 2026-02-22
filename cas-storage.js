@@ -1,6 +1,6 @@
 // 文件名: cas-storage.js
 /**
- * CAS 4.0 Clinical Data Engine (v4.3 疾病风险拓展版)
+ * CAS 4.0 Clinical Data Engine (v4.4 包含脑卒中与心血管风险拓展)
  * 包含原始时序数据收集与计算精神病学风险标签的统一存储
  */
 const CAS_Storage = {
@@ -23,7 +23,7 @@ const CAS_Storage = {
                 demographics: {}, 
                 ema_fatigue_logs: [], 
                 modules: {}, 
-                // 计算精神病学风险画像标签，利于未来 Python/MATLAB 直接读取特征靶点
+                // 计算精神病学风险画像标签
                 computational_risk_profile: {
                     generated_at: null,
                     risk_scores: {},
