@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>NeuroMap 1.0 - 神经行为多模态评估图谱与计算精神病学风险报告</title>
+    <title>NeuroMap 1.0 - 神经行为多模态评估图谱与计算预警报告</title>
     <style>
         :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --purple: #8b5cf6; --teal: #0d9488; --slate: #64748b; }
         
@@ -14,6 +14,7 @@
             .container { box-shadow: none; padding: 0; border: none; max-width: 100%; }
             .results-box { break-inside: avoid; }
             .viz-card { break-inside: avoid; }
+            .risk-card { break-inside: avoid; }
         }
 
         body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; padding: 30px; color: #334155; line-height: 1.6; margin: 0;}
@@ -32,6 +33,7 @@
         .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; }
         .info-item span { display: block; font-size: 13.5px; color: var(--slate); font-weight: bold;}
         .info-item strong { font-size: 18px; color: var(--primary); }
+        .bmi-badge { background: var(--light-blue); color: var(--blue); padding: 2px 8px; border-radius: 8px; font-size: 14px; margin-left: 8px; font-weight: bold;}
 
         /* 模块 1：六大基带雷达 */
         .chart-container { background: white; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 1px solid #e2e8f0; }
@@ -57,18 +59,17 @@
         
         .risk-low { background: var(--green); } .risk-med { background: var(--amber); } .risk-high { background: var(--red); }
 
-        /* ================= 新增模块 3：生物标志物可视化面板 ================= */
+        /* 模块 3：生物标志物可视化面板 */
         .viz-box { background: white; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 1px solid #e2e8f0; }
         .viz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .viz-card { background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; text-align: center; }
         .viz-title { font-size: 14px; font-weight: bold; color: var(--slate); margin-bottom: 15px; width: 100%; text-align: left; }
         
-        /* 可视化组件：环形图 (Donut) */
+        /* 可视化组件：环形图与标尺 */
         .viz-donut { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 10px; }
         .viz-donut-inner { width: 75px; height: 75px; background: #f8fafc; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: var(--primary); z-index: 2; }
         .viz-donut-inner span { font-size: 11px; color: var(--slate); font-weight: normal; }
         
-        /* 可视化组件：渐变阈值标尺 (Gauge) */
         .viz-gauge-container { width: 100%; margin-top: 10px; margin-bottom: 15px; position: relative; }
         .viz-gauge-track { width: 100%; height: 14px; border-radius: 7px; background: linear-gradient(90deg, var(--green) 0%, var(--amber) 50%, var(--red) 100%); }
         .viz-gauge-marker { position: absolute; top: -5px; width: 4px; height: 24px; background: var(--primary); border-radius: 2px; box-shadow: 0 0 5px rgba(0,0,0,0.3); transition: left 1s; }
@@ -98,10 +99,9 @@
         <button onclick="location.href='index.html'" style="background:none; border:none; color:var(--blue); font-weight:bold; cursor:pointer; font-size: 16px; margin-bottom: 20px;">← 返回控制台</button>
 
         <div class="input-panel">
-            <h3>⚙️ 临床基线融合引擎</h3>
+            <h3>⚙️ 临床基线与人体测量学融合引擎</h3>
             <div class="input-grid">
                 <div>
-                    <label style="font-size:13px; font-weight:bold; color:var(--slate);">选择数据源</label>
                     <select id="data-source-select" class="form-input" style="width:100%; margin-bottom:10px;" onchange="document.getElementById('file-uploader').style.display = this.value === 'file' ? 'block' : 'none';">
                         <option value="local">读取当前测试患者 (本地缓存)</option>
                         <option value="file">导入离线 BIDS-JSON 数据包</option>
@@ -110,20 +110,27 @@
                         <span class="btn-action" id="btn-file-label">📂 点击上传 JSON 档案</span>
                         <input type="file" id="json-file-input" accept=".json" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;">
                     </div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="number" id="input-height" class="form-input" placeholder="身高 (cm) 选填" style="flex:1;">
+                        <input type="number" id="input-weight" class="form-input" placeholder="体重 (kg) 选填" style="flex:1;">
+                    </div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="input-mmse" class="form-input" placeholder="MMSE 得分 (选填)" style="flex:1;">
-                    <input type="number" id="input-moca" class="form-input" placeholder="MoCA 得分 (选填)" style="flex:1;">
+                <div>
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="input-mmse" class="form-input" placeholder="MMSE 得分 (选填)" style="flex:1;">
+                        <input type="number" id="input-moca" class="form-input" placeholder="MoCA 得分 (选填)" style="flex:1;">
+                    </div>
+                    <p style="font-size:12px; color:var(--slate); margin:0;">提示：输入身高体重系统将自动计算 BMI，并融合入脑卒中与微血管病变风险模型中评估心脑血管负荷。</p>
                 </div>
             </div>
-            <button class="btn-generate" onclick="generateReport()">⚡ 启动联合评估与多模态解析</button>
+            <button class="btn-generate" onclick="generateReport()">⚡ 启动多模态解析与风险预测模型</button>
         </div>
 
         <h2>📊 NeuroMap 多模态图谱与计算预警报告</h2>
         
         <div class="info-grid">
             <div class="info-item"><span>被试 ID</span><strong id="r-id">-</strong></div>
-            <div class="info-item"><span>年龄 / 性别</span><strong id="r-bio">-</strong></div>
+            <div class="info-item"><span>年龄 / 性别</span><strong id="r-bio">-</strong><span id="r-bmi"></span></div>
             <div class="info-item"><span>传统量表得分</span><strong id="r-scales" style="color:var(--blue);">- / -</strong></div>
         </div>
 
@@ -140,15 +147,20 @@
         <div class="risk-container" id="risk-panel" style="display:none;">
             <div class="risk-header">⚠️ 第二层：计算精神病学联合预警模型 (多维特征交叉映射)</div>
             <div class="risk-grid">
+                <div class="risk-card" style="border-color:#f87171; background:#fef2f2;">
+                    <div class="risk-title" style="color:#b91c1c;"><span>脑卒中/微血管病变 (Stroke/CSVD)</span><span id="risk-val-stroke">0%</span></div>
+                    <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-stroke"></div></div>
+                    <p class="risk-details">融合靶点: 肥胖(BMI) + 迷走抑制(rPPG) + 步态变异(IMU) + 血管认知迟缓(TMT)</p>
+                </div>
                 <div class="risk-card">
                     <div class="risk-title"><span>阿尔茨海默病 (AD/MCI) 综合风险</span><span id="risk-val-ad">0%</span></div>
                     <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-ad"></div></div>
-                    <p class="risk-details">融合靶点: 语义阻滞(VFT) + 空间衰退(Corsi) + 执行迟缓(TMT/dCDT) + 决策迟疑(LIF)</p>
+                    <p class="risk-details">融合靶点: 语义阻滞(VFT) + 空间衰退(Corsi) + 执行迟缓(TMT) + 决策迟疑(LIF)</p>
                 </div>
                 <div class="risk-card">
                     <div class="risk-title"><span>重度抑郁症 (MDD) 综合风险</span><span id="risk-val-mdd">0%</span></div>
                     <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-mdd"></div></div>
-                    <p class="risk-details">融合靶点: 内隐负性偏置(IAT) + 前额叶调节失败(ERT) + 迷走张力抑制(rPPG) + 语音迟滞(VBM)</p>
+                    <p class="risk-details">融合靶点: 内隐负性偏置(IAT) + 前额叶调节失败(ERT) + 迷走抑制(rPPG)</p>
                 </div>
                 <div class="risk-card">
                     <div class="risk-title"><span>帕金森病 (PD) 综合风险</span><span id="risk-val-pd">0%</span></div>
@@ -199,23 +211,36 @@
             let session = (mode === 'file') ? importedSessionData : CAS_Storage.getSession();
             if (!session) return alert("⚠️ 无有效数据可供解析！");
 
-            // 回填基线信息
+            // 回填基线与 BMI 计算
+            let calculatedBMI = null;
+            let h = parseFloat(document.getElementById('input-height').value);
+            let w = parseFloat(document.getElementById('input-weight').value);
+            
             if(session.demographics) {
                 document.getElementById('r-id').innerText = session.demographics.subject_id || '-';
                 const age = session.demographics.dob ? (new Date().getFullYear() - parseInt(session.demographics.dob.split('-')[0])) : '-';
                 document.getElementById('r-bio').innerText = `${age}岁 / ${session.demographics.gender || '-'}`;
             }
+            
+            if (h && w) {
+                calculatedBMI = parseFloat((w / Math.pow(h/100, 2)).toFixed(1));
+                let bmiText = calculatedBMI >= 28 ? '肥胖' : (calculatedBMI >= 24 ? '超重' : '正常');
+                document.getElementById('r-bmi').innerHTML = `<span class="bmi-badge">BMI: ${calculatedBMI} (${bmiText})</span>`;
+            } else {
+                document.getElementById('r-bmi').innerHTML = '';
+            }
+
             document.getElementById('r-scales').innerText = `${document.getElementById('input-mmse').value||'--'} / ${document.getElementById('input-moca').value||'--'}`;
 
             const mods = session.modules || {};
             let htmlMap = { COG:'', EMO:'', MOT:'', SEN:'', LAN:'', LIF:'', PHY:'' };
             let chartScores = { COG: 100, EMO: 100, MOT: 100, SEN: 100, LAN: 100, LIF: 100 };
             
-            // 风险与可视化追踪池
-            let riskScores = { AD: 0, MDD: 0, PD: 0, ATT: 0 };
-            let activeRiskModules = { AD: 0, MDD: 0, PD: 0, ATT: 0 }; 
+            // 风险追踪池 (新增 STROKE)
+            let riskScores = { AD: 0, MDD: 0, PD: 0, ATT: 0, STROKE: 0 };
+            let activeRiskModules = { AD: 0, MDD: 0, PD: 0, ATT: 0, STROKE: 0 }; 
             let clinicalFlags = []; 
-            let vizHtml = ''; // 用于收集可视化卡片的 HTML
+            let vizHtml = ''; 
 
             const buildItem = (label, value, alertHtml = '', singleScore = null) => {
                 let scoreBadge = '';
@@ -228,7 +253,7 @@
             };
             const alertTag = (text, type='danger') => `<span class="${type==='warning'?'warning-badge':'alert-badge'}">${text}</span>`;
 
-            // ===== 辅助函数：生成环形图 (Donut) HTML =====
+            // ===== 可视化生成器 =====
             const createDonut = (title, percent, color, label) => `
                 <div class="viz-card">
                     <div class="viz-title">${title}</div>
@@ -237,11 +262,8 @@
                     </div>
                 </div>`;
 
-            // ===== 辅助函数：生成渐变标尺 (Gauge) HTML =====
             const createGauge = (title, value, min, max, unit, invertColor = false) => {
-                // 计算指针的百分比位置
                 let pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
-                // 如果是逆向指标（数值越低越好，如CV变异性），反转标尺渐变方向
                 let bgGradient = invertColor ? `linear-gradient(90deg, var(--green) 0%, var(--amber) 50%, var(--red) 100%)` : `linear-gradient(90deg, var(--red) 0%, var(--amber) 50%, var(--green) 100%)`;
                 return `
                 <div class="viz-card" style="justify-content:center;">
@@ -254,6 +276,19 @@
                     <div class="viz-gauge-labels"><span>优 (${min})</span><span>高危 (${max})</span></div>
                 </div>`;
             };
+
+            // 【脑卒中风险 BMI 靶点注入】
+            if (calculatedBMI) {
+                activeRiskModules.STROKE += 40; // BMI对脑卒中权重极高
+                if (calculatedBMI >= 28) {
+                    riskScores.STROKE += 40;
+                    clinicalFlags.push('重度肥胖(脑血管高危)');
+                } else if (calculatedBMI >= 24) {
+                    riskScores.STROKE += 20;
+                    clinicalFlags.push('超重(心脑血管风险)');
+                }
+                vizHtml += createGauge('⚖️ 身体质量指数 (BMI)', calculatedBMI, 18.5, 30, '', true);
+            }
 
             try {
                 // ================= 解析与常模折算 =================
@@ -275,17 +310,20 @@
                 if(mods['COG_TMT_B']) {
                     const tmt = mods['COG_TMT_B'].data;
                     const modScore = Math.max(0, Math.min(100, Math.round(100 - (tmt.total_time_ms - 60000) / 1000)));
-                    const alertHtml = tmt.total_time_ms > 100000 ? alertTag('执行网络迟缓') : '';
+                    const alertHtml = tmt.total_time_ms > 100000 ? alertTag('血管性认知迟缓') : '';
                     htmlMap.COG += buildItem('🔗 TMT-B 执行任务切换耗时:', `${(tmt.total_time_ms/1000).toFixed(1)} s`, alertHtml, modScore);
-                    if(tmt.total_time_ms > 100000) { chartScores.COG -= 20; riskScores.AD += 25; riskScores.ATT += 20; }
-                    activeRiskModules.AD += 25; activeRiskModules.ATT += 20;
+                    if(tmt.total_time_ms > 100000) { 
+                        chartScores.COG -= 20; riskScores.AD += 25; riskScores.ATT += 20; 
+                        riskScores.STROKE += 20; // 脑小血管病执行受损
+                    }
+                    activeRiskModules.AD += 25; activeRiskModules.ATT += 20; activeRiskModules.STROKE += 20;
                 }
                 if(mods['SEN_PVT']) {
                     const lapses = mods['SEN_PVT'].data.summary.lapses;
                     const modScore = Math.max(0, 100 - lapses * 10);
                     const alertHtml = lapses > 3 ? alertTag('蓝斑警觉失误', 'warning') : '';
                     htmlMap.SEN += buildItem('⏱️ PVT 蓝斑警觉 Lapses:', `${lapses} 次`, alertHtml, modScore);
-                    if(lapses > 3) { chartScores.SEN -= (lapses*5); riskScores.ATT += 40; clinicalFlags.push('蓝斑网络失误'); }
+                    if(lapses > 3) { chartScores.SEN -= (lapses*5); riskScores.ATT += 40; }
                     activeRiskModules.ATT += 40;
                     vizHtml += createGauge('⏱️ PVT 注意力脱节 (Lapses)', lapses, 0, 10, '次', true);
                 }
@@ -311,7 +349,7 @@
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, fatigue) * 3));
                     const alertHtml = fatigue > 20 ? alertTag('剂末衰竭严重') : '';
                     htmlMap.MOT += buildItem('👇 AFT 交替敲击剂末衰减:', `${fatigue}%`, alertHtml, modScore);
-                    if(fatigue > 15) { chartScores.MOT -= 15; riskScores.PD += 40; clinicalFlags.push('基底节衰竭'); }
+                    if(fatigue > 15) { chartScores.MOT -= 15; riskScores.PD += 40; }
                     activeRiskModules.PD += 40;
                     vizHtml += createGauge('👇 AFT 运动疲劳衰减指数', fatigue, 0, 30, '%', true);
                 }
@@ -326,10 +364,13 @@
                 if(mods['MOT_DualTaskGait']) {
                     const gaitCV = mods['MOT_DualTaskGait'].data.summary.stride_time_cv_percent || mods['MOT_DualTaskGait'].data.summary.variability_cv || 0;
                     const modScore = Math.max(0, 100 - Math.round(Math.max(0, gaitCV - 2) * 15));
-                    const alertHtml = gaitCV > 5.0 ? alertTag('高危跌倒步频') : '';
+                    const alertHtml = gaitCV > 5.0 ? alertTag('血管性步态不稳') : '';
                     htmlMap.MOT += buildItem('🚶‍♂️ IMU 双重任务步态变异:', `${gaitCV}%`, alertHtml, modScore);
-                    if(gaitCV > 4.0) { chartScores.MOT -= 20; riskScores.PD += 25; }
-                    activeRiskModules.PD += 25;
+                    if(gaitCV > 4.0) { 
+                        chartScores.MOT -= 20; riskScores.PD += 25; 
+                        riskScores.STROKE += 20; // 血管性帕金森综合征/卒中步态
+                    }
+                    activeRiskModules.PD += 25; activeRiskModules.STROKE += 20;
                     vizHtml += createGauge('🚶‍♂️ 步态稳定性 (变异系数CV)', gaitCV, 0, 10, '%', true);
                 }
                 if(mods['MOT_dCDT']) {
@@ -344,11 +385,14 @@
                     const rmssd = mods['PHY_Face_rPPG'].data.summary.estimated_rmssd_ms || 0;
                     const hr = mods['PHY_Face_rPPG'].data.summary.estimated_hr_bpm || '-';
                     const modScore = Math.min(100, Math.round((rmssd / 40) * 100)); 
-                    const alertHtml = (rmssd < 20 && rmssd > 0) ? alertTag('迷走张力抑制') : '';
+                    const alertHtml = (rmssd < 20 && rmssd > 0) ? alertTag('心源性脑卒中高危') : '';
                     htmlMap.PHY += buildItem('🎥 rPPG 拟合心率/RMSSD:', `${hr} bpm / ${rmssd} ms`, alertHtml, modScore);
-                    if(rmssd < 20 && rmssd > 0) { chartScores.PHY -= 20; riskScores.MDD += 25; }
-                    activeRiskModules.MDD += 25;
-                    vizHtml += createGauge('🎥 rPPG 迷走张力 (RMSSD)', rmssd, 0, 60, 'ms', false); // RMSSD越高越好，不反转
+                    if(rmssd < 20 && rmssd > 0) { 
+                        chartScores.PHY -= 20; riskScores.MDD += 25; 
+                        riskScores.STROKE += 20; // 自主神经抑制/房颤高危
+                    }
+                    activeRiskModules.MDD += 25; activeRiskModules.STROKE += 20;
+                    vizHtml += createGauge('🎥 rPPG 迷走张力 (RMSSD)', rmssd, 0, 60, 'ms', false); 
                 }
                 if(mods['LIF_Lifestyle']) {
                     const lif = mods['LIF_Lifestyle'].data.summary.avg_decision_hesitation_ms;
@@ -398,6 +442,7 @@
             };
 
             const finalRisks = {
+                STROKE: setRiskBar('stroke', riskScores.STROKE, activeRiskModules.STROKE),
                 AD: setRiskBar('ad', riskScores.AD, activeRiskModules.AD),
                 MDD: setRiskBar('mdd', riskScores.MDD, activeRiskModules.MDD),
                 PD: setRiskBar('pd', riskScores.PD, activeRiskModules.PD),
