@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>NeuroMap 1.0 - 神经行为多模态评估图谱与计算精神病学风险报告</title>
+    <title>CAS 4.0 - 神经行为多模态评估图谱与计算精神病学风险报告</title>
     <style>
         :root { --primary: #1e293b; --blue: #4f46e5; --light-blue: #eef2ff; --green: #10b981; --red: #f43f5e; --amber: #f59e0b; --purple: #8b5cf6; --teal: #0d9488; --slate: #64748b; }
         body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fcfcfd; padding: 30px; color: #334155; line-height: 1.6; margin: 0;}
@@ -46,13 +46,17 @@
         
         .risk-low { background: var(--green); } .risk-med { background: var(--amber); } .risk-high { background: var(--red); }
 
-        /* 临床报告明细 */
+        /* 临床报告明细与模块得分 UI */
         .results-box { background: #f8fafc; padding: 30px; border-radius: 20px; margin-bottom: 35px; border: 2px dashed #cbd5e1; }
         .domain-section { margin-bottom: 25px; }
         .domain-title { font-size: 16px; font-weight: bold; color: white; background: var(--primary); padding: 8px 15px; border-radius: 8px; display: inline-block; margin-bottom: 12px;}
-        .result-item { font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; padding: 10px 15px; background: white; border-radius: 8px; border: 1px solid #e2e8f0;}
+        .result-item { font-size: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; padding: 12px 15px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .item-text-group { display: flex; flex-direction: column; gap: 4px; }
         .alert-badge { color: white; background: var(--red); font-size: 12px; padding: 3px 8px; border-radius: 12px; font-weight: bold;}
         .warning-badge { color: white; background: var(--amber); font-size: 12px; padding: 3px 8px; border-radius: 12px; font-weight: bold;}
+        
+        /* 模块独立得分徽章 */
+        .module-score { padding: 6px 12px; border-radius: 10px; font-weight: bold; font-size: 15px; border: 1px solid; display: flex; align-items: center; gap: 5px; min-width: 80px; justify-content: center;}
 
         /* 打印与导出控制 */
         .btn-group { display: flex; gap: 20px; }
@@ -139,7 +143,7 @@
         </div>
 
         <div class="results-box">
-            <h3 style="margin-top:0; color:var(--primary);">📋 原始高频特征指标解析库</h3>
+            <h3 style="margin-top:0; color:var(--primary);">📋 原始特征明细与模块单项得分 (0-100)</h3>
             <div id="results-content"><p style="color:var(--slate);">请启动多模态解析引擎获取底层数据明细...</p></div>
         </div>
 
@@ -187,67 +191,90 @@
             let htmlMap = { COG:'', EMO:'', MOT:'', SEN:'', LAN:'', LIF:'', PHY:'' };
             let chartScores = { COG: 100, EMO: 100, MOT: 100, SEN: 100, LAN: 100, LIF: 100 };
             
-            // --- 计算精神病学：疾病风险引擎初始化 ---
+            // --- 疾病风险引擎初始化 ---
             let riskScores = { AD: 0, MDD: 0, PD: 0, ATT: 0 };
-            // activeRiskModules 记录用户实际完成了哪些模块（作为分母进行权重归一化计算）
             let activeRiskModules = { AD: 0, MDD: 0, PD: 0, ATT: 0 }; 
-            let clinicalFlags = []; // 存储系统发现的所有临床危险体征
+            let clinicalFlags = []; 
 
-            const buildItem = (label, value, alertHtml = '') => `<div class="result-item"><span>${label}</span><strong>${value} ${alertHtml}</strong></div>`;
+            // UI 渲染器 (新增模块单项独立计分显示机制)
+            const buildItem = (label, value, alertHtml = '', singleScore = null) => {
+                let scoreBadge = '';
+                if (singleScore !== null) {
+                    let sColor = singleScore >= 80 ? 'var(--green)' : (singleScore >= 60 ? 'var(--amber)' : 'var(--red)');
+                    let sBg = singleScore >= 80 ? '#ecfdf5' : (singleScore >= 60 ? '#fffbeb' : '#fff1f2');
+                    scoreBadge = `<div class="module-score" style="color:${sColor}; background:${sBg}; border-color:${sColor}80;">${singleScore} 分</div>`;
+                }
+                return `
+                <div class="result-item">
+                    <div class="item-text-group">
+                        <span style="color:var(--slate); font-size:13px; font-weight:bold;">${label}</span>
+                        <strong style="color:var(--primary); font-size:16px;">${value} ${alertHtml}</strong>
+                    </div>
+                    ${scoreBadge}
+                </div>`;
+            };
+
             const alertTag = (text, type='danger') => `<span class="${type==='warning'?'warning-badge':'alert-badge'}">${text}</span>`;
 
             try {
-                // ================= 3. 解析全部 13 个模块，并并行计算联合疾病风险 =================
+                // ================= 3. 解析全部 13 个模块，执行常模折算与疾病映射 =================
                 
                 // 【COG / SEN 认知与警觉维度】
                 if(mods['COG_Corsi']) {
                     const span = mods['COG_Corsi'].data.max_span;
-                    htmlMap.COG += buildItem('🧩 Corsi 空间极限广度:', `${span}`);
+                    const modScore = Math.min(100, Math.round((span / 7) * 100)); // 常模：空间记忆容量7即满分
+                    htmlMap.COG += buildItem('🧩 Corsi 空间极限广度:', `${span}`, '', modScore);
                     if(span < 4) { chartScores.COG -= 15; riskScores.AD += 25; clinicalFlags.push('空间工作记忆衰退'); }
                     activeRiskModules.AD += 25;
                 }
                 if(mods['COG_DSST']) {
                     const count = mods['COG_DSST'].data.correct_count;
-                    htmlMap.COG += buildItem('🔢 DSST 限时加工速度:', `${count} 个`);
+                    const modScore = Math.min(100, Math.round((count / 50) * 100)); // 常模：90秒完成50个满分
+                    htmlMap.COG += buildItem('🔢 DSST 限时加工速度:', `${count} 个`, '', modScore);
                     if(count < 25) { chartScores.COG -= 15; }
                 }
                 if(mods['COG_Stroop']) {
                     const stp = mods['COG_Stroop'].data.records;
                     const stpAcc = stp.length ? Math.round((stp.filter(r=>r.correct).length/stp.length)*100) : 0;
-                    htmlMap.COG += buildItem('🚥 Stroop 侧抑制网络 (准确率):', `${stpAcc}%`);
+                    htmlMap.COG += buildItem('🚥 Stroop 侧抑制网络 (准确率):', `${stpAcc}%`, '', stpAcc);
                     if(stpAcc < 80) chartScores.COG -= 10;
                 }
                 if(mods['COG_TMT_B']) {
                     const tmt = mods['COG_TMT_B'].data;
+                    const modScore = Math.max(0, Math.min(100, Math.round(100 - (tmt.total_time_ms - 60000) / 1000))); // 常模：60s内满分
                     const alertHtml = tmt.total_time_ms > 100000 ? alertTag('执行网络迟缓') : '';
-                    htmlMap.COG += buildItem('🔗 TMT-B 执行任务切换耗时:', `${(tmt.total_time_ms/1000).toFixed(1)} s`, alertHtml);
+                    htmlMap.COG += buildItem('🔗 TMT-B 执行任务切换耗时:', `${(tmt.total_time_ms/1000).toFixed(1)} s`, alertHtml, modScore);
                     if(tmt.total_time_ms > 100000) { chartScores.COG -= 20; riskScores.AD += 25; riskScores.ATT += 20; clinicalFlags.push('执行网络迟缓'); }
                     activeRiskModules.AD += 25; activeRiskModules.ATT += 20;
                 }
                 if(mods['SEN_PVT']) {
                     const lapses = mods['SEN_PVT'].data.summary.lapses;
+                    const modScore = Math.max(0, 100 - lapses * 10); // 漏报一次扣10分
                     const alertHtml = lapses > 3 ? alertTag('蓝斑警觉失误', 'warning') : '';
-                    htmlMap.SEN += buildItem('⏱️ PVT 蓝斑警觉 Lapses:', `${lapses} 次`, alertHtml);
+                    htmlMap.SEN += buildItem('⏱️ PVT 蓝斑警觉 Lapses:', `${lapses} 次`, alertHtml, modScore);
                     if(lapses > 3) { chartScores.SEN -= (lapses*5); riskScores.ATT += 40; clinicalFlags.push('蓝斑警觉网络失误'); }
                     activeRiskModules.ATT += 40;
                 }
                 if(mods['SEN_TimeRep']) {
                     const tr = mods['SEN_TimeRep'].data.summary.mean_absolute_error_ms;
-                    htmlMap.SEN += buildItem('⏳ TimeRep 内部时间绝对误差:', `${tr} ms`);
+                    const modScore = Math.max(0, 100 - Math.round(tr / 10)); // 误差越小分数越高
+                    htmlMap.SEN += buildItem('⏳ TimeRep 内部时间绝对误差:', `${tr} ms`, '', modScore);
                 }
 
                 // 【LAN 语言网络维度】
                 if(mods['Language_VFT']) {
                     const words = mods['Language_VFT'].data.summary.total_valid_words;
+                    const modScore = Math.min(100, Math.round((words / 20) * 100)); // 常模：1分钟20词满分
                     const alertHtml = words < 12 ? alertTag('语义提取障碍') : '';
-                    htmlMap.LAN += buildItem('🗣️ VFT 类别词汇流畅性:', `${words} 词`, alertHtml);
+                    htmlMap.LAN += buildItem('🗣️ VFT 类别词汇流畅性:', `${words} 词`, alertHtml, modScore);
                     if(words < 12) { chartScores.LAN -= 30; riskScores.AD += 30; clinicalFlags.push('语义网络提取阻滞'); }
                     activeRiskModules.AD += 30;
                 }
                 if(mods['Voice_Biomarkers']) {
                     const ratio = mods['Voice_Biomarkers'].data.summary.silence_ratio_percent || mods['Voice_Biomarkers'].data.summary.pause_ratio || 0;
+                    const modScore = Math.max(0, 100 - Math.round(ratio * 2)); 
                     const alertHtml = ratio > 40 ? alertTag('找词困难/空洞言语') : '';
-                    htmlMap.LAN += buildItem('🎙️ VBM 找词空洞/静默比:', `${ratio}%`, alertHtml);
+                    htmlMap.LAN += buildItem('🎙️ VBM 找词空洞/静默比:', `${ratio}%`, alertHtml, modScore);
                     if(ratio > 35) { chartScores.LAN -= 20; riskScores.MDD += 20; riskScores.AD += 15; clinicalFlags.push('言语动力缺乏/空洞'); }
                     activeRiskModules.MDD += 20; activeRiskModules.AD += 15;
                 }
@@ -255,33 +282,38 @@
                 // 【MOT 动力学与运动维度】
                 if(mods['MOT_AFT']) {
                     const fatigue = mods['MOT_AFT'].data.summary.fatigue_index_percent;
+                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, fatigue) * 3));
                     const alertHtml = fatigue > 20 ? alertTag('剂末衰竭严重') : '';
-                    htmlMap.MOT += buildItem('👇 AFT 交替敲击剂末衰减:', `${fatigue}%`, alertHtml);
+                    htmlMap.MOT += buildItem('👇 AFT 交替敲击剂末衰减:', `${fatigue}%`, alertHtml, modScore);
                     if(fatigue > 15) { chartScores.MOT -= 15; riskScores.PD += 40; clinicalFlags.push('基底节运动衰竭'); }
                     activeRiskModules.PD += 40;
                 }
                 if(mods['MOT_SRT']) {
                     const srt = mods['MOT_SRT'].data.summary.mean_rt_ms;
-                    htmlMap.MOT += buildItem('⚡ SRT 简单运动反应时:', `${srt} ms`);
+                    const modScore = Math.max(0, Math.min(100, Math.round(100 - (srt - 200) * 0.2)));
+                    htmlMap.MOT += buildItem('⚡ SRT 简单运动反应时:', `${srt} ms`, '', modScore);
                 }
                 if(mods['MOT_Keystroke']) {
                     const cv = mods['MOT_Keystroke'].data.summary.dwell_cv;
+                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, cv - 10) * 4));
                     const alertHtml = cv > 25 ? alertTag('Dwell变异(肌强直)') : '';
-                    htmlMap.MOT += buildItem('⌨️ 按键滞留时间肌强直 CV:', `${cv}%`, alertHtml);
+                    htmlMap.MOT += buildItem('⌨️ 按键滞留时间肌强直 CV:', `${cv}%`, alertHtml, modScore);
                     if(cv > 20) { chartScores.MOT -= 15; riskScores.PD += 35; clinicalFlags.push('隐匿性手指肌强直'); }
                     activeRiskModules.PD += 35;
                 }
                 if(mods['MOT_DualTaskGait']) {
                     const gaitCV = mods['MOT_DualTaskGait'].data.summary.stride_time_cv_percent || mods['MOT_DualTaskGait'].data.summary.variability_cv || 0;
+                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, gaitCV - 2) * 15));
                     const alertHtml = gaitCV > 5.0 ? alertTag('高危跌倒步频') : '';
-                    htmlMap.MOT += buildItem('🚶‍♂️ IMU 双重任务步态变异:', `${gaitCV}%`, alertHtml);
+                    htmlMap.MOT += buildItem('🚶‍♂️ IMU 双重任务步态变异:', `${gaitCV}%`, alertHtml, modScore);
                     if(gaitCV > 4.0) { chartScores.MOT -= 20; riskScores.PD += 25; clinicalFlags.push('步态失衡/跌倒高危'); }
                     activeRiskModules.PD += 25;
                 }
                 if(mods['MOT_dCDT']) {
                     const inair = mods['MOT_dCDT'].data.summary.in_air_sec;
+                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, inair - 1) * 15));
                     const alertHtml = inair > 6.0 ? alertTag('空中思维悬停过长', 'warning') : '';
-                    htmlMap.MOT += buildItem('✍️ dCDT 画钟空中悬停时间:', `${inair} s`, alertHtml);
+                    htmlMap.MOT += buildItem('✍️ dCDT 画钟空中悬停时间:', `${inair} s`, alertHtml, modScore);
                     if(inair > 5.0) { chartScores.MOT -= 15; riskScores.AD += 20; clinicalFlags.push('视空间解构迟疑'); }
                     activeRiskModules.AD += 20;
                 }
@@ -289,27 +321,30 @@
                 // 【EMO & PHY 情感与生理维度】
                 if(mods['AEMO_IAT']) {
                     const bias = mods['AEMO_IAT'].data.implicit_bias_ms;
+                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, bias) / 3));
                     const alertHtml = bias > 150 ? alertTag('内隐抑郁偏置') : '';
-                    htmlMap.EMO += buildItem('⚡ IAT 内隐负性联想阻力:', `${bias} ms`, alertHtml);
+                    htmlMap.EMO += buildItem('⚡ IAT 内隐负性联想阻力:', `${bias} ms`, alertHtml, modScore);
                     if(bias > 100) { chartScores.EMO -= 15; riskScores.MDD += 30; clinicalFlags.push('严重内隐负性偏置'); }
                     activeRiskModules.MDD += 30;
                 }
                 if(mods['AEMO_ERT']) {
                     const ert = mods['AEMO_ERT'].data.regulation_capacity;
+                    const modScore = Math.max(0, Math.min(100, Math.round(ert * 5))); // 调节量度转换
                     const alertHtml = ert <= 0 ? alertTag('前额叶抑制失败') : '';
-                    htmlMap.EMO += buildItem('🖼️ ERT 前额叶调节差值:', `${ert}`, alertHtml);
+                    htmlMap.EMO += buildItem('🖼️ ERT 前额叶调节差值:', `${ert}`, alertHtml, modScore);
                     if(ert < 5) { chartScores.EMO -= 20; riskScores.MDD += 25; clinicalFlags.push('情绪下调抑制失败'); }
                     activeRiskModules.MDD += 25;
                 }
                 if(mods['Emotion_FER']) {
                     const acc = mods['Emotion_FER'].data.summary.overall_accuracy_percent;
-                    htmlMap.EMO += buildItem('😃 FER 面孔情绪识别准确率:', `${acc}%`);
+                    htmlMap.EMO += buildItem('😃 FER 面孔情绪识别准确率:', `${acc}%`, '', acc);
                 }
                 if(mods['PHY_Face_rPPG']) {
                     const rmssd = mods['PHY_Face_rPPG'].data.summary.estimated_rmssd_ms || 0;
                     const hr = mods['PHY_Face_rPPG'].data.summary.estimated_hr_bpm || '-';
+                    const modScore = Math.min(100, Math.round((rmssd / 40) * 100)); // 常模心率变异率
                     const alertHtml = (rmssd < 20 && rmssd > 0) ? alertTag('迷走张力抑制') : '';
-                    htmlMap.PHY += buildItem('🎥 rPPG 拟合心率/RMSSD:', `${hr} bpm / ${rmssd} ms`, alertHtml);
+                    htmlMap.PHY += buildItem('🎥 rPPG 拟合心率/RMSSD:', `${hr} bpm / ${rmssd} ms`, alertHtml, modScore);
                     if(rmssd < 20 && rmssd > 0) { chartScores.PHY -= 20; riskScores.MDD += 25; clinicalFlags.push('自主神经/迷走深度抑制'); }
                     activeRiskModules.MDD += 25;
                 }
@@ -317,8 +352,9 @@
                 // 【LIF 节律与生活维度】
                 if(mods['LIF_Lifestyle']) {
                     const lif = mods['LIF_Lifestyle'].data.summary.avg_decision_hesitation_ms;
+                    const modScore = Math.max(0, 100 - Math.round(Math.max(0, lif - 2000) / 80));
                     const alertHtml = lif > 5000 ? alertTag('隐性决策迟疑', 'warning') : '';
-                    htmlMap.LIF += buildItem('🥗 LIF 日常功能决策迟疑:', `${lif} ms`, alertHtml);
+                    htmlMap.LIF += buildItem('🥗 LIF 日常功能决策迟疑:', `${lif} ms`, alertHtml, modScore);
                     if(lif > 5000) { chartScores.LIF -= 15; riskScores.AD += 15; clinicalFlags.push('隐匿性生活能力衰退');}
                     activeRiskModules.AD += 15;
                 }
